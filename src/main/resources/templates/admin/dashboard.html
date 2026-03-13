@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Student Discipline System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #151820;
+      --surface2: #1c2030;
+      --border: #252a3a;
+      --accent: #4f7fff;
+      --accent2: #ff6b6b;
+      --accent3: #43d9a2;
+      --accent4: #f7c948;
+      --text: #e8eaf2;
+      --muted: #7a829a;
+      --nav-w: 240px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--nav-w); min-height: 100vh; background: var(--surface);
+      border-right: 1px solid var(--border); display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; z-index: 100;
+    }
+    .sidebar-logo {
+      padding: 24px 20px; border-bottom: 1px solid var(--border);
+      font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+      letter-spacing: .02em; color: var(--accent);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .sidebar-logo span { color: var(--text); }
+    .sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+    .nav-section { padding: 16px 12px 8px; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .nav-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px 16px;
+      border-radius: 8px; margin: 2px 8px; color: var(--muted);
+      text-decoration: none; font-size: .88rem; font-weight: 500; transition: all .18s;
+    }
+    .nav-link:hover { background: var(--surface2); color: var(--text); }
+    .nav-link.active { background: rgba(79,127,255,.12); color: var(--accent); }
+    .nav-link .icon { font-size: 1rem; width: 18px; text-align: center; }
+    .sidebar-footer {
+      margin-top: auto; padding: 16px; border-top: 1px solid var(--border);
+      font-size: .8rem; color: var(--muted);
+    }
+    .logout-btn {
+      display: flex; align-items: center; gap: 8px; padding: 9px 14px;
+      border-radius: 8px; background: rgba(255,107,107,.08); color: var(--accent2);
+      text-decoration: none; font-size: .85rem; font-weight: 500; transition: background .18s;
+    }
+    .logout-btn:hover { background: rgba(255,107,107,.18); }
+
+    /* ── Main ── */
+    .main { margin-left: var(--nav-w); flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      padding: 18px 32px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--surface); position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; }
+    .topbar-meta { display: flex; align-items: center; gap: 16px; }
+    .avatar {
+      width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; color: #fff;
+    }
+    .badge {
+      padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600;
+      background: rgba(79,127,255,.15); color: var(--accent); letter-spacing: .04em;
+    }
+
+    .content { padding: 32px; flex: 1; }
+
+    /* ── Stat Cards ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; position: relative; overflow: hidden; transition: transform .2s, border-color .2s;
+    }
+    .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .stat-card.blue::before { background: var(--accent); }
+    .stat-card.red::before { background: var(--accent2); }
+    .stat-card.green::before { background: var(--accent3); }
+    .stat-card.yellow::before { background: var(--accent4); }
+    .stat-label { font-size: .78rem; color: var(--muted); font-weight: 500; margin-bottom: 10px; letter-spacing: .04em; text-transform: uppercase; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; }
+    .stat-card.blue .stat-value { color: var(--accent); }
+    .stat-card.red .stat-value { color: var(--accent2); }
+    .stat-card.green .stat-value { color: var(--accent3); }
+    .stat-card.yellow .stat-value { color: var(--accent4); }
+    .stat-sub { font-size: .78rem; color: var(--muted); margin-top: 8px; }
+    .stat-icon { position: absolute; top: 16px; right: 16px; font-size: 1.6rem; opacity: .15; }
+
+    /* ── Two-column layout ── */
+    .row { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+    }
+    .card-header {
+      padding: 18px 22px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; }
+    .card-body { padding: 0; }
+    .view-all { font-size: .78rem; color: var(--accent); text-decoration: none; font-weight: 500; }
+    .view-all:hover { text-decoration: underline; }
+
+    /* ── Table ── */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 11px 20px; text-align: left; font-size: .72rem; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: .07em;
+      border-bottom: 1px solid var(--border); background: var(--surface2);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 13px 20px; font-size: .87rem; }
+
+    /* ── Status Pills ── */
+    .pill {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: .72rem; font-weight: 600; letter-spacing: .04em;
+    }
+    .pill-open { background: rgba(255,107,107,.12); color: var(--accent2); }
+    .pill-review { background: rgba(247,201,72,.12); color: var(--accent4); }
+    .pill-resolved { background: rgba(67,217,162,.12); color: var(--accent3); }
+
+    /* ── Recent Activity list ── */
+    .activity-list { padding: 8px 0; }
+    .activity-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 12px 22px; border-bottom: 1px solid var(--border);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+    }
+    .activity-text { font-size: .85rem; line-height: 1.4; }
+    .activity-time { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Quick Actions ── */
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 18px; }
+    .quick-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; padding: 18px 10px; border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface2); text-decoration: none; color: var(--text);
+      font-size: .8rem; font-weight: 500; text-align: center; transition: all .18s;
+    }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,127,255,.06); }
+    .quick-btn .qicon { font-size: 1.4rem; }
+
+    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+    .stats-grid .stat-card:nth-child(1) { animation: fadeUp .35s ease both; }
+    .stats-grid .stat-card:nth-child(2) { animation: fadeUp .35s .07s ease both; }
+    .stats-grid .stat-card:nth-child(3) { animation: fadeUp .35s .14s ease both; }
+    .stats-grid .stat-card:nth-child(4) { animation: fadeUp .35s .21s ease both; }
+  </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="dot"></div>
+    <span>SDS <span style="color:var(--accent)">Admin</span></span>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link active"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+
+  <div class="sidebar-footer">
+    <a href="/logout" class="logout-btn">🚪 Logout</a>
+  </div>
+</aside>
+
+<!-- ── Main Content ── -->
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-meta">
+      <span class="badge">ADMIN</span>
+      <div class="avatar" th:text="${#strings.substring(adminName, 0, 1)}" th:if="${adminName}">A</div>
+      <span th:text="${adminName}" style="font-size:.87rem;font-weight:500;">Administrator</span>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-label">Total Students</div>
+        <div class="stat-value" th:text="${totalStudents}">0</div>
+        <div class="stat-sub">Enrolled this year</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">Open Incidents</div>
+        <div class="stat-value" th:text="${openIncidents}">0</div>
+        <div class="stat-sub">Requiring attention</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Resolved Cases</div>
+        <div class="stat-value" th:text="${resolvedIncidents}">0</div>
+        <div class="stat-sub">This semester</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon">👩‍🏫</div>
+        <div class="stat-label">Total Teachers</div>
+        <div class="stat-value" th:text="${totalTeachers}">0</div>
+        <div class="stat-sub">Active faculty</div>
+      </div>
+    </div>
+
+    <!-- Row: Recent Incidents + Quick Actions -->
+    <div class="row">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Incidents</div>
+          <a href="/admin/incidents" class="view-all">View all →</a>
+        </div>
+        <div class="card-body">
+          <table>
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Type</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="incident : ${recentIncidents}">
+                <td th:text="${incident.student.firstName + ' ' + incident.student.lastName}">—</td>
+                <td th:text="${incident.incidentType}">—</td>
+                <td th:text="${#temporals.format(incident.incidentDate, 'MMM dd, yyyy')}">—</td>
+                <td>
+                  <span class="pill"
+                    th:classappend="${incident.status.name() == 'OPEN'} ? 'pill-open' : (${incident.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 'pill-resolved')"
+                    th:text="${incident.status}">—</span>
+                </td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(recentIncidents)}">
+                <td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No recent incidents</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Quick Actions</div>
+        </div>
+        <div class="quick-grid">
+          <a href="/admin/students" class="quick-btn"><span class="qicon">➕</span>Add Student</a>
+          <a href="/admin/teachers" class="quick-btn"><span class="qicon">➕</span>Add Teacher</a>
+          <a href="/admin/incidents" class="quick-btn"><span class="qicon">📝</span>New Incident</a>
+          <a href="/admin/analytics" class="quick-btn"><span class="qicon">📊</span>Analytics</a>
+          <a href="/admin/anonymous-reports" class="quick-btn"><span class="qicon">🕵️</span>Anon Reports</a>
+          <a href="/admin/sanctions" class="quick-btn"><span class="qicon">🔒</span>Sanctions</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row: Recent Activity -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Activity</div>
+        <a href="/admin/activity-history" class="view-all">View all →</a>
+      </div>
+      <div class="activity-list">
+        <div class="activity-item" th:each="log : ${recentActivity}">
+          <div class="activity-dot" style="background:var(--accent);"></div>
+          <div>
+            <div class="activity-text" th:text="${log.description}">Activity description</div>
+            <div class="activity-time" th:text="${#temporals.format(log.timestamp, 'MMM dd, yyyy hh:mm a')}">—</div>
+          </div>
+        </div>
+        <div th:if="${#lists.isEmpty(recentActivity)}" style="padding:24px;text-align:center;color:var(--muted);font-size:.85rem;">
+          No recent activity
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</body>
+</html>
