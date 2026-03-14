@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Incidents — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(79,127,255,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:18px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:16px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);letter-spacing:.04em;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+    .content{padding:32px;flex:1;}
+    .summary-bar{display:flex;gap:12px;margin-bottom:24px;}
+    .sum-chip{padding:8px 18px;border-radius:8px;font-size:.82rem;font-weight:600;border:1px solid;cursor:pointer;transition:all .18s;text-decoration:none;}
+    .sum-chip.all{border-color:var(--border);color:var(--text);background:var(--surface);}
+    .sum-chip.open{border-color:rgba(255,107,107,.3);color:var(--accent2);background:rgba(255,107,107,.07);}
+    .sum-chip.review{border-color:rgba(247,201,72,.3);color:var(--accent4);background:rgba(247,201,72,.07);}
+    .sum-chip.resolved{border-color:rgba(67,217,162,.3);color:var(--accent3);background:rgba(67,217,162,.07);}
+    .sum-chip.active, .sum-chip:hover{filter:brightness(1.2);transform:translateY(-1px);}
+    .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:280px;}
+    .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;flex:1;}
+    .search-box input::placeholder{color:var(--muted);}
+    .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 20px;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:var(--surface2);}
+    tbody td{padding:13px 20px;font-size:.87rem;}
+    .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
+    .pill-open{background:rgba(255,107,107,.12);color:var(--accent2);}
+    .pill-review{background:rgba(247,201,72,.12);color:var(--accent4);}
+    .pill-resolved{background:rgba(67,217,162,.12);color:var(--accent3);}
+    .td-actions{display:flex;gap:8px;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn-sm{padding:6px 12px;font-size:.78rem;}
+    .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+    .btn-ghost:hover{border-color:var(--text);color:var(--text);}
+    .btn-warning{background:rgba(247,201,72,.12);color:var(--accent4);border:1px solid rgba(247,201,72,.25);}
+    .btn-success{background:rgba(67,217,162,.12);color:var(--accent3);border:1px solid rgba(67,217,162,.25);}
+    .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
+    .type-chip{font-size:.75rem;font-weight:600;color:var(--muted);background:var(--surface2);padding:3px 8px;border-radius:6px;}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link active"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">All Incidents</div>
+    <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
+  </header>
+  <div class="content">
+
+    <!-- Status Quick Filter -->
+    <div class="summary-bar">
+      <a href="/admin/incidents" class="sum-chip all" th:classappend="${statusFilter == null} ? ' active' : ''">All</a>
+      <a href="/admin/incidents?status=OPEN" class="sum-chip open" th:classappend="${statusFilter == 'OPEN'} ? ' active' : ''">
+        ⚠️ Open <span th:text="'(' + ${openCount} + ')'"></span>
+      </a>
+      <a href="/admin/incidents?status=UNDER_REVIEW" class="sum-chip review" th:classappend="${statusFilter == 'UNDER_REVIEW'} ? ' active' : ''">
+        🔍 Under Review <span th:text="'(' + ${reviewCount} + ')'"></span>
+      </a>
+      <a href="/admin/incidents?status=RESOLVED" class="sum-chip resolved" th:classappend="${statusFilter == 'RESOLVED'} ? ' active' : ''">
+        ✅ Resolved <span th:text="'(' + ${resolvedCount} + ')'"></span>
+      </a>
+    </div>
+
+    <div class="toolbar">
+      <form method="get" action="/admin/incidents" style="display:flex;gap:10px;flex:1;">
+        <input type="hidden" name="status" th:value="${statusFilter}"/>
+        <div class="search-box" style="max-width:none;flex:1;max-width:300px;">
+          <span>🔍</span>
+          <input type="text" name="search" placeholder="Search student, type…" th:value="${search}"/>
+        </div>
+        <select class="filter-select" name="type" onchange="this.form.submit()">
+          <option value="">All Types</option>
+          <option th:each="t : ${T(com.studentdiscipline.enums.IncidentType).values()}"
+                  th:value="${t}" th:text="${t}" th:selected="${t == selectedType}">Type</option>
+        </select>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Incident Records</div>
+        <span style="font-size:.8rem;color:var(--muted);" th:text="${incidents.size()} + ' records'">0 records</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Type</th>
+            <th>Reported By</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="incident : ${incidents}">
+            <td th:text="${incident.student.firstName + ' ' + incident.student.lastName}">—</td>
+            <td><span class="type-chip" th:text="${incident.incidentType}">—</span></td>
+            <td th:text="${incident.reportedBy != null ? incident.reportedBy.firstName + ' ' + incident.reportedBy.lastName : 'N/A'}">—</td>
+            <td th:text="${#temporals.format(incident.incidentDate, 'MMM dd, yyyy')}">—</td>
+            <td>
+              <span class="pill"
+                th:classappend="${incident.status.name() == 'OPEN'} ? 'pill-open' : (${incident.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 'pill-resolved')"
+                th:text="${incident.status}">—</span>
+            </td>
+            <td>
+              <div class="td-actions">
+                <a th:href="@{/admin/incidents/{id}(id=${incident.id})}" class="btn btn-sm btn-ghost">👁 View</a>
+                <form th:if="${incident.status.name() != 'RESOLVED'}"
+                      th:action="@{/admin/incidents/{id}/resolve(id=${incident.id})}" method="post" style="display:inline;">
+                  <button type="submit" class="btn btn-sm btn-success">✅ Resolve</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(incidents)}">
+            <td colspan="6" class="empty-state">No incidents found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+</body>
+</html>
