@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Students — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(79,127,255,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:18px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:16px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);letter-spacing:.04em;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+    .content{padding:32px;flex:1;}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:320px;}
+    .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;flex:1;}
+    .search-box input::placeholder{color:var(--muted);}
+    .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--accent);color:#fff;}
+    .btn-primary:hover{background:#3a6eef;}
+    .btn-danger{background:rgba(255,107,107,.12);color:var(--accent2);border:1px solid rgba(255,107,107,.25);}
+    .btn-danger:hover{background:rgba(255,107,107,.25);}
+    .btn-sm{padding:6px 12px;font-size:.78rem;}
+    .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+    .btn-ghost:hover{border-color:var(--text);color:var(--text);}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+    table{width:100%;border-collapse:collapse;}
+    thead th{padding:11px 20px;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:var(--surface2);}
+    tbody td{padding:14px 20px;font-size:.87rem;}
+    .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
+    .pill-open{background:rgba(255,107,107,.12);color:var(--accent2);}
+    .pill-clean{background:rgba(67,217,162,.12);color:var(--accent3);}
+    .td-actions{display:flex;gap:8px;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:520px;animation:fadeUp .25s ease;}
+    .modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:24px;}
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
+    .form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
+    .form-control:focus{border-color:var(--accent);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;}
+    .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link active"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">Manage Students</div>
+    <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
+  </header>
+  <div class="content">
+
+    <div class="toolbar">
+      <form method="get" action="/admin/students" style="display:flex;gap:10px;flex:1;">
+        <div class="search-box" style="max-width:none;flex:1;max-width:300px;">
+          <span>🔍</span>
+          <input type="text" name="search" placeholder="Search students…" th:value="${search}"/>
+        </div>
+        <select class="filter-select" name="gradeLevel" onchange="this.form.submit()">
+          <option value="">All Grades</option>
+          <option th:each="g : ${gradeLevels}" th:value="${g}" th:text="${g}" th:selected="${g == selectedGrade}">Grade</option>
+        </select>
+      </form>
+      <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Student</button>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Students</div>
+        <span style="font-size:.8rem;color:var(--muted);" th:text="${students.size()} + ' records'">0 records</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Student ID</th>
+            <th>Grade</th>
+            <th>Section</th>
+            <th>Incidents</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="student : ${students}">
+            <td th:text="${student.firstName + ' ' + student.lastName}">—</td>
+            <td th:text="${student.studentId}" style="font-family:monospace;font-size:.82rem;color:var(--muted);">—</td>
+            <td th:text="${student.gradeLevel}">—</td>
+            <td th:text="${student.section}">—</td>
+            <td>
+              <span class="pill"
+                th:classappend="${student.incidents != null and !student.incidents.empty} ? 'pill-open' : 'pill-clean'"
+                th:text="${student.incidents != null} ? ${student.incidents.size()} : 0">0</span>
+            </td>
+            <td>
+              <div class="td-actions">
+                <a th:href="@{/admin/students/{id}(id=${student.id})}" class="btn btn-sm btn-ghost">👁 View</a>
+                <a th:href="@{/admin/students/edit/{id}(id=${student.id})}" class="btn btn-sm btn-ghost">✏️ Edit</a>
+                <form th:action="@{/admin/students/delete/{id}(id=${student.id})}" method="post" style="display:inline;"
+                      onsubmit="return confirm('Delete this student?')">
+                  <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(students)}">
+            <td colspan="6" class="empty-state">No students found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Add New Student</div>
+    <form th:action="@{/admin/students/add}" method="post">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input class="form-control" type="text" name="firstName" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input class="form-control" type="text" name="lastName" required/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Student ID</label>
+          <input class="form-control" type="text" name="studentId" required/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Grade Level</label>
+          <input class="form-control" type="text" name="gradeLevel"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Section</label>
+          <input class="form-control" type="text" name="section"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-control" type="email" name="email"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" name="password" required/>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('addModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+</script>
+</body>
+</html>
