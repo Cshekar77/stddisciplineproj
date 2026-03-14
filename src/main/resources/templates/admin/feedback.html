@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Feedback — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(79,127,255,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:18px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:16px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);letter-spacing:.04em;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+    .content{padding:32px;flex:1;}
+    .feedback-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:18px;}
+    .feedback-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;transition:border-color .18s,transform .18s;position:relative;}
+    .feedback-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+    .feedback-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;background:var(--accent);}
+    .fc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .fc-author{display:flex;align-items:center;gap:10px;}
+    .fc-avatar{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--accent);}
+    .fc-name{font-weight:600;font-size:.88rem;}
+    .fc-role{font-size:.72rem;color:var(--muted);}
+    .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;}
+    .pill-teacher{background:rgba(79,127,255,.12);color:var(--accent);}
+    .pill-student{background:rgba(67,217,162,.12);color:var(--accent3);}
+    .fc-body{font-size:.87rem;line-height:1.6;color:var(--text);margin-bottom:14px;}
+    .fc-footer{display:flex;align-items:center;justify-content:space-between;}
+    .fc-date{font-size:.75rem;color:var(--muted);}
+    .btn{padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn-sm{padding:5px 10px;font-size:.75rem;}
+    .btn-danger{background:rgba(255,107,107,.12);color:var(--accent2);border:1px solid rgba(255,107,107,.25);}
+    .btn-danger:hover{background:rgba(255,107,107,.25);}
+    .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+    .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
+    .empty-state{text-align:center;color:var(--muted);font-size:.9rem;padding:64px;grid-column:1/-1;}
+    .count-info{font-size:.82rem;color:var(--muted);margin-left:auto;}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link active"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">Feedback</div>
+    <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
+  </header>
+  <div class="content">
+
+    <div class="toolbar">
+      <form method="get" action="/admin/feedback" style="display:flex;gap:10px;align-items:center;">
+        <select class="filter-select" name="role" onchange="this.form.submit()">
+          <option value="">All Roles</option>
+          <option value="TEACHER" th:selected="${roleFilter == 'TEACHER'}">Teachers</option>
+          <option value="STUDENT" th:selected="${roleFilter == 'STUDENT'}">Students</option>
+        </select>
+      </form>
+      <span class="count-info" th:text="${feedbackList.size()} + ' submissions'">0 submissions</span>
+    </div>
+
+    <div class="feedback-grid">
+      <div class="feedback-card" th:each="fb : ${feedbackList}">
+        <div class="fc-header">
+          <div class="fc-author">
+            <div class="fc-avatar" th:text="${#strings.substring(fb.submittedBy.firstName, 0, 1)}">?</div>
+            <div>
+              <div class="fc-name" th:text="${fb.submittedBy.firstName + ' ' + fb.submittedBy.lastName}">Name</div>
+              <div class="fc-role" th:text="${fb.submittedBy.role}">Role</div>
+            </div>
+          </div>
+          <span class="pill"
+            th:classappend="${fb.submittedBy.role.name() == 'TEACHER'} ? 'pill-teacher' : 'pill-student'"
+            th:text="${fb.submittedBy.role}">—</span>
+        </div>
+        <div class="fc-body" th:text="${fb.content}">Feedback content here…</div>
+        <div class="fc-footer">
+          <span class="fc-date" th:text="${#temporals.format(fb.submittedAt, 'MMM dd, yyyy · hh:mm a')}">—</span>
+          <form th:action="@{/admin/feedback/delete/{id}(id=${fb.id})}" method="post"
+                onsubmit="return confirm('Delete this feedback?')">
+            <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+          </form>
+        </div>
+      </div>
+      <div th:if="${#lists.isEmpty(feedbackList)}" class="empty-state">
+        💬 No feedback submitted yet
+      </div>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>
