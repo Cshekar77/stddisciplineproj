@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity History — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(79,127,255,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;}
+    .topbar{padding:18px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:16px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);letter-spacing:.04em;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+    .content{padding:32px;flex:1;}
+    .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:300px;}
+    .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;flex:1;}
+    .search-box input::placeholder{color:var(--muted);}
+    .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
+    .timeline{display:flex;flex-direction:column;gap:0;}
+    .tl-day{margin-bottom:28px;}
+    .tl-day-label{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;padding-left:8px;border-left:2px solid var(--border);}
+    .tl-item{display:flex;gap:14px;padding:12px 0;position:relative;}
+    .tl-line{position:absolute;left:11px;top:28px;bottom:-12px;width:1px;background:var(--border);}
+    .tl-dot{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;border:2px solid var(--bg);margin-top:2px;}
+    .tl-dot.blue{background:rgba(79,127,255,.2);color:var(--accent);}
+    .tl-dot.red{background:rgba(255,107,107,.2);color:var(--accent2);}
+    .tl-dot.green{background:rgba(67,217,162,.2);color:var(--accent3);}
+    .tl-dot.yellow{background:rgba(247,201,72,.2);color:var(--accent4);}
+    .tl-body{flex:1;}
+    .tl-desc{font-size:.87rem;color:var(--text);line-height:1.5;margin-bottom:3px;}
+    .tl-meta{display:flex;gap:12px;align-items:center;}
+    .tl-user{font-size:.75rem;font-weight:600;color:var(--accent);}
+    .tl-time{font-size:.73rem;color:var(--muted);}
+    .tl-role{font-size:.68rem;padding:2px 7px;border-radius:10px;background:var(--surface2);color:var(--muted);font-weight:600;}
+    .empty-state{text-align:center;color:var(--muted);font-size:.9rem;padding:64px;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;padding:24px;}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link active"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-title">Activity History</div>
+    <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
+  </header>
+  <div class="content">
+
+    <div class="toolbar">
+      <form method="get" action="/admin/activity-history" style="display:flex;gap:10px;flex:1;">
+        <div class="search-box" style="max-width:none;flex:1;max-width:300px;">
+          <span>🔍</span>
+          <input type="text" name="search" placeholder="Search activity…" th:value="${search}"/>
+        </div>
+        <select class="filter-select" name="role" onchange="this.form.submit()">
+          <option value="">All Roles</option>
+          <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">Admin</option>
+          <option value="TEACHER" th:selected="${roleFilter == 'TEACHER'}">Teacher</option>
+          <option value="STUDENT" th:selected="${roleFilter == 'STUDENT'}">Student</option>
+        </select>
+      </form>
+      <span style="font-size:.82rem;color:var(--muted);" th:text="${logs.size()} + ' entries'">0 entries</span>
+    </div>
+
+    <div class="card">
+      <!-- Group by date using Thymeleaf -->
+      <div th:if="${#lists.isEmpty(logs)}" class="empty-state">📋 No activity recorded yet</div>
+
+      <div class="timeline" th:unless="${#lists.isEmpty(logs)}">
+        <div class="tl-item" th:each="log, iterStat : ${logs}">
+          <!-- Show day label when date changes -->
+          <div th:if="${iterStat.first or !#temporals.format(log.timestamp,'yyyy-MM-dd').equals(#temporals.format(logs[iterStat.index - 1].timestamp,'yyyy-MM-dd'))}"
+               class="tl-day-label" style="position:absolute;top:-24px;left:0;right:0;"
+               th:text="${#temporals.format(log.timestamp, 'EEEE, MMMM dd yyyy')}">Today</div>
+
+          <div th:unless="${iterStat.last}" class="tl-line"></div>
+          <div class="tl-dot"
+            th:classappend="${log.user != null and log.user.role.name() == 'ADMIN'} ? 'blue' :
+              (${log.user != null and log.user.role.name() == 'TEACHER'} ? 'yellow' : 'green')">●</div>
+          <div class="tl-body">
+            <div class="tl-desc" th:text="${log.description}">Activity description</div>
+            <div class="tl-meta">
+              <span class="tl-user" th:text="${log.user != null ? log.user.firstName + ' ' + log.user.lastName : 'System'}">User</span>
+              <span class="tl-role" th:text="${log.user != null ? log.user.role : 'SYSTEM'}">Role</span>
+              <span class="tl-time" th:text="${#temporals.format(log.timestamp, 'hh:mm a')}">Time</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>
