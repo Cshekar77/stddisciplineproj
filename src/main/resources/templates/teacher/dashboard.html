@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Teacher Dashboard</title>
+<style>
+body{font-family:Arial;background:#f4f4f4;text-align:center}
+nav a{margin:10px;text-decoration:none;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<h1>Teacher Dashboard</h1>
+
+<nav>
+<a th:href="@{/teacher/students}">Students</a>
+<a th:href="@{/teacher/incidents}">Incidents</a>
+<a th:href="@{/teacher/sanctions}">Sanctions</a>
+<a th:href="@{/teacher/feedback}">Feedback</a>
+<a th:href="@{/teacher/activity}">Activity History</a>
+</nav>
+
+<p>Welcome Teacher! Manage student discipline here.</p>
+
+</body>
+</html>
