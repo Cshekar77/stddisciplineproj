@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Students</title>
+
+<style>
+table{border-collapse:collapse;width:60%;margin:auto}
+th,td{border:1px solid black;padding:10px;text-align:center}
+</style>
+
+<script>
+
+function addStudent(){
+
+let table=document.getElementById("table");
+
+let name=document.getElementById("name").value;
+
+let row=table.insertRow();
+
+row.insertCell(0).innerHTML=name;
+
+row.insertCell(1).innerHTML="<button onclick='deleteRow(this)'>Delete</button>";
+
+}
+
+function deleteRow(btn){
+
+let row=btn.parentNode.parentNode;
+
+row.remove();
+
+}
+
+</script>
+
+</head>
+
+<body>
+
+<h2>Student Records</h2>
+
+<input type="text" id="name" placeholder="Student Name">
+<button onclick="addStudent()">Add</button>
+
+<table id="table">
+<tr>
+<th>Name</th>
+<th>Action</th>
+</tr>
+</table>
+
+</body>
+</html>
