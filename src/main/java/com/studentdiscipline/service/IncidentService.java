@@ -81,9 +81,10 @@ public class IncidentService {
     }
 
     // NEWLY ADDED: Get recent incidents (Required by AdminController)
+    // FIXED: Uses getDate() instead of getIncidentDate()
     public List<Incident> getRecent(int count) {
         return findAll().stream()
-                .sorted(Comparator.comparing(Incident::getIncidentDate).reversed())
+                .sorted(Comparator.comparing(Incident::getDate).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -127,6 +128,7 @@ public class IncidentService {
     }
 
     // NEWLY ADDED: Get incident counts per month for analytics (Required by AdminController)
+    // FIXED: Uses getDate() instead of getIncidentDate()
     public List<Long> getCountsPerMonth() {
         List<Long> counts = new ArrayList<>();
         YearMonth currentMonth = YearMonth.now();
@@ -135,8 +137,8 @@ public class IncidentService {
             YearMonth month = currentMonth.minusMonths(i);
             long count = findAll().stream()
                     .filter(incident -> {
-                        if (incident.getIncidentDate() == null) return false;
-                        YearMonth incidentMonth = YearMonth.from(incident.getIncidentDate());
+                        if (incident.getDate() == null) return false;
+                        YearMonth incidentMonth = YearMonth.from(incident.getDate());
                         return incidentMonth.equals(month);
                     })
                     .count();

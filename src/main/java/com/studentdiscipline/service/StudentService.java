@@ -22,7 +22,33 @@ public class StudentService {
     @Autowired
     private UserService userService;
 
-    // Create student and linked user account
+    // OVERLOADED: Create student with 7 parameters (Required by AdminController)
+    // Uses email as username
+    public Student createStudent(String firstName, String lastName, String studentId,
+                                  String grade, String section, String email, String password) {
+        if (studentRepository.existsByStudentId(studentId)) {
+            throw new RuntimeException("Student ID already exists: " + studentId);
+        }
+
+        // Create linked user account with email as username
+        User user = userService.createUser(email, password, Role.STUDENT);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+
+        Student student = new Student();
+        student.setFirstName(firstName);
+        student.setLastName(lastName);
+        student.setStudentId(studentId);
+        student.setGrade(grade);
+        student.setSection(section);
+        student.setEmail(email);
+        student.setDateEnrolled(LocalDate.now());
+        student.setUser(user);
+
+        return studentRepository.save(student);
+    }
+
+    // ORIGINAL: Create student and linked user account with 8 parameters
     public Student createStudent(String firstName, String lastName, String studentId,
                                   String grade, String section, String email, String username, String password) {
         if (studentRepository.existsByStudentId(studentId)) {
@@ -31,6 +57,8 @@ public class StudentService {
 
         // Create linked user account
         User user = userService.createUser(username, password, Role.STUDENT);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
 
         Student student = new Student();
         student.setFirstName(firstName);
