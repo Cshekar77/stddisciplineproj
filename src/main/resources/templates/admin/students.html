@@ -99,9 +99,9 @@
           <span>🔍</span>
           <input type="text" name="search" placeholder="Search students…" th:value="${search}"/>
         </div>
-        <select class="filter-select" name="gradeLevel" onchange="this.form.submit()">
+        <select class="filter-select" name="grade" onchange="this.form.submit()">
           <option value="">All Grades</option>
-          <option th:each="g : ${gradeLevels}" th:value="${g}" th:text="${g}" th:selected="${g == selectedGrade}">Grade</option>
+          <option th:each="g : ${grades}" th:value="${g}" th:text="${g}" th:selected="${g == selectedGrade}">Grade</option>
         </select>
       </form>
       <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Student</button>
@@ -119,7 +119,6 @@
             <th>Student ID</th>
             <th>Grade</th>
             <th>Section</th>
-            <th>Incidents</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -127,13 +126,8 @@
           <tr th:each="student : ${students}">
             <td th:text="${student.firstName + ' ' + student.lastName}">—</td>
             <td th:text="${student.studentId}" style="font-family:monospace;font-size:.82rem;color:var(--muted);">—</td>
-            <td th:text="${student.gradeLevel}">—</td>
+            <td th:text="${student.grade}">—</td>
             <td th:text="${student.section}">—</td>
-            <td>
-              <span class="pill"
-                th:classappend="${student.incidents != null and !student.incidents.empty} ? 'pill-open' : 'pill-clean'"
-                th:text="${student.incidents != null} ? ${student.incidents.size()} : 0">0</span>
-            </td>
             <td>
               <div class="td-actions">
                 <a th:href="@{/admin/students/{id}(id=${student.id})}" class="btn btn-sm btn-ghost">👁 View</a>
@@ -146,7 +140,7 @@
             </td>
           </tr>
           <tr th:if="${#lists.isEmpty(students)}">
-            <td colspan="6" class="empty-state">No students found</td>
+            <td colspan="5" class="empty-state">No students found</td>
           </tr>
         </tbody>
       </table>
@@ -175,8 +169,8 @@
           <input class="form-control" type="text" name="studentId" required/>
         </div>
         <div class="form-group">
-          <label class="form-label">Grade Level</label>
-          <input class="form-control" type="text" name="gradeLevel"/>
+          <label class="form-label">Grade</label>
+          <input class="form-control" type="text" name="grade"/>
         </div>
       </div>
       <div class="form-row">
