@@ -46,6 +46,11 @@ public class UserService {
         return userRepository.findByUsername(username);
     }
 
+    // Get user by email (NEWLY ADDED - Required by AdminController)
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByUsername(email);
+    }
+
     // Get users by role
     public List<User> getUsersByRole(Role role) {
         return userRepository.findByRole(role);

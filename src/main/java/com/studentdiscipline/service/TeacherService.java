@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TeacherService {
@@ -47,8 +48,23 @@ public class TeacherService {
         return teacherRepository.findAll();
     }
 
+    // NEWLY ADDED: Count total teachers (Required by AdminController)
+    public long countAll() {
+        return teacherRepository.count();
+    }
+
+    // NEWLY ADDED: Get all teachers (Alias for getAllTeachers - Required by AdminController)
+    public List<Teacher> findAll() {
+        return teacherRepository.findAll();
+    }
+
     // Get teacher by DB id
     public Optional<Teacher> getTeacherById(Long id) {
+        return teacherRepository.findById(id);
+    }
+
+    // NEWLY ADDED: Find teacher by ID (Alias for getTeacherById - Required by AdminController)
+    public Optional<Teacher> findById(Long id) {
         return teacherRepository.findById(id);
     }
 
@@ -65,6 +81,16 @@ public class TeacherService {
     // Get teachers by department
     public List<Teacher> getTeachersByDepartment(String department) {
         return teacherRepository.findByDepartment(department);
+    }
+
+    // NEWLY ADDED: Search teachers by name or department (Required by AdminController)
+    public List<Teacher> search(String term) {
+        String searchTerm = term.toLowerCase();
+        return findAll().stream()
+                .filter(t -> t.getFirstName().toLowerCase().contains(searchTerm)
+                        || t.getLastName().toLowerCase().contains(searchTerm)
+                        || (t.getDepartment() != null && t.getDepartment().toLowerCase().contains(searchTerm)))
+                .collect(Collectors.toList());
     }
 
     // Search teachers by last name
@@ -85,11 +111,21 @@ public class TeacherService {
         return teacherRepository.save(teacher);
     }
 
+    // NEWLY ADDED: Update teacher (Alias for updateTeacher - Required by AdminController)
+    public Teacher update(Long id, String firstName, String lastName, String department) {
+        return updateTeacher(id, firstName, lastName, department, null, null);
+    }
+
     // Delete teacher
     public void deleteTeacher(Long id) {
         if (!teacherRepository.existsById(id)) {
             throw new RuntimeException("Teacher not found with id: " + id);
         }
         teacherRepository.deleteById(id);
+    }
+
+    // NEWLY ADDED: Delete teacher by ID (Alias for deleteTeacher - Required by AdminController)
+    public void deleteById(Long id) {
+        deleteTeacher(id);
     }
 }

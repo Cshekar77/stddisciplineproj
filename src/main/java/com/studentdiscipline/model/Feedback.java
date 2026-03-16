@@ -75,6 +75,12 @@ public class Feedback {
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
 
+    // NEWLY ADDED: setContent() - Alias for setMessage() (Required by FeedbackService)
+    public void setContent(String content) { this.message = content; }
+
+    // NEWLY ADDED: getContent() - Alias for getMessage() (Required by FeedbackService)
+    public String getContent() { return this.message; }
+
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
