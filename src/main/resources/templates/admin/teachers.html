@@ -54,6 +54,9 @@
     .pill-active{background:rgba(67,217,162,.12);color:var(--accent3);}
     .pill-inactive{background:rgba(122,130,154,.12);color:var(--muted);}
     .td-actions{display:flex;gap:8px;}
+    .alert{padding:12px 18px;border-radius:8px;margin-bottom:20px;font-size:.88rem;display:flex;align-items:center;gap:10px;}
+    .alert-success{background:rgba(67,217,162,.12);border:1px solid rgba(67,217,162,.25);color:var(--accent3);}
+    .alert-error{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--accent2);}
 
     /* Modal */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;}
@@ -101,6 +104,14 @@
     </div>
   </header>
   <div class="content">
+
+    <!-- Flash Messages -->
+    <div th:if="${success}" class="alert alert-success">
+      ✅ <span th:text="${success}"></span>
+    </div>
+    <div th:if="${error}" class="alert alert-error">
+      ❌ <span th:text="${error}"></span>
+    </div>
 
     <!-- Toolbar -->
     <div class="toolbar">

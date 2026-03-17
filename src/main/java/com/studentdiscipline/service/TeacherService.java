@@ -21,9 +21,12 @@ public class TeacherService {
     private UserService userService;
 
     // OVERLOADED: Create teacher with 5 parameters (Required by AdminController)
-    // Uses email as username
+    // Auto-generates employeeId from email
     public Teacher createTeacher(String firstName, String lastName, String email,
                                   String department, String password) {
+        // Auto-generate unique employeeId
+        String employeeId = "EMP-" + System.currentTimeMillis();
+
         // Create linked user account with email as username
         User user = userService.createUser(email, password, Role.TEACHER);
         user.setFirstName(firstName);
@@ -32,7 +35,8 @@ public class TeacherService {
         Teacher teacher = new Teacher();
         teacher.setFirstName(firstName);
         teacher.setLastName(lastName);
-        teacher.setDepartment(department);
+        teacher.setEmployeeId(employeeId);
+        teacher.setDepartment(department != null && !department.isBlank() ? department : "General");
         teacher.setEmail(email);
         teacher.setUser(user);
 
@@ -47,7 +51,6 @@ public class TeacherService {
             throw new RuntimeException("Employee ID already exists: " + employeeId);
         }
 
-        // Create linked user account
         User user = userService.createUser(username, password, Role.TEACHER);
         user.setFirstName(firstName);
         user.setLastName(lastName);
