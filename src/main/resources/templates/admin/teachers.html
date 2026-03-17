@@ -129,14 +129,15 @@
     <div class="card">
       <div class="card-header">
         <div class="card-title">All Teachers</div>
-        <span style="font-size:.8rem;color:var(--muted);" th:text="${teachers.size()} + ' records'">0 records</span>
+        <span style="font-size:.8rem;color:var(--muted);"
+              th:text="${teachers != null ? teachers.size() : 0} + ' records'">0 records</span>
       </div>
       <table>
         <thead>
           <tr>
             <th>Name</th>
             <th>Email</th>
-            <th>Subject</th>
+            <th>Department</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -144,8 +145,8 @@
         <tbody>
           <tr th:each="teacher : ${teachers}">
             <td th:text="${teacher.firstName + ' ' + teacher.lastName}">—</td>
-            <td th:text="${teacher.user.email}">—</td>
-            <td th:text="${teacher.subject}">—</td>
+            <td th:text="${teacher.email}">—</td>
+            <td th:text="${teacher.department}">—</td>
             <td><span class="pill pill-active">Active</span></td>
             <td>
               <div class="td-actions">
@@ -158,7 +159,7 @@
               </div>
             </td>
           </tr>
-          <tr th:if="${#lists.isEmpty(teachers)}">
+          <tr th:if="${teachers == null or #lists.isEmpty(teachers)}">
             <td colspan="5" class="empty-state">No teachers found</td>
           </tr>
         </tbody>
@@ -188,8 +189,8 @@
         <input class="form-control" type="email" name="email" required placeholder="john@school.edu"/>
       </div>
       <div class="form-group">
-        <label class="form-label">Subject</label>
-        <input class="form-control" type="text" name="subject" placeholder="Mathematics"/>
+        <label class="form-label">Department</label>
+        <input class="form-control" type="text" name="department" placeholder="Mathematics"/>
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
