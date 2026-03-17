@@ -1,273 +1,269 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard — Student Discipline System</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg: #0d0f14;
-      --surface: #151820;
-      --surface2: #1c2030;
-      --border: #252a3a;
+      --nav-w: 240px;
       --accent: #4f7fff;
       --accent2: #ff6b6b;
       --accent3: #43d9a2;
       --accent4: #f7c948;
+      --transition: all 0.3s ease;
+    }
+    [data-theme="dark"] {
+      --bg: #0d0f14;
+      --surface: #151820;
+      --surface2: #1c2030;
+      --border: #252a3a;
       --text: #e8eaf2;
       --muted: #7a829a;
-      --nav-w: 240px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --topbar-bg: #151820;
+    }
+    [data-theme="light"] {
+      --bg: #f0f2f8;
+      --surface: #ffffff;
+      --surface2: #f5f7ff;
+      --border: #e2e6f0;
+      --text: #1a1d2e;
+      --muted: #6b7494;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --topbar-bg: #ffffff;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: var(--transition); }
 
-    /* ── Sidebar ── */
-    .sidebar {
-      width: var(--nav-w); min-height: 100vh; background: var(--surface);
-      border-right: 1px solid var(--border); display: flex; flex-direction: column;
-      position: fixed; top: 0; left: 0; z-index: 100;
-    }
-    .sidebar-logo {
-      padding: 24px 20px; border-bottom: 1px solid var(--border);
-      font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
-      letter-spacing: .02em; color: var(--accent);
-      display: flex; align-items: center; gap: 10px;
-    }
-    .sidebar-logo span { color: var(--text); }
-    .sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+    /* Sidebar */
+    .sidebar { width: var(--nav-w); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s ease, background 0.3s ease; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+    .sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
     .nav-section { padding: 16px 12px 8px; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-    .nav-link {
-      display: flex; align-items: center; gap: 10px; padding: 10px 16px;
-      border-radius: 8px; margin: 2px 8px; color: var(--muted);
-      text-decoration: none; font-size: .88rem; font-weight: 500; transition: all .18s;
-    }
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; margin: 2px 8px; color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 500; transition: all .18s; }
     .nav-link:hover { background: var(--surface2); color: var(--text); }
     .nav-link.active { background: rgba(79,127,255,.12); color: var(--accent); }
     .nav-link .icon { font-size: 1rem; width: 18px; text-align: center; }
-    .sidebar-footer {
-      margin-top: auto; padding: 16px; border-top: 1px solid var(--border);
-      font-size: .8rem; color: var(--muted);
-    }
-    .logout-btn {
-      display: flex; align-items: center; gap: 8px; padding: 9px 14px;
-      border-radius: 8px; background: rgba(255,107,107,.08); color: var(--accent2);
-      text-decoration: none; font-size: .85rem; font-weight: 500; transition: background .18s;
-    }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; background: rgba(255,107,107,.08); color: var(--accent2); text-decoration: none; font-size: .85rem; font-weight: 500; }
     .logout-btn:hover { background: rgba(255,107,107,.18); }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
 
-    /* ── Main ── */
-    .main { margin-left: var(--nav-w); flex: 1; display: flex; flex-direction: column; }
-    .topbar {
-      padding: 18px 32px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--surface); position: sticky; top: 0; z-index: 50;
-    }
-    .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.25rem; font-weight: 700; }
-    .topbar-meta { display: flex; align-items: center; gap: 16px; }
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--accent);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; color: #fff;
-    }
-    .badge {
-      padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600;
-      background: rgba(79,127,255,.15); color: var(--accent); letter-spacing: .04em;
-    }
+    /* Main */
+    .main { margin-left: var(--nav-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--topbar-bg); position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); transition: var(--transition); }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; color: #fff; flex-shrink: 0; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; background: rgba(79,127,255,.15); color: var(--accent); letter-spacing: .04em; }
+    .admin-name { font-size: .87rem; font-weight: 500; }
 
-    .content { padding: 32px; flex: 1; }
+    /* Theme Toggle */
+    .theme-toggle-wrap { display: flex; align-items: center; gap: 6px; }
+    .theme-icon { font-size: .9rem; cursor: pointer; user-select: none; }
+    .theme-toggle { width: 42px; height: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; position: relative; transition: var(--transition); flex-shrink: 0; }
+    .theme-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); transition: transform 0.3s ease; }
+    [data-theme="light"] .theme-toggle::after { transform: translateX(18px); }
 
-    /* ── Stat Cards ── */
-    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 32px; }
-    .stat-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
-      padding: 22px; position: relative; overflow: hidden; transition: transform .2s, border-color .2s;
-    }
-    .stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-    .stat-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    }
+    /* Hamburger */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: var(--transition); }
+
+    /* Content */
+    .content { padding: 28px 32px; flex: 1; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s; box-shadow: var(--shadow); }
+    .stat-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 8px 32px rgba(79,127,255,0.15); }
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
     .stat-card.blue::before { background: var(--accent); }
     .stat-card.red::before { background: var(--accent2); }
     .stat-card.green::before { background: var(--accent3); }
     .stat-card.yellow::before { background: var(--accent4); }
-    .stat-label { font-size: .78rem; color: var(--muted); font-weight: 500; margin-bottom: 10px; letter-spacing: .04em; text-transform: uppercase; }
-    .stat-value { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; }
+    .stat-label { font-size: .75rem; color: var(--muted); font-weight: 500; margin-bottom: 10px; letter-spacing: .04em; text-transform: uppercase; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1; }
     .stat-card.blue .stat-value { color: var(--accent); }
     .stat-card.red .stat-value { color: var(--accent2); }
     .stat-card.green .stat-value { color: var(--accent3); }
     .stat-card.yellow .stat-value { color: var(--accent4); }
-    .stat-sub { font-size: .78rem; color: var(--muted); margin-top: 8px; }
-    .stat-icon { position: absolute; top: 16px; right: 16px; font-size: 1.6rem; opacity: .15; }
+    .stat-sub { font-size: .75rem; color: var(--muted); margin-top: 8px; }
+    .stat-icon { position: absolute; top: 16px; right: 16px; font-size: 1.5rem; opacity: .12; }
 
-    /* ── Two-column layout ── */
-    .row { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; margin-bottom: 18px; }
+    /* Row */
+    .row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
 
-    /* ── Card ── */
-    .card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
-    }
-    .card-header {
-      padding: 18px 22px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
+    /* Card */
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
     .card-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; }
-    .card-body { padding: 0; }
     .view-all { font-size: .78rem; color: var(--accent); text-decoration: none; font-weight: 500; }
     .view-all:hover { text-decoration: underline; }
 
-    /* ── Table ── */
-    table { width: 100%; border-collapse: collapse; }
-    thead th {
-      padding: 11px 20px; text-align: left; font-size: .72rem; font-weight: 600;
-      color: var(--muted); text-transform: uppercase; letter-spacing: .07em;
-      border-bottom: 1px solid var(--border); background: var(--surface2);
-    }
+    /* Table */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 380px; }
+    thead th { padding: 10px 18px; text-align: left; font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); background: var(--surface2); }
     tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--surface2); }
-    tbody td { padding: 13px 20px; font-size: .87rem; }
-
-    /* ── Status Pills ── */
-    .pill {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: .72rem; font-weight: 600; letter-spacing: .04em;
-    }
+    tbody td { padding: 12px 18px; font-size: .85rem; }
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .7rem; font-weight: 600; letter-spacing: .04em; }
     .pill-open { background: rgba(255,107,107,.12); color: var(--accent2); }
     .pill-review { background: rgba(247,201,72,.12); color: var(--accent4); }
     .pill-resolved { background: rgba(67,217,162,.12); color: var(--accent3); }
 
-    /* ── Recent Activity list ── */
-    .activity-list { padding: 8px 0; }
-    .activity-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 12px 22px; border-bottom: 1px solid var(--border);
-    }
+    /* Activity */
+    .activity-list { padding: 4px 0; }
+    .activity-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); }
     .activity-item:last-child { border-bottom: none; }
-    .activity-dot {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
-    }
-    .activity-text { font-size: .85rem; line-height: 1.4; }
-    .activity-time { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .activity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .activity-text { font-size: .84rem; line-height: 1.4; }
+    .activity-time { font-size: .73rem; color: var(--muted); margin-top: 2px; }
 
-    /* ── Quick Actions ── */
-    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 18px; }
-    .quick-btn {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 6px; padding: 18px 10px; border-radius: 10px; border: 1px solid var(--border);
-      background: var(--surface2); text-decoration: none; color: var(--text);
-      font-size: .8rem; font-weight: 500; text-align: center; transition: all .18s;
-    }
-    .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,127,255,.06); }
-    .quick-btn .qicon { font-size: 1.4rem; }
+    /* Quick Actions */
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+    .quick-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px 10px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); text-decoration: none; color: var(--text); font-size: .78rem; font-weight: 500; text-align: center; transition: all .18s; }
+    .quick-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(79,127,255,.06); transform: translateY(-2px); }
+    .quick-btn .qicon { font-size: 1.3rem; }
 
-    @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform: translateY(0); } }
+    /* Animations */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     .stats-grid .stat-card:nth-child(1) { animation: fadeUp .35s ease both; }
     .stats-grid .stat-card:nth-child(2) { animation: fadeUp .35s .07s ease both; }
     .stats-grid .stat-card:nth-child(3) { animation: fadeUp .35s .14s ease both; }
     .stats-grid .stat-card:nth-child(4) { animation: fadeUp .35s .21s ease both; }
+
+    /* Tablet */
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .row { grid-template-columns: 1fr; }
+      .content { padding: 20px 24px; }
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); z-index: 200; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .hamburger { display: flex; }
+      .topbar { padding: 14px 16px; }
+      .topbar-title { font-size: 1rem; }
+      .admin-name { display: none; }
+      .content { padding: 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px; }
+      .stat-value { font-size: 1.8rem; }
+      .stat-card { padding: 16px; }
+      .row { grid-template-columns: 1fr; gap: 12px; }
+      .quick-grid { padding: 12px; gap: 8px; }
+      .quick-btn { padding: 14px 8px; font-size: .75rem; }
+    }
+
+    /* Small mobile */
+    @media (max-width: 480px) {
+      .stat-value { font-size: 1.6rem; }
+      .badge { display: none; }
+      .theme-icon { display: none; }
+    }
   </style>
 </head>
 <body>
 
-<!-- ── Sidebar ── -->
-<aside class="sidebar">
-  <div class="sidebar-logo">
-    <div class="dot"></div>
-    <span>SDS <span style="color:var(--accent)">Admin</span></span>
-  </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
   <div class="nav-section">Main</div>
   <a href="/admin/dashboard" class="nav-link active"><span class="icon">⊞</span> Dashboard</a>
   <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
   <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
-
   <div class="nav-section">Records</div>
   <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
   <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
   <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
   <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
-
   <div class="nav-section">System</div>
   <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
-
-  <div class="sidebar-footer">
-    <a href="/logout" class="logout-btn">🚪 Logout</a>
-  </div>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
 
-<!-- ── Main Content ── -->
 <main class="main">
   <header class="topbar">
-    <div class="topbar-title">Dashboard</div>
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="topbar-title">Dashboard</div>
+    </div>
     <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark"></div>
+      </div>
       <span class="badge">ADMIN</span>
-      <div class="avatar" th:text="${#strings.substring(adminName, 0, 1)}" th:if="${adminName}">A</div>
-      <span th:text="${adminName}" style="font-size:.87rem;font-weight:500;">Administrator</span>
+      <div class="avatar" th:text="${adminName != null} ? ${#strings.substring(adminName, 0, 1)} : 'A'">A</div>
+      <span class="admin-name" th:text="${adminName != null} ? ${adminName} : 'Administrator'">Administrator</span>
     </div>
   </header>
 
   <div class="content">
 
-    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card blue">
         <div class="stat-icon">🎓</div>
         <div class="stat-label">Total Students</div>
-        <div class="stat-value" th:text="${totalStudents}">0</div>
-        <div class="stat-sub">Enrolled this year</div>
+        <div class="stat-value" th:text="${totalStudents != null} ? ${totalStudents} : 0">0</div>
+        <div class="stat-sub">Enrolled</div>
       </div>
       <div class="stat-card red">
         <div class="stat-icon">⚠️</div>
         <div class="stat-label">Open Incidents</div>
-        <div class="stat-value" th:text="${openIncidents}">0</div>
-        <div class="stat-sub">Requiring attention</div>
+        <div class="stat-value" th:text="${openIncidents != null} ? ${openIncidents} : 0">0</div>
+        <div class="stat-sub">Needs attention</div>
       </div>
       <div class="stat-card green">
         <div class="stat-icon">✅</div>
-        <div class="stat-label">Resolved Cases</div>
-        <div class="stat-value" th:text="${resolvedIncidents}">0</div>
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" th:text="${resolvedIncidents != null} ? ${resolvedIncidents} : 0">0</div>
         <div class="stat-sub">This semester</div>
       </div>
       <div class="stat-card yellow">
         <div class="stat-icon">👩‍🏫</div>
-        <div class="stat-label">Total Teachers</div>
-        <div class="stat-value" th:text="${totalTeachers}">0</div>
+        <div class="stat-label">Teachers</div>
+        <div class="stat-value" th:text="${totalTeachers != null} ? ${totalTeachers} : 0">0</div>
         <div class="stat-sub">Active faculty</div>
       </div>
     </div>
 
-    <!-- Row: Recent Incidents + Quick Actions -->
     <div class="row">
       <div class="card">
         <div class="card-header">
           <div class="card-title">Recent Incidents</div>
           <a href="/admin/incidents" class="view-all">View all →</a>
         </div>
-        <div class="card-body">
+        <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>Student</th>
-                <th>Type</th>
-                <th>Date</th>
-                <th>Status</th>
-              </tr>
+              <tr><th>Student</th><th>Type</th><th>Date</th><th>Status</th></tr>
             </thead>
             <tbody>
               <tr th:each="incident : ${recentIncidents}">
-                <td th:text="${incident.student.firstName + ' ' + incident.student.lastName}">—</td>
+                <td th:text="${incident.student != null} ? ${incident.student.firstName + ' ' + incident.student.lastName} : '—'">—</td>
                 <td th:text="${incident.incidentType}">—</td>
-                <td th:text="${#temporals.format(incident.incidentDate, 'MMM dd, yyyy')}">—</td>
+                <td th:text="${incident.date != null} ? ${#temporals.format(incident.date, 'MMM dd, yyyy')} : '—'">—</td>
                 <td>
                   <span class="pill"
-                    th:classappend="${incident.status.name() == 'OPEN'} ? 'pill-open' : (${incident.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 'pill-resolved')"
+                    th:classappend="${incident.status != null and incident.status.name() == 'OPEN'} ? 'pill-open' : (${incident.status != null and incident.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 'pill-resolved')"
                     th:text="${incident.status}">—</span>
                 </td>
               </tr>
-              <tr th:if="${#lists.isEmpty(recentIncidents)}">
-                <td colspan="4" style="text-align:center;color:var(--muted);padding:24px;">No recent incidents</td>
+              <tr th:if="${recentIncidents == null or #lists.isEmpty(recentIncidents)}">
+                <td colspan="4" style="text-align:center;color:var(--muted);padding:24px;font-size:.85rem;">No recent incidents</td>
               </tr>
             </tbody>
           </table>
@@ -275,13 +271,11 @@
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <div class="card-title">Quick Actions</div>
-        </div>
+        <div class="card-header"><div class="card-title">Quick Actions</div></div>
         <div class="quick-grid">
-          <a href="/admin/students" class="quick-btn"><span class="qicon">➕</span>Add Student</a>
-          <a href="/admin/teachers" class="quick-btn"><span class="qicon">➕</span>Add Teacher</a>
-          <a href="/admin/incidents" class="quick-btn"><span class="qicon">📝</span>New Incident</a>
+          <a href="/admin/students" class="quick-btn"><span class="qicon">🎓</span>Students</a>
+          <a href="/admin/teachers" class="quick-btn"><span class="qicon">👩‍🏫</span>Teachers</a>
+          <a href="/admin/incidents" class="quick-btn"><span class="qicon">📝</span>Incidents</a>
           <a href="/admin/analytics" class="quick-btn"><span class="qicon">📊</span>Analytics</a>
           <a href="/admin/anonymous-reports" class="quick-btn"><span class="qicon">🕵️</span>Anon Reports</a>
           <a href="/admin/sanctions" class="quick-btn"><span class="qicon">🔒</span>Sanctions</a>
@@ -289,7 +283,6 @@
       </div>
     </div>
 
-    <!-- Row: Recent Activity -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Recent Activity</div>
@@ -299,17 +292,52 @@
         <div class="activity-item" th:each="log : ${recentActivity}">
           <div class="activity-dot" style="background:var(--accent);"></div>
           <div>
-            <div class="activity-text" th:text="${log.description}">Activity description</div>
-            <div class="activity-time" th:text="${#temporals.format(log.timestamp, 'MMM dd, yyyy hh:mm a')}">—</div>
+            <div class="activity-text" th:text="${log.description}">Activity</div>
+            <div class="activity-time" th:text="${log.timestamp != null} ? ${#temporals.format(log.timestamp, 'MMM dd, yyyy hh:mm a')} : '—'">—</div>
           </div>
         </div>
-        <div th:if="${#lists.isEmpty(recentActivity)}" style="padding:24px;text-align:center;color:var(--muted);font-size:.85rem;">
-          No recent activity
-        </div>
+        <div th:if="${recentActivity == null or #lists.isEmpty(recentActivity)}"
+             style="padding:24px;text-align:center;color:var(--muted);font-size:.85rem;">No recent activity</div>
       </div>
     </div>
 
-  </div><!-- /content -->
+  </div>
 </main>
+
+<script>
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+</script>
 </body>
 </html>

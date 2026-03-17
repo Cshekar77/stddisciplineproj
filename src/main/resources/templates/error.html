@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Error — Student Discipline System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    [data-theme="dark"] { --bg: #0d0f14; --surface: #151820; --border: #252a3a; --text: #e8eaf2; --muted: #7a829a; }
+    [data-theme="light"] { --bg: #f0f2f8; --surface: #ffffff; --border: #e2e6f0; --text: #1a1d2e; --muted: #6b7494; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .container { text-align: center; max-width: 480px; }
+    .error-code { font-family: 'Syne', sans-serif; font-size: 6rem; font-weight: 800; color: #4f7fff; line-height: 1; margin-bottom: 16px; }
+    .error-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 12px; }
+    .error-msg { color: var(--muted); font-size: .95rem; margin-bottom: 32px; line-height: 1.6; }
+    .error-detail { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; font-size: .82rem; color: var(--muted); margin-bottom: 32px; text-align: left; word-break: break-word; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 24px; border-radius: 8px; background: #4f7fff; color: #fff; text-decoration: none; font-weight: 600; font-size: .9rem; margin: 0 6px; transition: background .18s; }
+    .btn:hover { background: #3a6eef; }
+    .btn-ghost { background: var(--surface); border: 1px solid var(--border); color: var(--text); }
+    .btn-ghost:hover { border-color: #4f7fff; color: #4f7fff; background: var(--surface); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-code" th:text="${status != null} ? ${status} : '500'">500</div>
+    <div class="error-title" th:text="${error != null} ? ${error} : 'Something went wrong'">Something went wrong</div>
+    <div class="error-msg">
+      Sorry, an unexpected error occurred. Please try again or go back to the dashboard.
+    </div>
+    <div class="error-detail" th:if="${message != null and !#strings.isEmpty(message)}">
+      <strong>Details:</strong> <span th:text="${message}">Error details</span>
+    </div>
+    <div>
+      <a href="/admin/dashboard" class="btn">🏠 Go to Dashboard</a>
+      <a href="javascript:history.back()" class="btn btn-ghost">← Go Back</a>
+    </div>
+  </div>
+
+  <script>
+    const saved = localStorage.getItem('sds-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+  </script>
+</body>
+</html>
