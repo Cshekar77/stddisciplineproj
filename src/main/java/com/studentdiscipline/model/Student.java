@@ -1,5 +1,6 @@
 package com.studentdiscipline.model;
 
+import com.studentdiscipline.enums.DisciplineStatus;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -29,6 +30,9 @@ public class Student {
     private String email;
 
     private LocalDate dateEnrolled;
+
+    @Enumerated(EnumType.STRING)
+    private DisciplineStatus disciplineStatus = DisciplineStatus.GOOD;
 
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
@@ -69,6 +73,9 @@ public class Student {
 
     public LocalDate getDateEnrolled() { return dateEnrolled; }
     public void setDateEnrolled(LocalDate dateEnrolled) { this.dateEnrolled = dateEnrolled; }
+
+    public DisciplineStatus getDisciplineStatus() { return disciplineStatus; }
+    public void setDisciplineStatus(DisciplineStatus disciplineStatus) { this.disciplineStatus = disciplineStatus; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

@@ -9,7 +9,7 @@
     :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
-    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
     .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
     .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
@@ -19,53 +19,62 @@
     .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
     .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
     .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
-    .logout-btn:hover{background:rgba(255,107,107,.18);}
-    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;}
-    .topbar{padding:18px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
     .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
     .topbar-meta{display:flex;align-items:center;gap:16px;}
-    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);letter-spacing:.04em;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);}
     .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
-    .content{padding:32px;flex:1;}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
     .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
-    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:280px;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;min-width:200px;max-width:300px;}
     .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;flex:1;}
     .search-box input::placeholder{color:var(--muted);}
     .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
     .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
-    table{width:100%;border-collapse:collapse;}
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    table{width:100%;border-collapse:collapse;min-width:550px;}
     thead th{padding:11px 20px;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
     tbody tr:hover{background:var(--surface2);}
     tbody td{padding:13px 20px;font-size:.87rem;}
     .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.04em;}
-    .pill-warning{background:rgba(247,201,72,.12);color:var(--accent4);}
-    .pill-detention{background:rgba(255,107,107,.12);color:var(--accent2);}
-    .pill-suspension{background:rgba(255,107,107,.2);color:#ff4444;}
-    .pill-expulsion{background:rgba(200,0,0,.2);color:#ff2222;}
-    .pill-probation{background:rgba(79,127,255,.12);color:var(--accent);}
+    .pill-WARNING{background:rgba(247,201,72,.12);color:var(--accent4);}
+    .pill-DETENTION{background:rgba(255,107,107,.12);color:var(--accent2);}
+    .pill-SUSPENSION{background:rgba(255,68,68,.15);color:#ff4444;}
+    .pill-EXPULSION{background:rgba(200,0,0,.15);color:#ff2222;}
+    .pill-COMMUNITY_SERVICE{background:rgba(79,127,255,.12);color:var(--accent);}
+    .pill-PARENT_MEETING{background:rgba(67,217,162,.12);color:var(--accent3);}
     .td-actions{display:flex;gap:8px;}
-    .btn{padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn{padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
     .btn-sm{padding:6px 12px;font-size:.78rem;}
-    .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
-    .btn-ghost:hover{border-color:var(--text);color:var(--text);}
     .btn-danger{background:rgba(255,107,107,.12);color:var(--accent2);border:1px solid rgba(255,107,107,.25);}
     .btn-danger:hover{background:rgba(255,107,107,.25);}
     .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
-    .severity-bar{height:4px;border-radius:2px;width:60px;background:var(--border);display:inline-block;position:relative;overflow:hidden;}
-    .severity-bar::after{content:'';position:absolute;left:0;top:0;height:100%;border-radius:2px;}
-    .sev-1::after{width:20%;background:var(--accent3);}
-    .sev-2::after{width:40%;background:var(--accent4);}
-    .sev-3::after{width:60%;background:var(--accent2);}
-    .sev-4::after{width:80%;background:#ff4444;}
-    .sev-5::after{width:100%;background:#ff2222;}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+    }
   </style>
 </head>
 <body>
-<aside class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
   <div class="nav-section">Main</div>
   <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
@@ -81,83 +90,81 @@
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
-
 <main class="main">
   <header class="topbar">
-    <div class="topbar-title">All Sanctions</div>
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">All Sanctions</div>
+    </div>
     <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
   </header>
   <div class="content">
-
     <div class="toolbar">
-      <form method="get" action="/admin/sanctions" style="display:flex;gap:10px;flex:1;">
-        <div class="search-box" style="max-width:none;flex:1;max-width:300px;">
+      <form method="get" action="/admin/sanctions" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;">
+        <div class="search-box">
           <span>🔍</span>
           <input type="text" name="search" placeholder="Search student…" th:value="${search}"/>
         </div>
         <select class="filter-select" name="type" onchange="this.form.submit()">
           <option value="">All Types</option>
           <option th:each="t : ${T(com.studentdiscipline.enums.SanctionType).values()}"
-                  th:value="${t}" th:text="${t}" th:selected="${t == selectedType}">Type</option>
+                  th:value="${t}" th:text="${t}">Type</option>
         </select>
       </form>
     </div>
-
     <div class="card">
       <div class="card-header">
         <div class="card-title">Sanction Records</div>
         <span style="font-size:.8rem;color:var(--muted);" th:text="${sanctions.size()} + ' records'">0 records</span>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Type</th>
-            <th>Issued By</th>
-            <th>Date Issued</th>
-            <th>Severity</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="sanction : ${sanctions}">
-            <td th:text="${sanction.student.firstName + ' ' + sanction.student.lastName}">—</td>
-            <td>
-              <span class="pill"
-                th:classappend="${sanction.sanctionType.name() == 'WARNING'} ? 'pill-warning' :
-                  (${sanction.sanctionType.name() == 'DETENTION'} ? 'pill-detention' :
-                  (${sanction.sanctionType.name() == 'SUSPENSION'} ? 'pill-suspension' :
-                  (${sanction.sanctionType.name() == 'EXPULSION'} ? 'pill-expulsion' : 'pill-probation')))"
-                th:text="${sanction.sanctionType}">—</span>
-            </td>
-            <td th:text="${sanction.issuedBy != null ? sanction.issuedBy.firstName + ' ' + sanction.issuedBy.lastName : 'Admin'}">—</td>
-            <td th:text="${#temporals.format(sanction.dateIssued, 'MMM dd, yyyy')}">—</td>
-            <td>
-              <div class="severity-bar"
-                th:classappend="${sanction.sanctionType.name() == 'WARNING'} ? 'sev-1' :
-                  (${sanction.sanctionType.name() == 'DETENTION'} ? 'sev-2' :
-                  (${sanction.sanctionType.name() == 'PROBATION'} ? 'sev-3' :
-                  (${sanction.sanctionType.name() == 'SUSPENSION'} ? 'sev-4' : 'sev-5')))"></div>
-            </td>
-            <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" th:text="${sanction.description}">—</td>
-            <td>
-              <div class="td-actions">
-                <a th:href="@{/admin/sanctions/{id}(id=${sanction.id})}" class="btn btn-sm btn-ghost">👁 View</a>
-                <form th:action="@{/admin/sanctions/delete/{id}(id=${sanction.id})}" method="post" style="display:inline;"
-                      onsubmit="return confirm('Remove this sanction?')">
-                  <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(sanctions)}">
-            <td colspan="7" class="empty-state">No sanctions found</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="sanction : ${sanctions}">
+              <td th:text="${sanction.student != null ? sanction.student.firstName + ' ' + sanction.student.lastName : '—'}">—</td>
+              <td>
+                <span class="pill"
+                  th:classappend="'pill-' + ${sanction.sanctionType.name()}"
+                  th:text="${sanction.sanctionType}">—</span>
+              </td>
+              <td th:text="${sanction.startDate != null ? #temporals.format(sanction.startDate, 'MMM dd, yyyy') : '—'}">—</td>
+              <td th:text="${sanction.endDate != null ? #temporals.format(sanction.endDate, 'MMM dd, yyyy') : '—'}">—</td>
+              <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                  th:text="${sanction.notes != null ? sanction.notes : '—'}">—</td>
+              <td>
+                <div class="td-actions">
+                  <form th:action="@{/admin/sanctions/delete/{id}(id=${sanction.id})}" method="post" style="display:inline;"
+                        onsubmit="return confirm('Remove this sanction?')">
+                    <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(sanctions)}">
+              <td colspan="6" class="empty-state">No sanctions found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </main>
+<script>
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+</script>
 </body>
 </html>

@@ -20,14 +20,11 @@ public class TeacherService {
     @Autowired
     private UserService userService;
 
-    // OVERLOADED: Create teacher with 5 parameters (Required by AdminController)
-    // Auto-generates employeeId from email
+    // Create teacher with 5 parameters - auto-generates employeeId
     public Teacher createTeacher(String firstName, String lastName, String email,
                                   String department, String password) {
-        // Auto-generate unique employeeId
         String employeeId = "EMP-" + System.currentTimeMillis();
 
-        // Create linked user account with email as username
         User user = userService.createUser(email, password, Role.TEACHER);
         user.setFirstName(firstName);
         user.setLastName(lastName);
@@ -43,7 +40,7 @@ public class TeacherService {
         return teacherRepository.save(teacher);
     }
 
-    // ORIGINAL: Create teacher with 8 parameters
+    // Create teacher with 8 parameters
     public Teacher createTeacher(String firstName, String lastName, String employeeId,
                                   String department, String email, String contactNumber,
                                   String username, String password) {
@@ -67,38 +64,14 @@ public class TeacherService {
         return teacherRepository.save(teacher);
     }
 
-    // Get all teachers
-    public List<Teacher> getAllTeachers() {
-        return teacherRepository.findAll();
-    }
-
-    public long countAll() {
-        return teacherRepository.count();
-    }
-
-    public List<Teacher> findAll() {
-        return teacherRepository.findAll();
-    }
-
-    public Optional<Teacher> getTeacherById(Long id) {
-        return teacherRepository.findById(id);
-    }
-
-    public Optional<Teacher> findById(Long id) {
-        return teacherRepository.findById(id);
-    }
-
-    public Optional<Teacher> getTeacherByEmployeeId(String employeeId) {
-        return teacherRepository.findByEmployeeId(employeeId);
-    }
-
-    public Optional<Teacher> getTeacherByUser(User user) {
-        return teacherRepository.findByUser(user);
-    }
-
-    public List<Teacher> getTeachersByDepartment(String department) {
-        return teacherRepository.findByDepartment(department);
-    }
+    public List<Teacher> getAllTeachers() { return teacherRepository.findAll(); }
+    public long countAll() { return teacherRepository.count(); }
+    public List<Teacher> findAll() { return teacherRepository.findAll(); }
+    public Optional<Teacher> getTeacherById(Long id) { return teacherRepository.findById(id); }
+    public Optional<Teacher> findById(Long id) { return teacherRepository.findById(id); }
+    public Optional<Teacher> getTeacherByEmployeeId(String employeeId) { return teacherRepository.findByEmployeeId(employeeId); }
+    public Optional<Teacher> getTeacherByUser(User user) { return teacherRepository.findByUser(user); }
+    public List<Teacher> getTeachersByDepartment(String department) { return teacherRepository.findByDepartment(department); }
 
     public List<Teacher> search(String term) {
         String searchTerm = term.toLowerCase();
@@ -136,7 +109,5 @@ public class TeacherService {
         teacherRepository.deleteById(id);
     }
 
-    public void deleteById(Long id) {
-        deleteTeacher(id);
-    }
+    public void deleteById(Long id) { deleteTeacher(id); }
 }

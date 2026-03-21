@@ -2,7 +2,6 @@ package com.studentdiscipline.controller;
 
 import com.studentdiscipline.enums.IncidentStatus;
 import com.studentdiscipline.enums.IncidentType;
-import com.studentdiscipline.enums.Role;
 import com.studentdiscipline.enums.SanctionType;
 import com.studentdiscipline.model.*;
 import com.studentdiscipline.service.*;
@@ -49,7 +48,13 @@ public class AdminController {
             model.addAttribute("recentIncidents",   incidentService.getRecent(5));
             model.addAttribute("recentActivity",    activityLogService.getRecentLogs());
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to load dashboard: " + e.getMessage());
+            model.addAttribute("adminName", "Admin");
+            model.addAttribute("totalStudents", 0);
+            model.addAttribute("totalTeachers", 0);
+            model.addAttribute("openIncidents", 0);
+            model.addAttribute("resolvedIncidents", 0);
+            model.addAttribute("recentIncidents", new ArrayList<>());
+            model.addAttribute("recentActivity", new ArrayList<>());
         }
         return "admin/dashboard";
     }
@@ -70,41 +75,35 @@ public class AdminController {
     public String addTeacher(@RequestParam String firstName,
                              @RequestParam String lastName,
                              @RequestParam String email,
-                             @RequestParam(required = false) String subject,
+                             @RequestParam(required = false) String department,
                              @RequestParam String password,
                              @AuthenticationPrincipal UserDetails userDetails,
                              RedirectAttributes ra) {
         try {
-            teacherService.createTeacher(firstName, lastName, email, subject, password);
+            teacherService.createTeacher(firstName, lastName, email,
+                    department != null ? department : "General", password);
             activityLogService.log(currentUser(userDetails),
                     "Admin added teacher: " + firstName + " " + lastName);
             ra.addFlashAttribute("success", "Teacher added successfully.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to add teacher: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/teachers";
-    }
-
-    @GetMapping("/teachers/edit/{id}")
-    public String editTeacherForm(@PathVariable Long id, Model model) {
-        teacherService.findById(id).ifPresent(t -> model.addAttribute("teacher", t));
-        return "admin/teachers";
     }
 
     @PostMapping("/teachers/edit/{id}")
     public String editTeacher(@PathVariable Long id,
                               @RequestParam String firstName,
                               @RequestParam String lastName,
-                              @RequestParam(required = false) String subject,
+                              @RequestParam(required = false) String department,
                               @AuthenticationPrincipal UserDetails userDetails,
                               RedirectAttributes ra) {
         try {
-            teacherService.update(id, firstName, lastName, subject);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin updated teacher ID " + id);
-            ra.addFlashAttribute("success", "Teacher updated successfully.");
+            teacherService.update(id, firstName, lastName, department);
+            activityLogService.log(currentUser(userDetails), "Admin updated teacher ID " + id);
+            ra.addFlashAttribute("success", "Teacher updated.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to update teacher: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/teachers";
     }
@@ -115,11 +114,10 @@ public class AdminController {
                                 RedirectAttributes ra) {
         try {
             teacherService.deleteById(id);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin deleted teacher ID " + id);
+            activityLogService.log(currentUser(userDetails), "Admin deleted teacher ID " + id);
             ra.addFlashAttribute("success", "Teacher deleted.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to delete teacher: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/teachers";
     }
@@ -128,20 +126,20 @@ public class AdminController {
 
     @GetMapping("/students")
     public String students(@RequestParam(required = false) String search,
-                           @RequestParam(required = false) String gradeLevel,
+                           @RequestParam(required = false) String grade,
                            Model model) {
         List<Student> students;
         if (search != null && !search.isBlank()) {
             students = studentService.search(search);
-        } else if (gradeLevel != null && !gradeLevel.isBlank()) {
-            students = studentService.findByGradeLevel(gradeLevel);
+        } else if (grade != null && !grade.isBlank()) {
+            students = studentService.findByGradeLevel(grade);
         } else {
             students = studentService.findAll();
         }
         model.addAttribute("students", students);
         model.addAttribute("search", search);
-        model.addAttribute("selectedGrade", gradeLevel);
-        model.addAttribute("gradeLevels", studentService.getAllGradeLevels());
+        model.addAttribute("selectedGrade", grade);
+        model.addAttribute("grades", studentService.getAllGradeLevels());
         return "admin/students";
     }
 
@@ -149,34 +147,34 @@ public class AdminController {
     public String addStudent(@RequestParam String firstName,
                              @RequestParam String lastName,
                              @RequestParam String studentId,
-                             @RequestParam(required = false) String gradeLevel,
+                             @RequestParam(required = false) String grade,
                              @RequestParam(required = false) String section,
                              @RequestParam(required = false) String email,
                              @RequestParam String password,
                              @AuthenticationPrincipal UserDetails userDetails,
                              RedirectAttributes ra) {
         try {
-            studentService.createStudent(firstName, lastName, studentId, gradeLevel, section, email, password);
+            studentService.createStudent(firstName, lastName, studentId,
+                    grade != null ? grade : "N/A",
+                    section != null ? section : "N/A",
+                    email, password);
             activityLogService.log(currentUser(userDetails),
                     "Admin added student: " + firstName + " " + lastName);
             ra.addFlashAttribute("success", "Student added successfully.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to add student: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/students";
     }
 
     @GetMapping("/students/{id}")
     public String viewStudent(@PathVariable Long id, Model model) {
-        studentService.findById(id).ifPresent(s -> model.addAttribute("student", s));
-        return "admin/students";
-    }
-
-    @GetMapping("/students/edit/{id}")
-    public String editStudentForm(@PathVariable Long id, Model model) {
-        studentService.findById(id).ifPresent(s -> model.addAttribute("editStudent", s));
+        studentService.findById(id).ifPresent(s -> {
+            model.addAttribute("viewStudent", s);
+            model.addAttribute("disciplineStatus", studentService.calculateDisciplineStatus(s));
+        });
         model.addAttribute("students", studentService.findAll());
-        model.addAttribute("gradeLevels", studentService.getAllGradeLevels());
+        model.addAttribute("grades", studentService.getAllGradeLevels());
         return "admin/students";
     }
 
@@ -184,17 +182,17 @@ public class AdminController {
     public String editStudent(@PathVariable Long id,
                               @RequestParam String firstName,
                               @RequestParam String lastName,
-                              @RequestParam(required = false) String gradeLevel,
+                              @RequestParam(required = false) String grade,
                               @RequestParam(required = false) String section,
                               @AuthenticationPrincipal UserDetails userDetails,
                               RedirectAttributes ra) {
         try {
-            studentService.update(id, firstName, lastName, gradeLevel, section);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin updated student ID " + id);
+            studentService.update(id, firstName, lastName, grade, section);
+            studentService.updateDisciplineStatus(id);
+            activityLogService.log(currentUser(userDetails), "Admin updated student ID " + id);
             ra.addFlashAttribute("success", "Student updated.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to update student: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/students";
     }
@@ -205,11 +203,10 @@ public class AdminController {
                                 RedirectAttributes ra) {
         try {
             studentService.deleteById(id);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin deleted student ID " + id);
+            activityLogService.log(currentUser(userDetails), "Admin deleted student ID " + id);
             ra.addFlashAttribute("success", "Student deleted.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to delete student: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/students";
     }
@@ -222,39 +219,28 @@ public class AdminController {
                             @RequestParam(required = false) String type,
                             Model model) {
         List<Incident> incidents = incidentService.findAll();
-
         if (status != null && !status.isBlank()) {
             IncidentStatus s = IncidentStatus.valueOf(status);
-            incidents = incidents.stream()
-                    .filter(i -> i.getStatus() == s).collect(Collectors.toList());
+            incidents = incidents.stream().filter(i -> i.getStatus() == s).collect(Collectors.toList());
         }
         if (type != null && !type.isBlank()) {
             IncidentType t = IncidentType.valueOf(type);
-            incidents = incidents.stream()
-                    .filter(i -> i.getIncidentType() == t).collect(Collectors.toList());
+            incidents = incidents.stream().filter(i -> i.getIncidentType() == t).collect(Collectors.toList());
         }
         if (search != null && !search.isBlank()) {
             String kw = search.toLowerCase();
             incidents = incidents.stream()
-                    .filter(i -> (i.getStudent().getFirstName() + " " + i.getStudent().getLastName())
-                            .toLowerCase().contains(kw)
-                            || i.getIncidentType().name().toLowerCase().contains(kw))
+                    .filter(i -> i.getStudent() != null &&
+                            (i.getStudent().getFirstName() + " " + i.getStudent().getLastName())
+                                    .toLowerCase().contains(kw))
                     .collect(Collectors.toList());
         }
-
         model.addAttribute("incidents", incidents);
         model.addAttribute("statusFilter", status);
-        model.addAttribute("selectedType", type != null && !type.isBlank() ? IncidentType.valueOf(type) : null);
         model.addAttribute("search", search);
         model.addAttribute("openCount",     incidentService.countByStatus(IncidentStatus.OPEN));
         model.addAttribute("reviewCount",   incidentService.countByStatus(IncidentStatus.UNDER_REVIEW));
         model.addAttribute("resolvedCount", incidentService.countByStatus(IncidentStatus.RESOLVED));
-        return "admin/incidents";
-    }
-
-    @GetMapping("/incidents/{id}")
-    public String viewIncident(@PathVariable Long id, Model model) {
-        incidentService.findById(id).ifPresent(i -> model.addAttribute("incident", i));
         return "admin/incidents";
     }
 
@@ -264,11 +250,10 @@ public class AdminController {
                                   RedirectAttributes ra) {
         try {
             incidentService.updateStatus(id, IncidentStatus.RESOLVED);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin resolved incident ID " + id);
+            activityLogService.log(currentUser(userDetails), "Admin resolved incident ID " + id);
             ra.addFlashAttribute("success", "Incident marked as resolved.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to resolve incident: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/incidents";
     }
@@ -280,29 +265,20 @@ public class AdminController {
                             @RequestParam(required = false) String type,
                             Model model) {
         List<Sanction> sanctions = sanctionService.findAll();
-
         if (type != null && !type.isBlank()) {
             SanctionType st = SanctionType.valueOf(type);
-            sanctions = sanctions.stream()
-                    .filter(s -> s.getSanctionType() == st).collect(Collectors.toList());
+            sanctions = sanctions.stream().filter(s -> s.getSanctionType() == st).collect(Collectors.toList());
         }
         if (search != null && !search.isBlank()) {
             String kw = search.toLowerCase();
             sanctions = sanctions.stream()
-                    .filter(s -> (s.getStudent().getFirstName() + " " + s.getStudent().getLastName())
-                            .toLowerCase().contains(kw))
+                    .filter(s -> s.getStudent() != null &&
+                            (s.getStudent().getFirstName() + " " + s.getStudent().getLastName())
+                                    .toLowerCase().contains(kw))
                     .collect(Collectors.toList());
         }
-
         model.addAttribute("sanctions", sanctions);
         model.addAttribute("search", search);
-        model.addAttribute("selectedType", type != null && !type.isBlank() ? SanctionType.valueOf(type) : null);
-        return "admin/sanctions";
-    }
-
-    @GetMapping("/sanctions/{id}")
-    public String viewSanction(@PathVariable Long id, Model model) {
-        sanctionService.findById(id).ifPresent(s -> model.addAttribute("sanction", s));
         return "admin/sanctions";
     }
 
@@ -312,11 +288,10 @@ public class AdminController {
                                  RedirectAttributes ra) {
         try {
             sanctionService.deleteById(id);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin deleted sanction ID " + id);
+            activityLogService.log(currentUser(userDetails), "Admin deleted sanction ID " + id);
             ra.addFlashAttribute("success", "Sanction removed.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to delete sanction: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/sanctions";
     }
@@ -341,7 +316,7 @@ public class AdminController {
             feedbackService.deleteFeedback(id, currentUser(userDetails));
             ra.addFlashAttribute("success", "Feedback deleted.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to delete feedback: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/feedback";
     }
@@ -350,7 +325,7 @@ public class AdminController {
 
     @GetMapping("/anonymous-reports")
     public String anonymousReports(@RequestParam(required = false) String status, Model model) {
-        List<AnonymousReport> reports = anonymousReportService.findAll();
+        List<AnonymousReport> reports = anonymousReportService.getAllReports();
         if ("PENDING".equals(status)) {
             reports = reports.stream().filter(r -> !r.isReviewed()).collect(Collectors.toList());
         } else if ("REVIEWED".equals(status)) {
@@ -366,12 +341,11 @@ public class AdminController {
                                @AuthenticationPrincipal UserDetails userDetails,
                                RedirectAttributes ra) {
         try {
-            anonymousReportService.markReviewed(id);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin reviewed anonymous report ID " + id);
+            anonymousReportService.markAsReviewed(id);
+            activityLogService.log(currentUser(userDetails), "Admin reviewed anonymous report ID " + id);
             ra.addFlashAttribute("success", "Report marked as reviewed.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to review report: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/anonymous-reports";
     }
@@ -381,12 +355,11 @@ public class AdminController {
                                @AuthenticationPrincipal UserDetails userDetails,
                                RedirectAttributes ra) {
         try {
-            anonymousReportService.deleteById(id);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin deleted anonymous report ID " + id);
+            anonymousReportService.deleteReport(id);
+            activityLogService.log(currentUser(userDetails), "Admin deleted anonymous report ID " + id);
             ra.addFlashAttribute("success", "Report deleted.");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", "Failed to delete report: " + e.getMessage());
+            ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/anonymous-reports";
     }
@@ -423,32 +396,22 @@ public class AdminController {
             int resolutionRate = totalIncidents > 0
                     ? (int) ((resolvedIncidents * 100) / totalIncidents) : 0;
 
-            List<String> monthLabels       = incidentService.getMonthLabels();
-            List<Long>   incidentsPerMonth = incidentService.getCountsPerMonth();
-            List<String> incidentTypeLabels = incidentService.getTypeLabels();
-            List<Long>   incidentTypeCounts = incidentService.getCountsPerType();
-            List<String> sanctionTypeLabels = sanctionService.getTypeLabels();
-            List<Long>   sanctionTypeCounts = sanctionService.getCountsPerType();
-            List<String> gradeLevelLabels   = incidentService.getGradeLevelLabels();
-            List<Long>   gradeIncidentCounts = incidentService.getCountsPerGradeLevel();
-            List<Map<String, Object>> topStudents = incidentService.getTopStudentsByIncidentCount(5);
-
-            model.addAttribute("totalIncidents",     totalIncidents);
-            model.addAttribute("openIncidents",      openIncidents);
-            model.addAttribute("resolvedIncidents",  resolvedIncidents);
-            model.addAttribute("totalSanctions",     totalSanctions);
-            model.addAttribute("resolutionRate",     resolutionRate);
-            model.addAttribute("monthLabels",        monthLabels);
-            model.addAttribute("incidentsPerMonth",  incidentsPerMonth);
-            model.addAttribute("incidentTypeLabels", incidentTypeLabels);
-            model.addAttribute("incidentTypeCounts", incidentTypeCounts);
-            model.addAttribute("sanctionTypeLabels", sanctionTypeLabels);
-            model.addAttribute("sanctionTypeCounts", sanctionTypeCounts);
-            model.addAttribute("gradeLevelLabels",   gradeLevelLabels);
-            model.addAttribute("gradeIncidentCounts",gradeIncidentCounts);
-            model.addAttribute("topStudents",        topStudents);
+            model.addAttribute("totalIncidents",      totalIncidents);
+            model.addAttribute("openIncidents",        openIncidents);
+            model.addAttribute("resolvedIncidents",    resolvedIncidents);
+            model.addAttribute("totalSanctions",       totalSanctions);
+            model.addAttribute("resolutionRate",       resolutionRate);
+            model.addAttribute("monthLabels",          incidentService.getMonthLabels());
+            model.addAttribute("incidentsPerMonth",    incidentService.getCountsPerMonth());
+            model.addAttribute("incidentTypeLabels",   incidentService.getTypeLabels());
+            model.addAttribute("incidentTypeCounts",   incidentService.getCountsPerType());
+            model.addAttribute("sanctionTypeLabels",   sanctionService.getTypeLabels());
+            model.addAttribute("sanctionTypeCounts",   sanctionService.getCountsPerType());
+            model.addAttribute("gradeLevelLabels",     incidentService.getGradeLevelLabels());
+            model.addAttribute("gradeIncidentCounts",  incidentService.getCountsPerGradeLevel());
+            model.addAttribute("topStudents",          incidentService.getTopStudentsByIncidentCount(5));
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to load analytics: " + e.getMessage());
+            model.addAttribute("error", "Could not load analytics: " + e.getMessage());
         }
         return "admin/analytics";
     }

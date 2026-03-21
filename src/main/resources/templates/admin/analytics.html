@@ -10,7 +10,7 @@
     :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
-    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
     .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
     .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
@@ -20,14 +20,17 @@
     .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
     .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
     .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
-    .logout-btn:hover{background:rgba(255,107,107,.18);}
-    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;}
-    .topbar{padding:18px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
     .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
     .topbar-meta{display:flex;align-items:center;gap:16px;}
-    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);letter-spacing:.04em;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);}
     .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
-    .content{padding:32px;flex:1;}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
     .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
     .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
@@ -47,20 +50,39 @@
     .chart-title{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;}
     .chart-subtitle{font-size:.75rem;color:var(--muted);margin-top:2px;}
     .chart-body{padding:22px;}
-    .chart-body canvas{max-height:260px;}
+    .chart-body canvas{max-height:240px;}
     .full-width{grid-column:1/-1;}
     .top-list{padding:8px 0;}
     .top-item{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid var(--border);}
     .top-item:last-child{border-bottom:none;}
     .top-rank{font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:var(--muted);width:24px;}
     .top-name{flex:1;font-size:.87rem;}
-    .top-bar-wrap{width:120px;height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
-    .top-bar{height:100%;border-radius:3px;background:var(--accent2);}
-    .top-count{font-family:'Syne',sans-serif;font-weight:700;font-size:.87rem;color:var(--accent2);width:30px;text-align:right;}
+    .top-id{font-size:.75rem;color:var(--muted);font-family:monospace;}
+    .top-count{font-family:'Syne',sans-serif;font-weight:700;font-size:.87rem;color:var(--accent2);min-width:30px;text-align:right;}
+
+    @media(max-width:1024px){
+      .stats-row{grid-template-columns:repeat(2,1fr);}
+      .charts-grid{grid-template-columns:1fr;}
+    }
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+      .stats-row{grid-template-columns:1fr 1fr;gap:12px;}
+      .stat-value{font-size:1.6rem;}
+      .chart-body{padding:14px;}
+    }
   </style>
 </head>
 <body>
-<aside class="sidebar">
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
   <div class="nav-section">Main</div>
   <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
@@ -76,217 +98,76 @@
   <a href="/admin/analytics" class="nav-link active"><span class="icon">📊</span> Analytics</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
-
 <main class="main">
   <header class="topbar">
-    <div class="topbar-title">Analytics & Reports</div>
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Analytics & Reports</div>
+    </div>
     <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
   </header>
   <div class="content">
-
-    <!-- Summary Stats -->
     <div class="stats-row">
-      <div class="stat-card c1">
-        <div class="stat-label">Total Incidents</div>
-        <div class="stat-value" id="totalIncidents" th:text="${totalIncidents}">0</div>
-      </div>
-      <div class="stat-card c2">
-        <div class="stat-label">Open Cases</div>
-        <div class="stat-value" th:text="${openIncidents}">0</div>
-      </div>
-      <div class="stat-card c3">
-        <div class="stat-label">Resolution Rate</div>
-        <div class="stat-value" th:text="${resolutionRate} + '%'">0%</div>
-      </div>
-      <div class="stat-card c4">
-        <div class="stat-label">Sanctions Issued</div>
-        <div class="stat-value" th:text="${totalSanctions}">0</div>
-      </div>
+      <div class="stat-card c1"><div class="stat-label">Total Incidents</div><div class="stat-value" th:text="${totalIncidents}">0</div></div>
+      <div class="stat-card c2"><div class="stat-label">Open Cases</div><div class="stat-value" th:text="${openIncidents}">0</div></div>
+      <div class="stat-card c3"><div class="stat-label">Resolution Rate</div><div class="stat-value" th:text="${resolutionRate} + '%'">0%</div></div>
+      <div class="stat-card c4"><div class="stat-label">Sanctions Issued</div><div class="stat-value" th:text="${totalSanctions}">0</div></div>
     </div>
-
-    <!-- Charts Row 1 -->
     <div class="charts-grid">
-
-      <!-- Incidents by Month (line chart) -->
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Incidents Over Time</div>
-          <div class="chart-subtitle">Monthly breakdown this year</div>
-        </div>
-        <div class="chart-body">
-          <canvas id="incidentsTrend"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Incidents Over Time</div><div class="chart-subtitle">Monthly breakdown</div></div>
+        <div class="chart-body"><canvas id="incidentsTrend"></canvas></div>
       </div>
-
-      <!-- Incidents by Type (doughnut) -->
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Incidents by Type</div>
-          <div class="chart-subtitle">Distribution across categories</div>
-        </div>
-        <div class="chart-body">
-          <canvas id="incidentsByType"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Incidents by Type</div><div class="chart-subtitle">Distribution</div></div>
+        <div class="chart-body"><canvas id="incidentsByType"></canvas></div>
       </div>
-
-      <!-- Sanctions by Type (bar) -->
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Sanctions by Type</div>
-          <div class="chart-subtitle">Total issued per sanction type</div>
-        </div>
-        <div class="chart-body">
-          <canvas id="sanctionsByType"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Sanctions by Type</div><div class="chart-subtitle">Total issued</div></div>
+        <div class="chart-body"><canvas id="sanctionsByType"></canvas></div>
       </div>
-
-      <!-- Grade Level Breakdown (bar) -->
       <div class="chart-card">
-        <div class="chart-header">
-          <div class="chart-title">Incidents by Grade Level</div>
-          <div class="chart-subtitle">Which grade has the most cases</div>
-        </div>
-        <div class="chart-body">
-          <canvas id="byGrade"></canvas>
-        </div>
+        <div class="chart-header"><div class="chart-title">Incidents by Grade</div><div class="chart-subtitle">Per grade level</div></div>
+        <div class="chart-body"><canvas id="byGrade"></canvas></div>
       </div>
-
     </div>
-
-    <!-- Top Students with Most Incidents -->
     <div class="chart-card full-width">
-      <div class="chart-header">
-        <div class="chart-title">Students with Most Incidents</div>
-        <div class="chart-subtitle">Top 5 by incident count</div>
-      </div>
+      <div class="chart-header"><div class="chart-title">Students with Most Incidents</div><div class="chart-subtitle">Top 5</div></div>
       <div class="top-list">
         <div class="top-item" th:each="entry, i : ${topStudents}">
           <div class="top-rank" th:text="${i.count}">1</div>
           <div class="top-name" th:text="${entry.studentName}">Student Name</div>
-          <div class="top-bar-wrap">
-            <div class="top-bar" th:style="'width:' + ${entry.percentage} + '%'"></div>
-          </div>
-          <div class="top-count" th:text="${entry.count}">0</div>
+          <div class="top-id" th:text="${entry.studentId}">ID</div>
+          <div class="top-count" th:text="${entry.incidentCount}">0</div>
         </div>
-        <div th:if="${#lists.isEmpty(topStudents)}" style="padding:32px;text-align:center;color:var(--muted);font-size:.87rem;">
-          No data available
-        </div>
+        <div th:if="${topStudents == null or #lists.isEmpty(topStudents)}"
+             style="padding:32px;text-align:center;color:var(--muted);font-size:.87rem;">No data available</div>
       </div>
     </div>
-
   </div>
 </main>
-
-<!-- Chart.js initialization with Thymeleaf data injection -->
 <script th:inline="javascript">
-  Chart.defaults.color = '#7a829a';
-  Chart.defaults.borderColor = '#252a3a';
-  Chart.defaults.font.family = "'DM Sans', sans-serif";
+  Chart.defaults.color='#7a829a';Chart.defaults.borderColor='#252a3a';Chart.defaults.font.family="'DM Sans',sans-serif";
+  const monthLabels=/*[[${monthLabels}]]*/[];
+  const incidentsPerMonth=/*[[${incidentsPerMonth}]]*/[];
+  const incidentTypeLabels=/*[[${incidentTypeLabels}]]*/[];
+  const incidentTypeCounts=/*[[${incidentTypeCounts}]]*/[];
+  const sanctionTypeLabels=/*[[${sanctionTypeLabels}]]*/[];
+  const sanctionTypeCounts=/*[[${sanctionTypeCounts}]]*/[];
+  const gradeLevelLabels=/*[[${gradeLevelLabels}]]*/[];
+  const gradeIncidentCounts=/*[[${gradeIncidentCounts}]]*/[];
 
-  const monthLabels = /*[[${monthLabels}]]*/ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const incidentsPerMonth = /*[[${incidentsPerMonth}]]*/ [0,0,0,0,0,0,0,0,0,0,0,0];
-  const incidentTypeLabels = /*[[${incidentTypeLabels}]]*/ ['Fighting','Bullying','Vandalism','Other'];
-  const incidentTypeCounts = /*[[${incidentTypeCounts}]]*/ [0,0,0,0];
-  const sanctionTypeLabels = /*[[${sanctionTypeLabels}]]*/ ['Warning','Detention','Suspension','Expulsion','Probation'];
-  const sanctionTypeCounts = /*[[${sanctionTypeCounts}]]*/ [0,0,0,0,0];
-  const gradeLevelLabels = /*[[${gradeLevelLabels}]]*/ ['Grade 7','Grade 8','Grade 9','Grade 10'];
-  const gradeIncidentCounts = /*[[${gradeIncidentCounts}]]*/ [0,0,0,0];
-
-  // Line chart — incidents trend
-  new Chart(document.getElementById('incidentsTrend'), {
-    type: 'line',
-    data: {
-      labels: monthLabels,
-      datasets: [{
-        label: 'Incidents',
-        data: incidentsPerMonth,
-        borderColor: '#4f7fff',
-        backgroundColor: 'rgba(79,127,255,0.08)',
-        borderWidth: 2,
-        pointBackgroundColor: '#4f7fff',
-        pointRadius: 4,
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: '#252a3a' } },
-        y: { grid: { color: '#252a3a' }, beginAtZero: true, ticks: { stepSize: 1 } }
-      }
-    }
-  });
-
-  // Doughnut — incidents by type
-  new Chart(document.getElementById('incidentsByType'), {
-    type: 'doughnut',
-    data: {
-      labels: incidentTypeLabels,
-      datasets: [{
-        data: incidentTypeCounts,
-        backgroundColor: ['#ff6b6b','#f7c948','#4f7fff','#43d9a2','#a78bfa'],
-        borderColor: '#151820',
-        borderWidth: 3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: {
-        legend: { position: 'right', labels: { padding: 16, font: { size: 12 } } }
-      },
-      cutout: '65%'
-    }
-  });
-
-  // Bar — sanctions by type
-  new Chart(document.getElementById('sanctionsByType'), {
-    type: 'bar',
-    data: {
-      labels: sanctionTypeLabels,
-      datasets: [{
-        label: 'Count',
-        data: sanctionTypeCounts,
-        backgroundColor: ['rgba(247,201,72,0.6)','rgba(255,107,107,0.6)','rgba(255,68,68,0.6)','rgba(200,0,0,0.6)','rgba(79,127,255,0.6)'],
-        borderRadius: 6,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display: false } },
-        y: { grid: { color: '#252a3a' }, beginAtZero: true, ticks: { stepSize: 1 } }
-      }
-    }
-  });
-
-  // Bar — by grade
-  new Chart(document.getElementById('byGrade'), {
-    type: 'bar',
-    data: {
-      labels: gradeLevelLabels,
-      datasets: [{
-        label: 'Incidents',
-        data: gradeIncidentCounts,
-        backgroundColor: 'rgba(67,217,162,0.5)',
-        borderColor: '#43d9a2',
-        borderWidth: 1,
-        borderRadius: 6,
-        borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display: false } },
-        y: { grid: { color: '#252a3a' }, beginAtZero: true, ticks: { stepSize: 1 } }
-      }
-    }
-  });
+  new Chart(document.getElementById('incidentsTrend'),{type:'line',data:{labels:monthLabels,datasets:[{label:'Incidents',data:incidentsPerMonth,borderColor:'#4f7fff',backgroundColor:'rgba(79,127,255,0.08)',borderWidth:2,pointBackgroundColor:'#4f7fff',pointRadius:4,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#252a3a'}},y:{grid:{color:'#252a3a'},beginAtZero:true,ticks:{stepSize:1}}}}});
+  new Chart(document.getElementById('incidentsByType'),{type:'doughnut',data:{labels:incidentTypeLabels,datasets:[{data:incidentTypeCounts,backgroundColor:['#ff6b6b','#f7c948','#4f7fff','#43d9a2','#a78bfa','#fb923c','#34d399'],borderColor:'#151820',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{padding:12,font:{size:11}}}},cutout:'65%'}});
+  new Chart(document.getElementById('sanctionsByType'),{type:'bar',data:{labels:sanctionTypeLabels,datasets:[{label:'Count',data:sanctionTypeCounts,backgroundColor:['rgba(247,201,72,0.6)','rgba(255,107,107,0.6)','rgba(255,68,68,0.6)','rgba(200,0,0,0.6)','rgba(79,127,255,0.6)','rgba(67,217,162,0.6)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#252a3a'},beginAtZero:true,ticks:{stepSize:1}}}}});
+  new Chart(document.getElementById('byGrade'),{type:'bar',data:{labels:gradeLevelLabels,datasets:[{label:'Incidents',data:gradeIncidentCounts,backgroundColor:'rgba(67,217,162,0.5)',borderColor:'#43d9a2',borderWidth:1,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#252a3a'},beginAtZero:true,ticks:{stepSize:1}}}}});
+</script>
+<script>
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
 </script>
 </body>
 </html>

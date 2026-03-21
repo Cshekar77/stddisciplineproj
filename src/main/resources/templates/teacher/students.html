@@ -1,54 +1,190 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-<title>Students</title>
-
-<style>
-table{border-collapse:collapse;width:60%;margin:auto}
-th,td{border:1px solid black;padding:10px;text-align:center}
-</style>
-
-<script>
-
-function addStudent(){
-
-let table=document.getElementById("table");
-
-let name=document.getElementById("name").value;
-
-let row=table.insertRow();
-
-row.insertCell(0).innerHTML=name;
-
-row.insertCell(1).innerHTML="<button onclick='deleteRow(this)'>Delete</button>";
-
-}
-
-function deleteRow(btn){
-
-let row=btn.parentNode.parentNode;
-
-row.remove();
-
-}
-
-</script>
-
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Students — Teacher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--nav-w:240px;--accent:#43d9a2;--accent2:#ff6b6b;--accent3:#4f7fff;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;}
+    [data-theme="light"]{--bg:#f0f4f0;--surface:#ffffff;--surface2:#f0faf5;--border:#d4e8dc;--text:#1a2e1a;--muted:#5a7a5a;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(67,217,162,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#0d0f14;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(67,217,162,.15);color:var(--accent);}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform 0.3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
+    .alert{padding:12px 18px;border-radius:8px;margin-bottom:20px;font-size:.88rem;display:flex;align-items:center;gap:10px;}
+    .alert-success{background:rgba(67,217,162,.12);border:1px solid rgba(67,217,162,.25);color:var(--accent);}
+    .alert-error{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--accent2);}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:12px;flex-wrap:wrap;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:300px;}
+    .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;flex:1;}
+    .search-box input::placeholder{color:var(--muted);}
+    .btn{padding:9px 18px;border-radius:8px;font-size:.85rem;font-weight:600;cursor:pointer;border:none;transition:all .18s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    .btn-primary{background:var(--accent);color:#0d0f14;}
+    .btn-danger{background:rgba(255,107,107,.12);color:var(--accent2);border:1px solid rgba(255,107,107,.25);}
+    .btn-sm{padding:6px 12px;font-size:.78rem;}
+    .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    table{width:100%;border-collapse:collapse;min-width:480px;}
+    thead th{padding:10px 18px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:var(--surface2);}
+    tbody td{padding:12px 18px;font-size:.85rem;}
+    .td-actions{display:flex;gap:6px;flex-wrap:wrap;}
+    .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
+    .modal-overlay.open{display:flex;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
+    .modal-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px;}
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
+    .form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;transition:border-color .18s;}
+    .form-control:focus{border-color:var(--accent);}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+    .divider{border:none;border-top:1px solid var(--border);margin:14px 0;}
+    .section-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+      .form-row{grid-template-columns:1fr;}
+    }
+  </style>
 </head>
-
 <body>
-
-<h2>Student Records</h2>
-
-<input type="text" id="name" placeholder="Student Name">
-<button onclick="addStudent()">Add</button>
-
-<table id="table">
-<tr>
-<th>Name</th>
-<th>Action</th>
-</tr>
-</table>
-
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Teacher</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/teacher/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/teacher/students" class="nav-link active"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/teacher/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/teacher/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/teacher/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <div class="nav-section">System</div>
+  <a href="/teacher/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Students</div>
+    </div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap"><span class="theme-icon" id="themeIcon">🌙</span><div class="theme-toggle" onclick="toggleTheme()"></div></div>
+      <span class="badge">TEACHER</span><div class="avatar">T</div>
+    </div>
+  </header>
+  <div class="content">
+    <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
+    <div th:if="${error}" class="alert alert-error">❌ <span th:text="${error}"></span></div>
+    <div class="toolbar">
+      <form method="get" action="/teacher/students" style="display:flex;gap:10px;flex:1;">
+        <div class="search-box"><span>🔍</span><input type="text" name="search" placeholder="Search students…" th:value="${search}"/></div>
+      </form>
+      <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Student</button>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Students</div>
+        <span style="font-size:.8rem;color:var(--muted);" th:text="${students != null ? students.size() : 0} + ' records'">0 records</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Student ID</th><th>Grade</th><th>Section</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr th:each="student : ${students}">
+              <td th:text="${student.firstName + ' ' + student.lastName}">—</td>
+              <td style="font-family:monospace;font-size:.82rem;color:var(--muted);" th:text="${student.studentId}">—</td>
+              <td th:text="${student.grade}">—</td>
+              <td th:text="${student.section}">—</td>
+              <td>
+                <div class="td-actions">
+                  <form th:action="@{/teacher/students/delete/{id}(id=${student.id})}" method="post" style="display:inline;" onsubmit="return confirm('Delete this student?')">
+                    <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            <tr th:if="${students == null or #lists.isEmpty(students)}"><td colspan="5" class="empty-state">No students found</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-title">➕ Add New Student</div>
+    <form th:action="@{/teacher/students/add}" method="post">
+      <div class="section-label">Personal Info</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name *</label><input class="form-control" type="text" name="firstName" required/></div>
+        <div class="form-group"><label class="form-label">Last Name *</label><input class="form-control" type="text" name="lastName" required/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Student ID *</label><input class="form-control" type="text" name="studentId" required placeholder="STU-2024-001"/></div>
+        <div class="form-group"><label class="form-label">Grade</label><input class="form-control" type="text" name="grade" placeholder="Grade 10"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Section</label><input class="form-control" type="text" name="section" placeholder="Section A"/></div>
+      <hr class="divider"/>
+      <div class="section-label">Login Credentials</div>
+      <div class="form-group"><label class="form-label">Email / Username *</label><input class="form-control" type="email" name="email" required placeholder="student@school.edu"/></div>
+      <div class="form-group"><label class="form-label">Password *</label><input class="form-control" type="password" name="password" required placeholder="••••••••"/></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Add Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  const html=document.documentElement;const themeIcon=document.getElementById('themeIcon');
+  const saved=localStorage.getItem('sds-theme')||'dark';html.setAttribute('data-theme',saved);themeIcon.textContent=saved==='dark'?'🌙':'☀️';
+  function toggleTheme(){const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('sds-theme',next);themeIcon.textContent=next==='dark'?'🌙':'☀️';}
+  const sidebar=document.getElementById('sidebar');const overlay=document.getElementById('sidebarOverlay');
+  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+  document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+</script>
 </body>
 </html>

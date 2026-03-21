@@ -1,18 +1,108 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-<title>Activity History</title>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity Log — Teacher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--nav-w:240px;--accent:#43d9a2;--accent2:#ff6b6b;--accent3:#4f7fff;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;}
+    [data-theme="light"]{--bg:#f0f4f0;--surface:#ffffff;--surface2:#f0faf5;--border:#d4e8dc;--text:#1a2e1a;--muted:#5a7a5a;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(67,217,162,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#0d0f14;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(67,217,162,.15);color:var(--accent);}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform 0.3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+    .log-list{padding:8px 0;}
+    .log-item{display:flex;align-items:flex-start;gap:14px;padding:14px 20px;border-bottom:1px solid var(--border);}
+    .log-item:last-child{border-bottom:none;}
+    .log-dot{width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:5px;}
+    .log-desc{font-size:.87rem;line-height:1.5;margin-bottom:3px;}
+    .log-time{font-size:.75rem;color:var(--muted);}
+    .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}.sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}.main{margin-left:0;}.hamburger{display:flex;}
+      .topbar{padding:14px 16px;}.topbar-title{font-size:1rem;}.content{padding:16px;}.badge{display:none;}
+    }
+  </style>
 </head>
-
 <body>
-
-<h2>Teacher Activity History</h2>
-
-<ul>
-<li>Added student record</li>
-<li>Submitted incident</li>
-<li>Assigned sanction</li>
-</ul>
-
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Teacher</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/teacher/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/teacher/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/teacher/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/teacher/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/teacher/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <div class="nav-section">System</div>
+  <a href="/teacher/activity" class="nav-link active"><span class="icon">📋</span> Activity Log</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left"><div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div><div class="topbar-title">My Activity</div></div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap"><span class="theme-icon" id="themeIcon">🌙</span><div class="theme-toggle" onclick="toggleTheme()"></div></div>
+      <span class="badge">TEACHER</span><div class="avatar">T</div>
+    </div>
+  </header>
+  <div class="content">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">📋 Activity History</div>
+        <span style="font-size:.8rem;color:var(--muted);" th:text="${logs != null ? logs.size() : 0} + ' entries'">0 entries</span>
+      </div>
+      <div class="log-list">
+        <div class="log-item" th:each="log : ${logs}">
+          <div class="log-dot"></div>
+          <div>
+            <div class="log-desc" th:text="${log.description}">Activity description</div>
+            <div class="log-time" th:text="${log.timestamp != null ? #temporals.format(log.timestamp, 'MMM dd, yyyy · hh:mm a') : '—'}">—</div>
+          </div>
+        </div>
+        <div th:if="${logs == null or #lists.isEmpty(logs)}" class="empty-state">📋 No activity recorded yet</div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  const html=document.documentElement;const themeIcon=document.getElementById('themeIcon');
+  const saved=localStorage.getItem('sds-theme')||'dark';html.setAttribute('data-theme',saved);themeIcon.textContent=saved==='dark'?'🌙':'☀️';
+  function toggleTheme(){const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('sds-theme',next);themeIcon.textContent=next==='dark'?'🌙':'☀️';}
+  const sidebar=document.getElementById('sidebar');const overlay=document.getElementById('sidebarOverlay');
+  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+</script>
 </body>
 </html>

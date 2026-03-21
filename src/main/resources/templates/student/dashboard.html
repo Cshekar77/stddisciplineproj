@@ -1,22 +1,201 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-<title>Student Dashboard</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--nav-w:240px;--accent:#f7c948;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#4f7fff;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;}
+    [data-theme="light"]{--bg:#faf8f0;--surface:#ffffff;--surface2:#fdf9e8;--border:#e8e0c0;--text:#2e2a1a;--muted:#7a6a3a;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(247,201,72,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#0d0f14;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(247,201,72,.15);color:var(--accent);}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform 0.3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
+    .welcome-card{background:linear-gradient(135deg,rgba(247,201,72,.15),rgba(247,201,72,.05));border:1px solid rgba(247,201,72,.25);border-radius:16px;padding:24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+    .welcome-text h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:4px;}
+    .welcome-text p{font-size:.88rem;color:var(--muted);}
+    .status-badge{padding:8px 16px;border-radius:20px;font-size:.82rem;font-weight:700;font-family:'Syne',sans-serif;}
+    .status-GOOD{background:rgba(67,217,162,.15);color:var(--accent3);border:1px solid rgba(67,217,162,.3);}
+    .status-WARNING{background:rgba(247,201,72,.15);color:var(--accent);border:1px solid rgba(247,201,72,.3);}
+    .status-CRITICAL{background:rgba(255,107,107,.15);color:var(--accent2);border:1px solid rgba(255,107,107,.3);}
+    .status-SUSPENDED{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.3);}
+    .status-EXPELLED{background:rgba(200,0,0,.15);color:#ff2222;border:1px solid rgba(200,0,0,.3);}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s;box-shadow:var(--shadow);}
+    .stat-card:hover{transform:translateY(-3px);}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+    .stat-card.yellow::before{background:var(--accent);}
+    .stat-card.red::before{background:var(--accent2);}
+    .stat-label{font-size:.75rem;color:var(--muted);font-weight:500;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em;}
+    .stat-value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
+    .stat-card.yellow .stat-value{color:var(--accent);}
+    .stat-card.red .stat-value{color:var(--accent2);}
+    .stat-icon{position:absolute;top:16px;right:16px;font-size:1.5rem;opacity:.12;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+    .view-all{font-size:.78rem;color:var(--accent);text-decoration:none;font-weight:500;}
+    .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    table{width:100%;border-collapse:collapse;min-width:400px;}
+    thead th{padding:10px 18px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
+    tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:var(--surface2);}
+    tbody td{padding:12px 18px;font-size:.85rem;}
+    .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;}
+    .pill-open{background:rgba(255,107,107,.12);color:var(--accent2);}
+    .pill-review{background:rgba(247,201,72,.12);color:var(--accent);}
+    .pill-resolved{background:rgba(67,217,162,.12);color:var(--accent3);}
+    .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px;}
+    .quick-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);text-decoration:none;color:var(--text);font-size:.78rem;font-weight:500;text-align:center;transition:all .18s;}
+    .quick-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+    .quick-btn .qicon{font-size:1.3rem;}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+      .quick-grid{grid-template-columns:repeat(2,1fr);}
+      .stat-value{font-size:1.6rem;}
+    }
+    @media(max-width:480px){
+      .quick-grid{grid-template-columns:1fr 1fr;}
+    }
+  </style>
 </head>
-
 <body>
-
-<h1>Student Dashboard</h1>
-
-<nav>
-
-<a th:href="@{/student/my-record}">My Record</a>
-<a th:href="@{/student/my-sanctions}">My Sanctions</a>
-<a th:href="@{/student/feedback}">Feedback</a>
-<a th:href="@{/student/report}">Anonymous Report</a>
-<a th:href="@{/student/activity}">Activity History</a>
-
-</nav>
-
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Student</span></span></div>
+  <div class="nav-section">My Account</div>
+  <a href="/student/dashboard" class="nav-link active"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/student/my-record" class="nav-link"><span class="icon">📄</span> My Record</a>
+  <a href="/student/my-sanctions" class="nav-link"><span class="icon">🔒</span> My Sanctions</a>
+  <div class="nav-section">Actions</div>
+  <a href="/student/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/student/anonymous-report" class="nav-link"><span class="icon">🕵️</span> Report Issue</a>
+  <div class="nav-section">System</div>
+  <a href="/student/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">My Dashboard</div>
+    </div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <span class="badge">STUDENT</span>
+      <div class="avatar" th:text="${studentName != null} ? ${#strings.substring(studentName, 0, 1)} : 'S'">S</div>
+    </div>
+  </header>
+  <div class="content">
+    <div class="welcome-card">
+      <div class="welcome-text">
+        <h2 th:text="'Welcome, ' + ${studentName != null ? studentName : 'Student'} + '!'">Welcome!</h2>
+        <p>Here's an overview of your discipline record.</p>
+      </div>
+      <div class="status-badge"
+        th:classappend="'status-' + ${disciplineStatus != null ? disciplineStatus.name() : 'GOOD'}"
+        th:text="${disciplineStatus != null ? '● ' + disciplineStatus.name() : '● GOOD'}">● GOOD</div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card yellow">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">Total Incidents</div>
+        <div class="stat-value" th:text="${incidentCount != null} ? ${incidentCount} : 0">0</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">🔒</div>
+        <div class="stat-label">Sanctions</div>
+        <div class="stat-value" th:text="${sanctionCount != null} ? ${sanctionCount} : 0">0</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Recent Incidents</div>
+        <a href="/student/my-record" class="view-all">View all →</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr th:each="incident : ${recentIncidents}">
+              <td th:text="${incident.incidentType}">—</td>
+              <td th:text="${incident.date != null ? #temporals.format(incident.date, 'MMM dd, yyyy') : '—'}">—</td>
+              <td>
+                <span class="pill"
+                  th:classappend="${incident.status != null and incident.status.name() == 'OPEN'} ? 'pill-open' :
+                    (${incident.status != null and incident.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 'pill-resolved')"
+                  th:text="${incident.status}">—</span>
+              </td>
+            </tr>
+            <tr th:if="${recentIncidents == null or #lists.isEmpty(recentIncidents)}">
+              <td colspan="3" style="text-align:center;color:var(--muted);padding:24px;font-size:.85rem;">✅ No incidents on record</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Quick Actions</div></div>
+      <div class="quick-grid">
+        <a href="/student/my-record" class="quick-btn"><span class="qicon">📄</span>My Record</a>
+        <a href="/student/my-sanctions" class="quick-btn"><span class="qicon">🔒</span>Sanctions</a>
+        <a href="/student/feedback" class="quick-btn"><span class="qicon">💬</span>Feedback</a>
+        <a href="/student/anonymous-report" class="quick-btn"><span class="qicon">🕵️</span>Report Issue</a>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  const html=document.documentElement;
+  const themeIcon=document.getElementById('themeIcon');
+  const saved=localStorage.getItem('sds-theme')||'dark';
+  html.setAttribute('data-theme',saved);
+  themeIcon.textContent=saved==='dark'?'🌙':'☀️';
+  function toggleTheme(){const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('sds-theme',next);themeIcon.textContent=next==='dark'?'🌙':'☀️';}
+  const sidebar=document.getElementById('sidebar');
+  const overlay=document.getElementById('sidebarOverlay');
+  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+</script>
 </body>
 </html>
