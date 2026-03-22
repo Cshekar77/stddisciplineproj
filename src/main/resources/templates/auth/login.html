@@ -6,7 +6,7 @@
   <title>Login — Student Discipline System</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root{--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--accent5:#a78bfa;--transition:all 0.3s ease;}
+    :root{--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--transition:all 0.3s ease;}
     [data-theme="dark"]{--bg:#0a0c12;--surface:#13161f;--surface2:#1a1e2e;--border:#232838;--text:#e8eaf2;--muted:#7a829a;--shadow:0 8px 48px rgba(0,0,0,0.6);}
     [data-theme="light"]{--bg:#e8ecf8;--surface:#ffffff;--surface2:#f0f4ff;--border:#d4daf0;--text:#1a1d2e;--muted:#6b7494;--shadow:0 8px 48px rgba(79,127,255,0.14);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -32,7 +32,7 @@
     .role-tab.active-teacher{background:rgba(67,217,162,.13);border-color:var(--accent3);color:var(--accent3);box-shadow:0 2px 16px rgba(67,217,162,.2);}
     .role-tab.active-student{background:rgba(247,201,72,.13);border-color:var(--accent4);color:var(--accent4);box-shadow:0 2px 16px rgba(247,201,72,.2);}
     .role-hint{font-size:.8rem;color:var(--muted);margin-bottom:18px;padding:10px 14px;background:var(--surface2);border-radius:9px;border-left:3px solid var(--accent);transition:border-color .25s;display:none;line-height:1.5;}
-    .role-hint.show{display:block;animation:fadeIn .25s ease;}
+    .role-hint.show{display:block;}
     .role-hint.hint-teacher{border-color:var(--accent3);}
     .role-hint.hint-student{border-color:var(--accent4);}
     .alert{padding:11px 16px;border-radius:9px;font-size:.85rem;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
@@ -59,7 +59,7 @@
     .btn-teacher:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(67,217,162,.45);}
     .btn-student{background:linear-gradient(135deg,#f7c948,#e6a820);color:#0a0c12;box-shadow:0 4px 20px rgba(247,201,72,.35);}
     .btn-student:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(247,201,72,.45);}
-    .btn-login:active{transform:translateY(0);box-shadow:none;}
+    .btn-login:active{transform:translateY(0);}
     .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:rippleOut .5s linear;pointer-events:none;}
     @keyframes rippleOut{to{transform:scale(4);opacity:0;}}
     .features{margin-top:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
@@ -75,7 +75,7 @@
 <body>
 
 <canvas id="c"></canvas>
-<button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+<button class="theme-btn" id="themeBtn">🌙</button>
 
 <div class="login-wrapper">
   <div class="brand">
@@ -85,36 +85,52 @@
   </div>
 
   <div class="card">
-    <div th:if="${param.error}" class="alert alert-error">❌ Invalid username or password. Please try again.</div>
-    <div th:if="${param.logout}" class="alert alert-success">✅ You have been logged out successfully.</div>
-
-    <div class="role-tabs">
-      <button type="button" class="role-tab active-admin" id="tab-admin" onclick="selectRole('admin')"><span class="tab-icon">🛡️</span>Admin</button>
-      <button type="button" class="role-tab" id="tab-teacher" onclick="selectRole('teacher')"><span class="tab-icon">👩‍🏫</span>Teacher</button>
-      <button type="button" class="role-tab" id="tab-student" onclick="selectRole('student')"><span class="tab-icon">🎓</span>Student</button>
+    <div th:if="${param.error}" class="alert alert-error">
+      &#10060; Invalid username or password. Please try again.
+    </div>
+    <div th:if="${param.logout}" class="alert alert-success">
+      &#9989; You have been logged out successfully.
     </div>
 
-    <div class="role-hint show" id="roleHint">Sign in as <strong>Admin</strong> to manage teachers, students, incidents and the full system.</div>
+    <div class="role-tabs">
+      <button type="button" class="role-tab active-admin" id="tab-admin" onclick="selectRole('admin')">
+        <span class="tab-icon">&#128737;</span>Admin
+      </button>
+      <button type="button" class="role-tab" id="tab-teacher" onclick="selectRole('teacher')">
+        <span class="tab-icon">&#128105;&#8205;&#127979;</span>Teacher
+      </button>
+      <button type="button" class="role-tab" id="tab-student" onclick="selectRole('student')">
+        <span class="tab-icon">&#127891;</span>Student
+      </button>
+    </div>
+
+    <div class="role-hint show" id="roleHint">
+      Sign in as <strong>Admin</strong> to manage teachers, students, incidents and the full system.
+    </div>
 
     <form th:action="@{/login}" method="post" id="loginForm" class="role-admin">
       <div class="form-group">
         <label class="form-label">Username</label>
-        <div class="input-wrap"><input type="text" class="form-control" name="username" placeholder="Enter your username" required autofocus/></div>
+        <div class="input-wrap">
+          <input type="text" class="form-control" name="username" placeholder="Enter your username" required autofocus/>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
         <div class="input-wrap">
           <input type="password" class="form-control pr" name="password" id="passwordInput" placeholder="Enter your password" required/>
-          <button type="button" class="pw-eye" id="pwEye" onclick="togglePassword()">👁️</button>
+          <button type="button" class="pw-eye" id="pwEye" onclick="togglePassword()">&#128065;</button>
         </div>
       </div>
-      <button type="submit" class="btn-login btn-admin" id="loginBtn" onclick="rippleEffect(event)">Sign In as Admin</button>
+      <button type="submit" class="btn-login btn-admin" id="loginBtn" onclick="rippleEffect(event)">
+        Sign In as Admin
+      </button>
     </form>
 
     <div class="features" id="featuresRow">
-      <div class="feature"><span class="ficon">📊</span>Analytics</div>
-      <div class="feature"><span class="ficon">🔒</span>Sanctions</div>
-      <div class="feature"><span class="ficon">🕵️</span>Reports</div>
+      <div class="feature"><span class="ficon">&#128202;</span>Analytics</div>
+      <div class="feature"><span class="ficon">&#128274;</span>Sanctions</div>
+      <div class="feature"><span class="ficon">&#128373;</span>Reports</div>
     </div>
 
     <div class="divider">secure login</div>
@@ -122,240 +138,7 @@
   </div>
 </div>
 
-<!--
-  ✅ FIX: th:inline="none" tells Thymeleaf to leave this script completely alone.
-  Without it, Thymeleaf tries to parse [[ and ]] in JS arrays as inline expressions and crashes.
--->
-<script th:inline="none">
-// ── Theme ────────────────────────────────────────────────────────────────────
-const html = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-let isDark = (localStorage.getItem('sds-theme') || 'dark') === 'dark';
-function applyTheme() {
-  html.setAttribute('data-theme', isDark ? 'dark' : 'light');
-  themeBtn.textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('sds-theme', isDark ? 'dark' : 'light');
-}
-applyTheme();
-function toggleTheme() { isDark = !isDark; applyTheme(); }
-
-// ── Password toggle ──────────────────────────────────────────────────────────
-function togglePassword() {
-  const i = document.getElementById('passwordInput');
-  const e = document.getElementById('pwEye');
-  i.type = i.type === 'password' ? 'text' : 'password';
-  e.textContent = i.type === 'password' ? '👁️' : '🙈';
-}
-
-// ── Ripple ───────────────────────────────────────────────────────────────────
-function rippleEffect(e) {
-  const btn = e.currentTarget;
-  const r = document.createElement('span');
-  const d = Math.max(btn.clientWidth, btn.clientHeight);
-  r.className = 'ripple';
-  r.style.cssText = `width:${d}px;height:${d}px;left:${e.clientX - btn.getBoundingClientRect().left - d/2}px;top:${e.clientY - btn.getBoundingClientRect().top - d/2}px;`;
-  btn.appendChild(r);
-  setTimeout(() => r.remove(), 600);
-}
-
-// ── Role data ────────────────────────────────────────────────────────────────
-// NOTE: No [[ or ]] anywhere — all JS arrays use standard syntax
-const roleData = {
-  admin: {
-    hint: 'Sign in as <strong>Admin</strong> to manage teachers, students, incidents and the full system.',
-    hintCls: '',
-    btnCls: 'btn-admin',
-    btnTxt: 'Sign In as Admin',
-    tabCls: 'active-admin',
-    features: [['📊','Analytics'], ['🔒','Sanctions'], ['🕵️','Reports']],
-    pal: ['#4f7fff','#a78bfa','#ff6b6b','#43d9a2','#f7c948']
-  },
-  teacher: {
-    hint: 'Sign in as <strong>Teacher</strong> to manage students, file incidents and apply sanctions.',
-    hintCls: 'hint-teacher',
-    btnCls: 'btn-teacher',
-    btnTxt: 'Sign In as Teacher',
-    tabCls: 'active-teacher',
-    features: [['📋','Incidents'], ['🔒','Sanctions'], ['💬','Feedback']],
-    pal: ['#43d9a2','#4f7fff','#f7c948','#a78bfa','#ff6b6b']
-  },
-  student: {
-    hint: 'Sign in as <strong>Student</strong> to view your discipline record and submit reports.',
-    hintCls: 'hint-student',
-    btnCls: 'btn-student',
-    btnTxt: 'Sign In as Student',
-    tabCls: 'active-student',
-    features: [['📄','My Record'], ['🔒','Sanctions'], ['🕵️','Reports']],
-    pal: ['#f7c948','#ff6b6b','#43d9a2','#4f7fff','#a78bfa']
-  }
-};
-
-let activePal = roleData.admin.pal;
-
-function selectRole(role) {
-  ['admin','teacher','student'].forEach(r => {
-    document.getElementById('tab-' + r).className = 'role-tab' + (r === role ? ' ' + roleData[r].tabCls : '');
-  });
-  const hint = document.getElementById('roleHint');
-  hint.innerHTML = roleData[role].hint;
-  hint.className = 'role-hint show ' + roleData[role].hintCls;
-  const btn = document.getElementById('loginBtn');
-  btn.className = 'btn-login ' + roleData[role].btnCls;
-  btn.textContent = roleData[role].btnTxt;
-  document.getElementById('loginForm').className = 'role-' + role;
-  const feats = document.querySelectorAll('.feature');
-  roleData[role].features.forEach((item, i) => {
-    feats[i].innerHTML = '<span class="ficon">' + item[0] + '</span>' + item[1];
-  });
-  activePal = roleData[role].pal;
-  spawnBurst();
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// CANVAS ANIMATION
-// ═══════════════════════════════════════════════════════════════════════════
-const canvas = document.getElementById('c');
-const ctx    = canvas.getContext('2d');
-let W = 0, H = 0;
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-window.addEventListener('resize', resize);
-resize();
-
-function R(n)  { return Math.random() * n; }
-function RP(n) { return R(n * 2) - n; }
-function hex(al) { return Math.round(Math.max(0, Math.min(1, al)) * 255).toString(16).padStart(2,'0'); }
-
-// ── Orbiting circles ─────────────────────────────────────────────────────────
-const orbs = [];
-for (let i = 0; i < 20; i++) {
-  orbs.push({
-    cx: R(1), cy: R(1),
-    or: R(160) + 50,
-    a:  R(Math.PI * 2),
-    sp: (R(.006) + .001) * (Math.random() > .5 ? 1 : -1),
-    r:  R(16) + 5,
-    ci: Math.floor(R(5)),
-    al: R(.15) + .06,
-    ps: R(Math.PI * 2),
-    psp: R(.025) + .008
-  });
-}
-
-// ── Shooting stars ────────────────────────────────────────────────────────────
-const stars = [];
-function spawnStar() {
-  stars.push({ x: R(W), y: R(H * .5), vx: R(6)+3, vy: R(3)+1, life: 1, maxLife: R(60)+40, ci: Math.floor(R(5)), len: R(80)+40 });
-}
-for (let i = 0; i < 6; i++) spawnStar();
-
-// ── Floating particles ────────────────────────────────────────────────────────
-const parts = [];
-function spawnParticle(x, y, ci) {
-  parts.push({
-    x: x !== undefined ? x : R(W),
-    y: y !== undefined ? y : R(H),
-    vx: RP(1.2), vy: RP(1.2) - 0.5,
-    r: R(3) + 1, life: 1,
-    decay: R(.008) + .003,
-    ci: ci !== undefined ? ci : Math.floor(R(5)),
-    al: R(.3) + .15
-  });
-}
-for (let i = 0; i < 60; i++) spawnParticle();
-
-// ── Burst on role switch ──────────────────────────────────────────────────────
-function spawnBurst() {
-  for (let i = 0; i < 25; i++) {
-    const angle = R(Math.PI * 2);
-    const spd   = R(4) + 1;
-    parts.push({ x: W*.5, y: H*.5, vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd, r: R(5)+2, life: 1, decay: R(.015)+.008, ci: Math.floor(R(5)), al: .6 });
-  }
-}
-
-// ── Mouse repel ───────────────────────────────────────────────────────────────
-let mx = 0, my = 0;
-window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-
-// ── Main draw loop ────────────────────────────────────────────────────────────
-let t = 0;
-function draw() {
-  ctx.clearRect(0, 0, W, H);
-  t += .012;
-  const pal = activePal;
-
-  // Orbiting circles
-  orbs.forEach(o => {
-    o.a += o.sp;
-    const x  = o.cx * W + Math.cos(o.a) * o.or;
-    const y  = o.cy * H + Math.sin(o.a) * o.or;
-    const pr = o.r * (1 + .15 * Math.sin(t * o.psp * 5 + o.ps));
-    const col = pal[o.ci % pal.length];
-    // Orbit ring
-    ctx.beginPath(); ctx.arc(o.cx*W, o.cy*H, o.or, 0, Math.PI*2);
-    ctx.strokeStyle = col + '12'; ctx.lineWidth = 1; ctx.stroke();
-    // Glow
-    const g = ctx.createRadialGradient(x, y, 0, x, y, pr*3);
-    g.addColorStop(0, col + hex(o.al)); g.addColorStop(1, col + '00');
-    ctx.beginPath(); ctx.arc(x, y, pr*3, 0, Math.PI*2); ctx.fillStyle = g; ctx.fill();
-    // Core
-    ctx.beginPath(); ctx.arc(x, y, pr, 0, Math.PI*2); ctx.fillStyle = col + hex(o.al + .1); ctx.fill();
-  });
-
-  // Shooting stars
-  for (let i = stars.length - 1; i >= 0; i--) {
-    const s = stars[i];
-    s.x += s.vx; s.y += s.vy; s.life -= 1 / s.maxLife;
-    if (s.life <= 0 || s.x > W + 100) { stars.splice(i, 1); spawnStar(); continue; }
-    const col = pal[s.ci % pal.length];
-    const al  = Math.min(s.life * 2, 1) * 0.7;
-    const tailX = s.x - s.vx * (s.len / s.vx);
-    const tailY = s.y - s.vy * (s.len / s.vx);
-    const grad  = ctx.createLinearGradient(s.x, s.y, tailX, tailY);
-    grad.addColorStop(0, col + hex(al)); grad.addColorStop(1, col + '00');
-    ctx.beginPath(); ctx.moveTo(s.x, s.y); ctx.lineTo(tailX, tailY);
-    ctx.strokeStyle = grad; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.beginPath(); ctx.arc(s.x, s.y, 2.5, 0, Math.PI*2);
-    ctx.fillStyle = col + hex(al); ctx.fill();
-  }
-
-  // Connection lines
-  for (let i = 0; i < parts.length; i++) {
-    for (let j = i + 1; j < parts.length; j++) {
-      const dx = parts[i].x - parts[j].x;
-      const dy = parts[i].y - parts[j].y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if (dist < 110) {
-        const al = (.5 - dist / 220) * Math.min(parts[i].life, parts[j].life) * .5;
-        ctx.beginPath(); ctx.moveTo(parts[i].x, parts[i].y); ctx.lineTo(parts[j].x, parts[j].y);
-        ctx.strokeStyle = pal[parts[i].ci % pal.length] + hex(al);
-        ctx.lineWidth = .7; ctx.stroke();
-      }
-    }
-  }
-
-  // Particles
-  if (Math.random() < .18) spawnParticle();
-  for (let i = parts.length - 1; i >= 0; i--) {
-    const p = parts[i];
-    const dx = p.x - mx, dy = p.y - my;
-    const dist = Math.sqrt(dx*dx + dy*dy);
-    if (dist < 120) { const f = .4*(1 - dist/120); p.vx += dx/dist*f; p.vy += dy/dist*f; }
-    p.vy -= .002;
-    p.x += p.vx; p.y += p.vy;
-    p.vx *= .98; p.vy *= .98;
-    p.life -= p.decay;
-    if (p.life <= 0 || p.x < -20 || p.x > W+20 || p.y < -20 || p.y > H+20) { parts.splice(i, 1); continue; }
-    const col = pal[p.ci % pal.length];
-    const al  = p.life * p.al;
-    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 2.5);
-    g.addColorStop(0, col + hex(al)); g.addColorStop(1, col + '00');
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r*2.5, 0, Math.PI*2); ctx.fillStyle = g; ctx.fill();
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fillStyle = col + hex(al+.1); ctx.fill();
-  }
-
-  requestAnimationFrame(draw);
-}
-draw();
-</script>
+<!-- ✅ External JS file — Thymeleaf never processes .js files, so no parsing conflicts ever -->
+<script src="/js/login.js"></script>
 </body>
 </html>
