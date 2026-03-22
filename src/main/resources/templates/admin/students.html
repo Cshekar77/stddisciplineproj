@@ -51,6 +51,7 @@
     .btn-danger{background:rgba(255,107,107,.12);color:var(--accent2);border:1px solid rgba(255,107,107,.25);}
     .btn-danger:hover{background:rgba(255,107,107,.25);}
     .btn-warning{background:rgba(247,201,72,.12);color:var(--accent4);border:1px solid rgba(247,201,72,.25);}
+    .btn-warning:hover{background:rgba(247,201,72,.22);}
     .btn-sm{padding:6px 12px;font-size:.78rem;}
     .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
     .btn-ghost:hover{border-color:var(--text);color:var(--text);}
@@ -66,6 +67,12 @@
     tbody td{padding:14px 20px;font-size:.87rem;}
     .td-actions{display:flex;gap:8px;flex-wrap:wrap;}
     .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
+    .status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;}
+    .status-GOOD{background:rgba(67,217,162,.12);color:var(--accent3);}
+    .status-WARNING{background:rgba(247,201,72,.12);color:var(--accent4);}
+    .status-CRITICAL{background:rgba(255,107,107,.12);color:var(--accent2);}
+    .status-SUSPENDED{background:rgba(255,68,68,.15);color:#ff4444;}
+    .status-EXPELLED{background:rgba(200,0,0,.15);color:#ff2222;}
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
     .modal-overlay.open{display:flex;}
     .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:520px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
@@ -79,7 +86,6 @@
     .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
     .section-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
       .sidebar.open{transform:translateX(0);}
@@ -102,6 +108,7 @@
   <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
   <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
   <a href="/admin/students" class="nav-link active"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
   <div class="nav-section">Records</div>
   <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
   <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
@@ -112,6 +119,7 @@
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
@@ -127,9 +135,11 @@
       <div class="avatar">A</div>
     </div>
   </header>
+
   <div class="content">
     <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
     <div th:if="${error}" class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
     <div class="toolbar">
       <form method="get" action="/admin/students" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;">
         <div class="search-box">
@@ -143,6 +153,7 @@
       </form>
       <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Student</button>
     </div>
+
     <div class="card">
       <div class="card-header">
         <div class="card-title">All Students</div>
@@ -167,14 +178,19 @@
               <td th:text="${student.grade}">—</td>
               <td th:text="${student.section}">—</td>
               <td>
-                <span style="padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;"
-                  th:classappend="${student.disciplineStatus != null and student.disciplineStatus.name() == 'GOOD'} ? 'style=&quot;background:rgba(67,217,162,.12);color:#43d9a2&quot;' : 'style=&quot;background:rgba(255,107,107,.12);color:#ff6b6b&quot;'"
+                <span class="status-pill"
+                  th:classappend="'status-' + ${student.disciplineStatus != null ? student.disciplineStatus.name() : 'GOOD'}"
                   th:text="${student.disciplineStatus != null ? student.disciplineStatus.name() : 'GOOD'}">GOOD</span>
               </td>
               <td>
                 <div class="td-actions">
-                  <button class="btn btn-sm btn-warning"
-                    th:onclick="'openEditModal(' + ${student.id} + ',\'' + ${student.firstName} + '\',\'' + ${student.lastName} + '\',\'' + ${student.grade} + '\',\'' + ${student.section} + '\')'">
+                  <!-- ✅ FIXED: data-* attributes instead of th:onclick strings -->
+                  <button class="btn btn-sm btn-warning edit-btn"
+                    th:data-id="${student.id}"
+                    th:data-firstname="${student.firstName}"
+                    th:data-lastname="${student.lastName}"
+                    th:data-grade="${student.grade}"
+                    th:data-section="${student.section}">
                     ✏️ Edit
                   </button>
                   <form th:action="@{/admin/students/delete/{id}(id=${student.id})}" method="post" style="display:inline;"
@@ -276,27 +292,48 @@
 </div>
 
 <script>
-  const html=document.documentElement;
-  const themeIcon=document.getElementById('themeIcon');
-  const saved=localStorage.getItem('sds-theme')||'dark';
-  html.setAttribute('data-theme',saved);
-  themeIcon.textContent=saved==='dark'?'🌙':'☀️';
-  function toggleTheme(){const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('sds-theme',next);themeIcon.textContent=next==='dark'?'🌙':'☀️';}
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('sidebarOverlay');
-  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
-  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
-  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
-  document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-  document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-  function openEditModal(id,firstName,lastName,grade,section){
-    document.getElementById('editForm').action='/admin/students/edit/'+id;
-    document.getElementById('editFirstName').value=firstName;
-    document.getElementById('editLastName').value=lastName;
-    document.getElementById('editGrade').value=grade||'';
-    document.getElementById('editSection').value=section||'';
-    document.getElementById('editModal').classList.add('open');
+  // Theme
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
+
+  // Sidebar
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
+
+  // Close modals on backdrop click
+  document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+  document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+
+  // ✅ FIXED: Read data-* attributes instead of th:onclick strings
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id        = this.getAttribute('data-id');
+      const firstName = this.getAttribute('data-firstname');
+      const lastName  = this.getAttribute('data-lastname');
+      const grade     = this.getAttribute('data-grade') || '';
+      const section   = this.getAttribute('data-section') || '';
+
+      document.getElementById('editForm').action    = '/admin/students/edit/' + id;
+      document.getElementById('editFirstName').value = firstName;
+      document.getElementById('editLastName').value  = lastName;
+      document.getElementById('editGrade').value     = grade;
+      document.getElementById('editSection').value   = section;
+
+      document.getElementById('editModal').classList.add('open');
+    });
+  });
 </script>
 </body>
 </html>

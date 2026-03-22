@@ -20,26 +20,18 @@ import java.util.stream.Collectors;
 @Service
 public class StudentService {
 
-    @Autowired
-    private StudentRepository studentRepository;
+    @Autowired private StudentRepository studentRepository;
+    @Autowired private UserService userService;
+    @Autowired private IncidentRepository incidentRepository;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private IncidentRepository incidentRepository;
-
-    // Create student with 7 parameters (Required by AdminController)
     public Student createStudent(String firstName, String lastName, String studentId,
                                   String grade, String section, String email, String password) {
         if (studentRepository.existsByStudentId(studentId)) {
             throw new RuntimeException("Student ID already exists: " + studentId);
         }
-
         User user = userService.createUser(email, password, Role.STUDENT);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-
         Student student = new Student();
         student.setFirstName(firstName);
         student.setLastName(lastName);
@@ -50,21 +42,18 @@ public class StudentService {
         student.setDateEnrolled(LocalDate.now());
         student.setDisciplineStatus(DisciplineStatus.GOOD);
         student.setUser(user);
-
         return studentRepository.save(student);
     }
 
-    // Create student with 8 parameters
     public Student createStudent(String firstName, String lastName, String studentId,
-                                  String grade, String section, String email, String username, String password) {
+                                  String grade, String section, String email,
+                                  String username, String password) {
         if (studentRepository.existsByStudentId(studentId)) {
             throw new RuntimeException("Student ID already exists: " + studentId);
         }
-
         User user = userService.createUser(username, password, Role.STUDENT);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-
         Student student = new Student();
         student.setFirstName(firstName);
         student.setLastName(lastName);
@@ -75,23 +64,22 @@ public class StudentService {
         student.setDateEnrolled(LocalDate.now());
         student.setDisciplineStatus(DisciplineStatus.GOOD);
         student.setUser(user);
-
         return studentRepository.save(student);
     }
 
-    // Calculate discipline status based on open incidents
+    // Save/update a student directly (used by credentials endpoint)
+    public Student saveStudent(Student student) {
+        return studentRepository.save(student);
+    }
+
     public DisciplineStatus calculateDisciplineStatus(Student student) {
         List<Incident> incidents = incidentRepository.findByStudent(student);
-        long openIncidents = incidents.stream()
-                .filter(i -> i.getStatus() == IncidentStatus.OPEN)
-                .count();
-
-        if (openIncidents == 0) return DisciplineStatus.GOOD;
-        else if (openIncidents <= 2) return DisciplineStatus.WARNING;
+        long open = incidents.stream().filter(i -> i.getStatus() == IncidentStatus.OPEN).count();
+        if (open == 0) return DisciplineStatus.GOOD;
+        else if (open <= 2) return DisciplineStatus.WARNING;
         else return DisciplineStatus.CRITICAL;
     }
 
-    // Update discipline status for a student
     public Student updateDisciplineStatus(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -99,71 +87,34 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-    public List<Student> getAllStudents() {
-        return studentRepository.findAll();
-    }
-
-    public long countAll() {
-        return studentRepository.count();
-    }
-
-    public List<Student> findAll() {
-        return studentRepository.findAll();
-    }
-
-    public Optional<Student> getStudentById(Long id) {
-        return studentRepository.findById(id);
-    }
-
-    public Optional<Student> findById(Long id) {
-        return studentRepository.findById(id);
-    }
-
-    public Optional<Student> getStudentByStudentId(String studentId) {
-        return studentRepository.findByStudentId(studentId);
-    }
-
-    public Optional<Student> getStudentByUser(User user) {
-        return studentRepository.findByUser(user);
-    }
-
-    public List<Student> getStudentsByGrade(String grade) {
-        return studentRepository.findByGrade(grade);
-    }
+    public List<Student> getAllStudents() { return studentRepository.findAll(); }
+    public long countAll() { return studentRepository.count(); }
+    public List<Student> findAll() { return studentRepository.findAll(); }
+    public Optional<Student> getStudentById(Long id) { return studentRepository.findById(id); }
+    public Optional<Student> findById(Long id) { return studentRepository.findById(id); }
+    public Optional<Student> getStudentByStudentId(String studentId) { return studentRepository.findByStudentId(studentId); }
+    public Optional<Student> getStudentByUser(User user) { return studentRepository.findByUser(user); }
+    public List<Student> getStudentsByGrade(String grade) { return studentRepository.findByGrade(grade); }
 
     public List<Student> search(String term) {
-        String searchTerm = term.toLowerCase();
+        String s = term.toLowerCase();
         return findAll().stream()
-                .filter(s -> s.getFirstName().toLowerCase().contains(searchTerm)
-                        || s.getLastName().toLowerCase().contains(searchTerm)
-                        || s.getStudentId().toLowerCase().contains(searchTerm))
+                .filter(st -> st.getFirstName().toLowerCase().contains(s)
+                        || st.getLastName().toLowerCase().contains(s)
+                        || st.getStudentId().toLowerCase().contains(s))
                 .collect(Collectors.toList());
     }
 
-    public List<Student> findByGradeLevel(String gradeLevel) {
-        return studentRepository.findByGrade(gradeLevel);
-    }
+    public List<Student> findByGradeLevel(String gradeLevel) { return studentRepository.findByGrade(gradeLevel); }
 
     public List<String> getAllGradeLevels() {
-        return findAll().stream()
-                .map(Student::getGrade)
-                .filter(Objects::nonNull)
-                .distinct()
-                .sorted()
-                .collect(Collectors.toList());
+        return findAll().stream().map(Student::getGrade).filter(Objects::nonNull)
+                .distinct().sorted().collect(Collectors.toList());
     }
 
-    public List<Student> getStudentsBySection(String section) {
-        return studentRepository.findBySection(section);
-    }
-
-    public List<Student> getStudentsByGradeAndSection(String grade, String section) {
-        return studentRepository.findByGradeAndSection(grade, section);
-    }
-
-    public List<Student> searchStudentsByLastName(String lastName) {
-        return studentRepository.findByLastNameContainingIgnoreCase(lastName);
-    }
+    public List<Student> getStudentsBySection(String section) { return studentRepository.findBySection(section); }
+    public List<Student> getStudentsByGradeAndSection(String grade, String section) { return studentRepository.findByGradeAndSection(grade, section); }
+    public List<Student> searchStudentsByLastName(String lastName) { return studentRepository.findByLastNameContainingIgnoreCase(lastName); }
 
     public Student updateStudent(Long id, String firstName, String lastName,
                                   String grade, String section, String email) {
@@ -188,7 +139,5 @@ public class StudentService {
         studentRepository.deleteById(id);
     }
 
-    public void deleteById(Long id) {
-        deleteStudent(id);
-    }
+    public void deleteById(Long id) { deleteStudent(id); }
 }

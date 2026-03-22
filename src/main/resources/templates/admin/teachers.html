@@ -50,6 +50,7 @@
     .btn-danger{background:rgba(255,107,107,.12);color:var(--accent2);border:1px solid rgba(255,107,107,.25);}
     .btn-danger:hover{background:rgba(255,107,107,.25);}
     .btn-warning{background:rgba(247,201,72,.12);color:var(--accent4);border:1px solid rgba(247,201,72,.25);}
+    .btn-warning:hover{background:rgba(247,201,72,.22);}
     .btn-sm{padding:6px 12px;font-size:.78rem;}
     .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted);}
     .btn-ghost:hover{border-color:var(--text);color:var(--text);}
@@ -80,7 +81,6 @@
     .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
     .section-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
       .sidebar.open{transform:translateX(0);}
@@ -103,6 +103,7 @@
   <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
   <a href="/admin/teachers" class="nav-link active"><span class="icon">👩‍🏫</span> Teachers</a>
   <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
   <div class="nav-section">Records</div>
   <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
   <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
@@ -113,6 +114,7 @@
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
@@ -128,9 +130,11 @@
       <div class="avatar">A</div>
     </div>
   </header>
+
   <div class="content">
     <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
     <div th:if="${error}" class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
     <div class="toolbar">
       <form method="get" action="/admin/teachers" style="display:flex;gap:10px;flex:1;">
         <div class="search-box" style="max-width:none;flex:1;">
@@ -140,6 +144,7 @@
       </form>
       <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Teacher</button>
     </div>
+
     <div class="card">
       <div class="card-header">
         <div class="card-title">All Teachers</div>
@@ -150,7 +155,7 @@
           <thead>
             <tr>
               <th>Name</th>
-              <th>Email / Username</th>
+              <th>Email</th>
               <th>Department</th>
               <th>Employee ID</th>
               <th>Status</th>
@@ -166,8 +171,12 @@
               <td><span class="pill pill-active">Active</span></td>
               <td>
                 <div class="td-actions">
-                  <button class="btn btn-sm btn-warning"
-                    th:onclick="'openEditModal(' + ${teacher.id} + ',\'' + ${teacher.firstName} + '\',\'' + ${teacher.lastName} + '\',\'' + ${teacher.department} + '\')'">
+                  <!-- ✅ FIXED: use data-* attributes instead of th:onclick strings -->
+                  <button class="btn btn-sm btn-warning edit-btn"
+                    th:data-id="${teacher.id}"
+                    th:data-firstname="${teacher.firstName}"
+                    th:data-lastname="${teacher.lastName}"
+                    th:data-department="${teacher.department}">
                     ✏️ Edit
                   </button>
                   <form th:action="@{/admin/teachers/delete/{id}(id=${teacher.id})}" method="post" style="display:inline;"
@@ -254,28 +263,45 @@
 
 <script>
   // Theme
-  const html=document.documentElement;
-  const themeIcon=document.getElementById('themeIcon');
-  const saved=localStorage.getItem('sds-theme')||'dark';
-  html.setAttribute('data-theme',saved);
-  themeIcon.textContent=saved==='dark'?'🌙':'☀️';
-  function toggleTheme(){const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('sds-theme',next);themeIcon.textContent=next==='dark'?'🌙':'☀️';}
-  // Sidebar
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('sidebarOverlay');
-  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
-  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
-  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
-  // Modals
-  document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-  document.getElementById('editModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
-  function openEditModal(id,firstName,lastName,department){
-    document.getElementById('editForm').action='/admin/teachers/edit/'+id;
-    document.getElementById('editFirstName').value=firstName;
-    document.getElementById('editLastName').value=lastName;
-    document.getElementById('editDepartment').value=department||'';
-    document.getElementById('editModal').classList.add('open');
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
+
+  // Sidebar
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
+
+  // Close modals on backdrop click
+  document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+  document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
+
+  // ✅ FIXED: Read data-* attributes instead of using th:onclick strings
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const id         = this.getAttribute('data-id');
+      const firstName  = this.getAttribute('data-firstname');
+      const lastName   = this.getAttribute('data-lastname');
+      const department = this.getAttribute('data-department') || '';
+
+      document.getElementById('editForm').action = '/admin/teachers/edit/' + id;
+      document.getElementById('editFirstName').value  = firstName;
+      document.getElementById('editLastName').value   = lastName;
+      document.getElementById('editDepartment').value = department;
+
+      document.getElementById('editModal').classList.add('open');
+    });
+  });
 </script>
 </body>
 </html>

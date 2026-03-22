@@ -14,21 +14,15 @@ import java.util.stream.Collectors;
 @Service
 public class TeacherService {
 
-    @Autowired
-    private TeacherRepository teacherRepository;
+    @Autowired private TeacherRepository teacherRepository;
+    @Autowired private UserService userService;
 
-    @Autowired
-    private UserService userService;
-
-    // Create teacher with 5 parameters - auto-generates employeeId
     public Teacher createTeacher(String firstName, String lastName, String email,
                                   String department, String password) {
         String employeeId = "EMP-" + System.currentTimeMillis();
-
         User user = userService.createUser(email, password, Role.TEACHER);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-
         Teacher teacher = new Teacher();
         teacher.setFirstName(firstName);
         teacher.setLastName(lastName);
@@ -36,22 +30,18 @@ public class TeacherService {
         teacher.setDepartment(department != null && !department.isBlank() ? department : "General");
         teacher.setEmail(email);
         teacher.setUser(user);
-
         return teacherRepository.save(teacher);
     }
 
-    // Create teacher with 8 parameters
     public Teacher createTeacher(String firstName, String lastName, String employeeId,
                                   String department, String email, String contactNumber,
                                   String username, String password) {
         if (teacherRepository.existsByEmployeeId(employeeId)) {
             throw new RuntimeException("Employee ID already exists: " + employeeId);
         }
-
         User user = userService.createUser(username, password, Role.TEACHER);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-
         Teacher teacher = new Teacher();
         teacher.setFirstName(firstName);
         teacher.setLastName(lastName);
@@ -60,7 +50,11 @@ public class TeacherService {
         teacher.setEmail(email);
         teacher.setContactNumber(contactNumber);
         teacher.setUser(user);
+        return teacherRepository.save(teacher);
+    }
 
+    // Save/update a teacher directly (used by credentials endpoint)
+    public Teacher saveTeacher(Teacher teacher) {
         return teacherRepository.save(teacher);
     }
 
@@ -74,11 +68,11 @@ public class TeacherService {
     public List<Teacher> getTeachersByDepartment(String department) { return teacherRepository.findByDepartment(department); }
 
     public List<Teacher> search(String term) {
-        String searchTerm = term.toLowerCase();
+        String s = term.toLowerCase();
         return findAll().stream()
-                .filter(t -> t.getFirstName().toLowerCase().contains(searchTerm)
-                        || t.getLastName().toLowerCase().contains(searchTerm)
-                        || (t.getDepartment() != null && t.getDepartment().toLowerCase().contains(searchTerm)))
+                .filter(t -> t.getFirstName().toLowerCase().contains(s)
+                        || t.getLastName().toLowerCase().contains(s)
+                        || (t.getDepartment() != null && t.getDepartment().toLowerCase().contains(s)))
                 .collect(Collectors.toList());
     }
 

@@ -59,6 +59,77 @@ public class AdminController {
         return "admin/dashboard";
     }
 
+    // ── CREDENTIALS ───────────────────────────────────────────────────────────
+
+    @GetMapping("/credentials")
+    public String credentials(Model model) {
+        model.addAttribute("teachers", teacherService.findAll());
+        model.addAttribute("students", studentService.findAll());
+        return "admin/credentials";
+    }
+
+    @PostMapping("/credentials/teacher")
+    public String createTeacherCredentials(@RequestParam Long teacherId,
+                                           @RequestParam String username,
+                                           @RequestParam String password,
+                                           @AuthenticationPrincipal UserDetails userDetails,
+                                           RedirectAttributes ra) {
+        try {
+            teacherService.findById(teacherId).ifPresent(teacher -> {
+                // Update user credentials if teacher already has a user account
+                if (teacher.getUser() != null) {
+                    userService.updatePassword(teacher.getUser().getId(), password);
+                    activityLogService.log(currentUser(userDetails),
+                            "Admin updated credentials for teacher: " + teacher.getFullName());
+                } else {
+                    // Create new user account and link
+                    User user = userService.createUser(username, password,
+                            com.studentdiscipline.enums.Role.TEACHER);
+                    user.setFirstName(teacher.getFirstName());
+                    user.setLastName(teacher.getLastName());
+                    teacher.setUser(user);
+                    teacherService.saveTeacher(teacher);
+                    activityLogService.log(currentUser(userDetails),
+                            "Admin created credentials for teacher: " + teacher.getFullName());
+                }
+            });
+            ra.addFlashAttribute("success", "Teacher credentials saved successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/credentials";
+    }
+
+    @PostMapping("/credentials/student")
+    public String createStudentCredentials(@RequestParam Long studentId,
+                                           @RequestParam String username,
+                                           @RequestParam String password,
+                                           @AuthenticationPrincipal UserDetails userDetails,
+                                           RedirectAttributes ra) {
+        try {
+            studentService.findById(studentId).ifPresent(student -> {
+                if (student.getUser() != null) {
+                    userService.updatePassword(student.getUser().getId(), password);
+                    activityLogService.log(currentUser(userDetails),
+                            "Admin updated credentials for student: " + student.getFullName());
+                } else {
+                    User user = userService.createUser(username, password,
+                            com.studentdiscipline.enums.Role.STUDENT);
+                    user.setFirstName(student.getFirstName());
+                    user.setLastName(student.getLastName());
+                    student.setUser(user);
+                    studentService.saveStudent(student);
+                    activityLogService.log(currentUser(userDetails),
+                            "Admin created credentials for student: " + student.getFullName());
+                }
+            });
+            ra.addFlashAttribute("success", "Student credentials saved successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/credentials";
+    }
+
     // ── TEACHERS ──────────────────────────────────────────────────────────────
 
     @GetMapping("/teachers")
@@ -392,10 +463,8 @@ public class AdminController {
             long openIncidents     = incidentService.countByStatus(IncidentStatus.OPEN);
             long resolvedIncidents = incidentService.countByStatus(IncidentStatus.RESOLVED);
             long totalSanctions    = sanctionService.countAll();
-
             int resolutionRate = totalIncidents > 0
                     ? (int) ((resolvedIncidents * 100) / totalIncidents) : 0;
-
             model.addAttribute("totalIncidents",      totalIncidents);
             model.addAttribute("openIncidents",        openIncidents);
             model.addAttribute("resolvedIncidents",    resolvedIncidents);
