@@ -1,164 +1,315 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login — Student Discipline System</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root {
-      --bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;
-      --accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;
-      --text:#e8eaf2;--muted:#7a829a;
-    }
+    :root{--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--accent5:#a78bfa;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0a0c12;--surface:#13161f;--surface2:#1a1e2e;--border:#232838;--text:#e8eaf2;--muted:#7a829a;--shadow:0 8px 48px rgba(0,0,0,0.6);}
+    [data-theme="light"]{--bg:#e8ecf8;--surface:#ffffff;--surface2:#f0f4ff;--border:#d4daf0;--text:#1a1d2e;--muted:#6b7494;--shadow:0 8px 48px rgba(79,127,255,0.14);}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;transition:background .4s,color .4s;position:relative;overflow:hidden;}
 
-    .login-wrapper{width:100%;max-width:440px;}
+    /* ── Canvas ── */
+    #c{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;}
 
-    .brand{text-align:center;margin-bottom:32px;}
-    .brand-icon{width:56px;height:56px;background:rgba(79,127,255,.15);border:1px solid rgba(79,127,255,.3);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 16px;}
-    .brand-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:var(--text);}
-    .brand-sub{font-size:.85rem;color:var(--muted);margin-top:4px;}
+    /* Theme toggle */
+    .theme-btn{position:fixed;top:18px;right:18px;background:var(--surface);border:1px solid var(--border);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.05rem;z-index:100;box-shadow:var(--shadow);transition:var(--transition);}
+    .theme-btn:hover{transform:scale(1.12) rotate(20deg);}
 
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px;}
+    /* Wrapper */
+    .login-wrapper{width:100%;max-width:420px;position:relative;z-index:1;animation:cardIn .5s cubic-bezier(.22,.68,0,1.15);}
+    @keyframes cardIn{from{opacity:0;transform:translateY(32px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
 
-    /* Role Tabs */
-    .role-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:28px;}
-    .role-tab{padding:10px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .18s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;}
-    .role-tab .tab-icon{font-size:1.2rem;}
-    .role-tab:hover{border-color:var(--accent);color:var(--text);}
-    .role-tab.active-admin{background:rgba(79,127,255,.12);border-color:var(--accent);color:var(--accent);}
-    .role-tab.active-teacher{background:rgba(67,217,162,.12);border-color:var(--accent3);color:var(--accent3);}
-    .role-tab.active-student{background:rgba(247,201,72,.12);border-color:var(--accent4);color:var(--accent4);}
+    /* Brand */
+    .brand{text-align:center;margin-bottom:26px;}
+    .brand-icon{width:66px;height:66px;background:rgba(79,127,255,.12);border:1px solid rgba(79,127,255,.28);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 14px;box-shadow:0 0 28px rgba(79,127,255,.22);animation:iconPulse 3s ease-in-out infinite;}
+    @keyframes iconPulse{0%,100%{box-shadow:0 0 28px rgba(79,127,255,.22);}50%{box-shadow:0 0 44px rgba(79,127,255,.42);}}
+    .brand-title{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;animation:fadeIn .6s .15s both;}
+    .brand-sub{font-size:.85rem;color:var(--muted);margin-top:4px;animation:fadeIn .6s .25s both;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 
-    .role-hint{font-size:.78rem;color:var(--muted);margin-bottom:20px;padding:10px 14px;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent);display:none;}
-    .role-hint.show{display:block;}
+    /* Card */
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:32px;box-shadow:var(--shadow);transition:var(--transition);}
 
-    .form-group{margin-bottom:18px;}
-    .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
-    .form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .18s;}
-    .form-control:focus{border-color:var(--accent);}
+    /* Role tabs */
+    .role-tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:22px;}
+    .role-tab{padding:11px 6px;border-radius:11px;border:1px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;user-select:none;}
+    .role-tab .tab-icon{font-size:1.25rem;transition:transform .2s;}
+    .role-tab:hover .tab-icon{transform:scale(1.2) rotate(-5deg);}
+    .role-tab:hover{transform:translateY(-2px);}
+    .role-tab.active-admin  {background:rgba(79,127,255,.13);border-color:var(--accent);color:var(--accent);box-shadow:0 2px 16px rgba(79,127,255,.2);}
+    .role-tab.active-teacher{background:rgba(67,217,162,.13);border-color:var(--accent3);color:var(--accent3);box-shadow:0 2px 16px rgba(67,217,162,.2);}
+    .role-tab.active-student{background:rgba(247,201,72,.13);border-color:var(--accent4);color:var(--accent4);box-shadow:0 2px 16px rgba(247,201,72,.2);}
+
+    /* Role hint */
+    .role-hint{font-size:.8rem;color:var(--muted);margin-bottom:18px;padding:10px 14px;background:var(--surface2);border-radius:9px;border-left:3px solid var(--accent);transition:border-color .25s,opacity .2s;display:none;line-height:1.5;}
+    .role-hint.show{display:block;animation:fadeIn .25s ease;}
+    .role-hint.hint-teacher{border-color:var(--accent3);}
+    .role-hint.hint-student{border-color:var(--accent4);}
+
+    /* Alerts */
+    .alert{padding:11px 16px;border-radius:9px;font-size:.85rem;margin-bottom:18px;display:flex;align-items:center;gap:8px;animation:fadeIn .3s ease;}
+    .alert-error  {background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.25);color:var(--accent2);}
+    .alert-success{background:rgba(67,217,162,.1);border:1px solid rgba(67,217,162,.25);color:var(--accent3);}
+
+    /* Form */
+    .form-group{margin-bottom:16px;}
+    .form-label{display:block;font-size:.74rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.06em;text-transform:uppercase;}
+    .input-wrap{position:relative;}
+    .form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s,transform .15s;}
+    .form-control:focus{transform:scale(1.01);}
     .form-control::placeholder{color:var(--muted);}
+    .form-control.pr{padding-right:46px;}
+    .role-admin   .form-control:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,127,255,.12);}
+    .role-teacher .form-control:focus{border-color:var(--accent3);box-shadow:0 0 0 3px rgba(67,217,162,.12);}
+    .role-student .form-control:focus{border-color:var(--accent4);box-shadow:0 0 0 3px rgba(247,201,72,.12);}
 
-    .btn-login{width:100%;padding:12px;border-radius:10px;border:none;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px;}
-    .btn-admin{background:var(--accent);color:#fff;}
-    .btn-admin:hover{background:#3a6eef;}
-    .btn-teacher{background:var(--accent3);color:#0d0f14;}
-    .btn-teacher:hover{background:#32c48d;}
-    .btn-student{background:var(--accent4);color:#0d0f14;}
-    .btn-student:hover{background:#e6b93a;}
+    /* Password eye */
+    .pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;padding:4px;transition:color .18s,transform .18s;}
+    .pw-eye:hover{color:var(--text);transform:translateY(-50%) scale(1.2);}
 
-    .alert{padding:11px 16px;border-radius:8px;font-size:.85rem;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
-    .alert-error{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--accent2);}
-    .alert-success{background:rgba(67,217,162,.12);border:1px solid rgba(67,217,162,.25);color:var(--accent3);}
+    /* Button */
+    .btn-login{width:100%;padding:13px;border-radius:11px;border:none;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:6px;letter-spacing:.02em;position:relative;overflow:hidden;}
+    .btn-login::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.12);opacity:0;transition:opacity .2s;}
+    .btn-login:hover::after{opacity:1;}
+    .btn-admin  {background:linear-gradient(135deg,#4f7fff,#6c63ff);color:#fff;box-shadow:0 4px 20px rgba(79,127,255,.4);}
+    .btn-admin:hover  {transform:translateY(-2px);box-shadow:0 8px 28px rgba(79,127,255,.5);}
+    .btn-teacher{background:linear-gradient(135deg,#43d9a2,#2fbf8e);color:#0a0c12;box-shadow:0 4px 20px rgba(67,217,162,.35);}
+    .btn-teacher:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(67,217,162,.45);}
+    .btn-student{background:linear-gradient(135deg,#f7c948,#e6a820);color:#0a0c12;box-shadow:0 4px 20px rgba(247,201,72,.35);}
+    .btn-student:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(247,201,72,.45);}
+    .btn-login:active{transform:translateY(0);box-shadow:none;}
 
-    .divider{text-align:center;color:var(--muted);font-size:.78rem;margin:20px 0;position:relative;}
-    .divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
-    .divider::before{left:0;}
-    .divider::after{right:0;}
+    /* Ripple on click */
+    .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.3);transform:scale(0);animation:rippleOut .5s linear;pointer-events:none;}
+    @keyframes rippleOut{to{transform:scale(4);opacity:0;}}
 
-    .footer-note{text-align:center;font-size:.78rem;color:var(--muted);margin-top:20px;}
+    /* Features */
+    .features{margin-top:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+    .feature{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;font-size:.72rem;color:var(--muted);transition:all .18s;cursor:default;}
+    .feature:hover{border-color:var(--accent);color:var(--text);transform:translateY(-2px);}
+    .feature .ficon{font-size:1.1rem;margin-bottom:3px;display:block;}
+
+    .divider{text-align:center;color:var(--muted);font-size:.74rem;margin:16px 0;position:relative;}
+    .divider::before,.divider::after{content:'';position:absolute;top:50%;width:36%;height:1px;background:var(--border);}
+    .divider::before{left:0;}.divider::after{right:0;}
+    .footer-note{text-align:center;font-size:.76rem;color:var(--muted);line-height:1.6;}
   </style>
 </head>
 <body>
 
-<div class="login-wrapper">
+<canvas id="c"></canvas>
+<button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
 
-  <!-- Brand -->
+<div class="login-wrapper">
   <div class="brand">
     <div class="brand-icon">🏫</div>
     <div class="brand-title">Student Discipline System</div>
-    <div class="brand-sub">Sign in to your account</div>
+    <div class="brand-sub">Sign in to continue</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="loginCard">
+    <div th:if="${param.error}" class="alert alert-error">❌ Invalid username or password. Please try again.</div>
+    <div th:if="${param.logout}" class="alert alert-success">✅ You have been logged out successfully.</div>
 
-    <!-- Alerts -->
-    <div th:if="${param.error}" class="alert alert-error">
-      ❌ Invalid username or password. Please try again.
-    </div>
-    <div th:if="${param.logout}" class="alert alert-success">
-      ✅ You have been logged out successfully.
-    </div>
-
-    <!-- Role Tabs -->
     <div class="role-tabs">
-      <button type="button" class="role-tab active-admin" onclick="selectRole('admin')">
-        <span class="tab-icon">🛡️</span> Admin
-      </button>
-      <button type="button" class="role-tab" onclick="selectRole('teacher')">
-        <span class="tab-icon">👩‍🏫</span> Teacher
-      </button>
-      <button type="button" class="role-tab" onclick="selectRole('student')">
-        <span class="tab-icon">🎓</span> Student
-      </button>
+      <button type="button" class="role-tab active-admin" id="tab-admin" onclick="selectRole('admin')"><span class="tab-icon">🛡️</span>Admin</button>
+      <button type="button" class="role-tab" id="tab-teacher" onclick="selectRole('teacher')"><span class="tab-icon">👩‍🏫</span>Teacher</button>
+      <button type="button" class="role-tab" id="tab-student" onclick="selectRole('student')"><span class="tab-icon">🎓</span>Student</button>
     </div>
 
-    <!-- Role Hint -->
-    <div class="role-hint show" id="roleHint">
-      Sign in as <strong>Admin</strong> to manage the system.
-    </div>
+    <div class="role-hint show" id="roleHint">Sign in as <strong>Admin</strong> to manage teachers, students, incidents and the full system.</div>
 
-    <!-- Login Form -->
-    <form th:action="@{/login}" method="post">
+    <form th:action="@{/login}" method="post" id="loginForm" class="role-admin">
       <div class="form-group">
         <label class="form-label">Username</label>
-        <input type="text" class="form-control" name="username" placeholder="Enter your username" required autofocus/>
+        <div class="input-wrap"><input type="text" class="form-control" name="username" placeholder="Enter your username" required autofocus/></div>
       </div>
       <div class="form-group">
         <label class="form-label">Password</label>
-        <input type="password" class="form-control" name="password" placeholder="Enter your password" required/>
+        <div class="input-wrap">
+          <input type="password" class="form-control pr" name="password" id="passwordInput" placeholder="Enter your password" required/>
+          <button type="button" class="pw-eye" id="pwEye" onclick="togglePassword()">👁️</button>
+        </div>
       </div>
-      <button type="submit" class="btn-login btn-admin" id="loginBtn">Sign In as Admin</button>
+      <button type="submit" class="btn-login btn-admin" id="loginBtn" onclick="rippleEffect(event)">Sign In as Admin</button>
     </form>
 
-    <div class="divider">secure login</div>
-    <div class="footer-note">Contact your administrator if you forgot your credentials.</div>
+    <div class="features" id="featuresRow">
+      <div class="feature"><span class="ficon">📊</span>Analytics</div>
+      <div class="feature"><span class="ficon">🔒</span>Sanctions</div>
+      <div class="feature"><span class="ficon">🕵️</span>Reports</div>
+    </div>
 
+    <div class="divider">secure login</div>
+    <div class="footer-note">Forgot your credentials? Contact your administrator.</div>
   </div>
 </div>
 
 <script>
-  const roles = {
-    admin: {
-      label: 'Admin',
-      hint: 'Sign in as <strong>Admin</strong> to manage the system.',
-      btnClass: 'btn-admin',
-      btnText: 'Sign In as Admin',
-      tabClass: 'active-admin'
-    },
-    teacher: {
-      label: 'Teacher',
-      hint: 'Sign in as <strong>Teacher</strong> to manage students and incidents.',
-      btnClass: 'btn-teacher',
-      btnText: 'Sign In as Teacher',
-      tabClass: 'active-teacher'
-    },
-    student: {
-      label: 'Student',
-      hint: 'Sign in as <strong>Student</strong> to view your discipline record.',
-      btnClass: 'btn-student',
-      btnText: 'Sign In as Student',
-      tabClass: 'active-student'
-    }
-  };
+// ── Theme ────────────────────────────────────────────────────────────────────
+const html = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+let isDark = (localStorage.getItem('sds-theme') || 'dark') === 'dark';
+function applyTheme(){html.setAttribute('data-theme',isDark?'dark':'light');themeBtn.textContent=isDark?'🌙':'☀️';localStorage.setItem('sds-theme',isDark?'dark':'light');}
+applyTheme();
+function toggleTheme(){isDark=!isDark;applyTheme();}
 
-  function selectRole(role) {
-    const tabs = document.querySelectorAll('.role-tab');
-    tabs.forEach(t => t.className = 'role-tab');
+// ── Password toggle ──────────────────────────────────────────────────────────
+function togglePassword(){const i=document.getElementById('passwordInput'),e=document.getElementById('pwEye');i.type=i.type==='password'?'text':'password';e.textContent=i.type==='password'?'👁️':'🙈';}
 
-    const idx = ['admin', 'teacher', 'student'].indexOf(role);
-    tabs[idx].classList.add(roles[role].tabClass);
+// ── Ripple ───────────────────────────────────────────────────────────────────
+function rippleEffect(e){const btn=e.currentTarget,r=document.createElement('span'),d=Math.max(btn.clientWidth,btn.clientHeight);r.className='ripple';r.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-btn.getBoundingClientRect().left-d/2}px;top:${e.clientY-btn.getBoundingClientRect().top-d/2}px;`;btn.appendChild(r);setTimeout(()=>r.remove(),600);}
 
-    const hint = document.getElementById('roleHint');
-    hint.innerHTML = roles[role].hint;
-    hint.classList.add('show');
+// ── Role selection ───────────────────────────────────────────────────────────
+const roleData={
+  admin:  {hint:'Sign in as <strong>Admin</strong> to manage teachers, students, incidents and the full system.',hintCls:'',btnCls:'btn-admin',btnTxt:'Sign In as Admin',tabCls:'active-admin',features:[['📊','Analytics'],['🔒','Sanctions'],['🕵️','Reports']],pal:['#4f7fff','#a78bfa','#ff6b6b','#43d9a2','#f7c948']},
+  teacher:{hint:'Sign in as <strong>Teacher</strong> to manage students, file incidents and apply sanctions.',hintCls:'hint-teacher',btnCls:'btn-teacher',btnTxt:'Sign In as Teacher',tabCls:'active-teacher',features:[['📋','Incidents'],['🔒','Sanctions'],['💬','Feedback']],pal:['#43d9a2','#4f7fff','#f7c948','#a78bfa','#ff6b6b']},
+  student:{hint:'Sign in as <strong>Student</strong> to view your discipline record and submit reports.',hintCls:'hint-student',btnCls:'btn-student',btnTxt:'Sign In as Student',tabCls:'active-student',features:[['📄','My Record'],['🔒','Sanctions'],['🕵️','Reports']],pal:['#f7c948','#ff6b6b','#43d9a2','#4f7fff','#a78bfa']}
+};
+let activePal = roleData.admin.pal;
+function selectRole(role){
+  ['admin','teacher','student'].forEach(r=>{document.getElementById('tab-'+r).className='role-tab'+(r===role?' '+roleData[r].tabCls:'');});
+  const hint=document.getElementById('roleHint');hint.innerHTML=roleData[role].hint;hint.className='role-hint show '+roleData[role].hintCls;
+  const btn=document.getElementById('loginBtn');btn.className='btn-login '+roleData[role].btnCls;btn.textContent=roleData[role].btnTxt;
+  document.getElementById('loginForm').className='role-'+role;
+  const feats=document.querySelectorAll('.feature');roleData[role].features.forEach(([ic,lb],i)=>{feats[i].innerHTML=`<span class="ficon">${ic}</span>${lb}`;});
+  activePal=roleData[role].pal;
+  spawnBurst(); // burst of new particles on role switch
+}
 
-    const btn = document.getElementById('loginBtn');
-    btn.className = 'btn-login ' + roles[role].btnClass;
-    btn.textContent = roles[role].btnText;
+// ═══════════════════════════════════════════════════════════════════════════
+// CANVAS ANIMATION ENGINE
+// ═══════════════════════════════════════════════════════════════════════════
+const canvas=document.getElementById('c');
+const ctx=canvas.getContext('2d');
+let W=0,H=0;
+function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+window.addEventListener('resize',resize);resize();
+
+const R=n=>Math.random()*n;
+const RP=n=>R(n*2)-n;
+
+// ── 1. Orbiting circles ──────────────────────────────────────────────────────
+const orbs=[];
+for(let i=0;i<20;i++)orbs.push({
+  cx:R(1),cy:R(1),or:R(160)+50,
+  a:R(Math.PI*2),sp:(R(.006)+.001)*(Math.random()>.5?1:-1),
+  r:R(16)+5,ci:Math.floor(R(5)),
+  al:R(.15)+.06,ps:R(Math.PI*2),psp:R(.025)+.008
+});
+
+// ── 2. Shooting stars ────────────────────────────────────────────────────────
+const stars=[];
+function spawnStar(){stars.push({x:R(W),y:R(H*.5),vx:R(6)+3,vy:R(3)+1,life:1,maxLife:R(60)+40,ci:Math.floor(R(5)),len:R(80)+40});}
+for(let i=0;i<6;i++)spawnStar();
+
+// ── 3. Floating particles ─────────────────────────────────────────────────────
+const parts=[];
+function spawnParticle(x,y,ci){parts.push({x:x||R(W),y:y||R(H),vx:RP(1.2),vy:RP(1.2)-0.5,r:R(3)+1,life:1,decay:R(.008)+.003,ci:ci!==undefined?ci:Math.floor(R(5)),al:R(.3)+.15});}
+for(let i=0;i<60;i++)spawnParticle();
+
+// ── 4. Connection lines ───────────────────────────────────────────────────────
+// Particles within 120px get a faint line
+
+// ── 5. Burst on role switch ───────────────────────────────────────────────────
+function spawnBurst(){for(let i=0;i<25;i++){const angle=R(Math.PI*2),spd=R(4)+1;parts.push({x:W*.5,y:H*.5,vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,r:R(5)+2,life:1,decay:R(.015)+.008,ci:Math.floor(R(5)),al:.6});}}
+
+// ── 6. Mouse repel field ──────────────────────────────────────────────────────
+let mx=W/2,my=H/2;
+window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+
+// ── Tick ──────────────────────────────────────────────────────────────────────
+let t=0;
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  t+=.012;
+
+  const pal=activePal;
+
+  // ─ Orbiting circles ─────────────────────────────────────────────────────
+  orbs.forEach(o=>{
+    o.a+=o.sp;
+    const x=o.cx*W+Math.cos(o.a)*o.or;
+    const y=o.cy*H+Math.sin(o.a)*o.or;
+    const pr=o.r*(1+.15*Math.sin(t*o.psp*5+o.ps));
+    const col=pal[o.ci%pal.length];
+
+    // Faint orbit ring
+    ctx.beginPath();ctx.arc(o.cx*W,o.cy*H,o.or,0,Math.PI*2);
+    ctx.strokeStyle=col+'12';ctx.lineWidth=1;ctx.stroke();
+
+    // Glow halo
+    const g=ctx.createRadialGradient(x,y,0,x,y,pr*3);
+    g.addColorStop(0,col+hex(o.al));g.addColorStop(1,col+'00');
+    ctx.beginPath();ctx.arc(x,y,pr*3,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+
+    // Core
+    ctx.beginPath();ctx.arc(x,y,pr,0,Math.PI*2);ctx.fillStyle=col+hex(o.al+.1);ctx.fill();
+  });
+
+  // ─ Shooting stars ────────────────────────────────────────────────────────
+  for(let i=stars.length-1;i>=0;i--){
+    const s=stars[i];
+    s.x+=s.vx;s.y+=s.vy;s.life-=1/s.maxLife;
+    if(s.life<=0||s.x>W+100){stars.splice(i,1);spawnStar();continue;}
+    const col=pal[s.ci%pal.length];
+    const al=Math.min(s.life*2,1)*0.7;
+    const grad=ctx.createLinearGradient(s.x,s.y,s.x-s.vx*s.len/s.vx,s.y-s.vy*s.len/s.vx);
+    grad.addColorStop(0,col+hex(al));grad.addColorStop(1,col+'00');
+    ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*(s.len/s.vx),s.y-s.vy*(s.len/s.vx));
+    ctx.strokeStyle=grad;ctx.lineWidth=1.5;ctx.stroke();
+    // Head glow
+    ctx.beginPath();ctx.arc(s.x,s.y,2.5,0,Math.PI*2);ctx.fillStyle=col+hex(al);ctx.fill();
   }
+
+  // ─ Floating particles ─────────────────────────────────────────────────────
+  // Occasionally spawn new ones
+  if(Math.random()<.18)spawnParticle();
+
+  // Connection lines first pass
+  for(let i=0;i<parts.length;i++){
+    for(let j=i+1;j<parts.length;j++){
+      const dx=parts[i].x-parts[j].x,dy=parts[i].y-parts[j].y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<110){
+        const al=(.5-dist/220)*Math.min(parts[i].life,parts[j].life)*.5;
+        ctx.beginPath();ctx.moveTo(parts[i].x,parts[i].y);ctx.lineTo(parts[j].x,parts[j].y);
+        ctx.strokeStyle=pal[parts[i].ci%pal.length]+hex(al);ctx.lineWidth=.7;ctx.stroke();
+      }
+    }
+  }
+
+  // Draw and update particles
+  for(let i=parts.length-1;i>=0;i--){
+    const p=parts[i];
+    // Mouse repel
+    const dx=p.x-mx,dy=p.y-my,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<120){const f=.4*(1-dist/120);p.vx+=dx/dist*f;p.vy+=dy/dist*f;}
+    // Gentle float
+    p.vy-=.002;
+    p.x+=p.vx;p.y+=p.vy;
+    p.vx*=.98;p.vy*=.98;
+    p.life-=p.decay;
+    if(p.life<=0||p.x<-20||p.x>W+20||p.y<-20||p.y>H+20){parts.splice(i,1);continue;}
+    const col=pal[p.ci%pal.length];
+    const al=p.life*p.al;
+    // Glow
+    const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*2.5);
+    g.addColorStop(0,col+hex(al));g.addColorStop(1,col+'00');
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r*2.5,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    // Core
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=col+hex(al+.1);ctx.fill();
+  }
+
+  requestAnimationFrame(draw);
+}
+
+function hex(al){return Math.round(Math.max(0,Math.min(1,al))*255).toString(16).padStart(2,'0');}
+draw();
 </script>
 </body>
 </html>
