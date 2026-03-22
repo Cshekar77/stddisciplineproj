@@ -37,15 +37,30 @@
     .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
     .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
     .content{padding:28px 32px;flex:1;}
-    .welcome-card{background:linear-gradient(135deg,rgba(247,201,72,.15),rgba(247,201,72,.05));border:1px solid rgba(247,201,72,.25);border-radius:16px;padding:24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+
+    /* Welcome card */
+    .welcome-card{border-radius:16px;padding:24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;border:1px solid;}
+    /* Dynamic color based on status */
+    .welcome-card.GOOD        {background:linear-gradient(135deg,rgba(67,217,162,.12),rgba(67,217,162,.04));border-color:rgba(67,217,162,.25);}
+    .welcome-card.WARNING     {background:linear-gradient(135deg,rgba(247,201,72,.12),rgba(247,201,72,.04));border-color:rgba(247,201,72,.25);}
+    .welcome-card.SUSPENDED   {background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04));border-color:rgba(255,107,107,.25);}
+    .welcome-card.REMOVED     {background:linear-gradient(135deg,rgba(200,0,0,.12),rgba(200,0,0,.04));border-color:rgba(200,0,0,.25);}
+    .welcome-card.APPRECIATED {background:linear-gradient(135deg,rgba(79,127,255,.12),rgba(79,127,255,.04));border-color:rgba(79,127,255,.25);}
+    .welcome-card.UNKNOWN     {background:linear-gradient(135deg,rgba(122,130,154,.1),rgba(122,130,154,.03));border-color:rgba(122,130,154,.2);}
+
     .welcome-text h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:4px;}
     .welcome-text p{font-size:.88rem;color:var(--muted);}
-    .status-badge{padding:8px 16px;border-radius:20px;font-size:.82rem;font-weight:700;font-family:'Syne',sans-serif;}
-    .status-GOOD{background:rgba(67,217,162,.15);color:var(--accent3);border:1px solid rgba(67,217,162,.3);}
-    .status-WARNING{background:rgba(247,201,72,.15);color:var(--accent);border:1px solid rgba(247,201,72,.3);}
-    .status-CRITICAL{background:rgba(255,107,107,.15);color:var(--accent2);border:1px solid rgba(255,107,107,.3);}
-    .status-SUSPENDED{background:rgba(255,68,68,.15);color:#ff4444;border:1px solid rgba(255,68,68,.3);}
-    .status-EXPELLED{background:rgba(200,0,0,.15);color:#ff2222;border:1px solid rgba(200,0,0,.3);}
+
+    /* Status badge */
+    .status-badge{padding:9px 18px;border-radius:20px;font-size:.85rem;font-weight:700;font-family:'Syne',sans-serif;display:flex;align-items:center;gap:6px;border:1px solid;}
+    .status-badge.GOOD        {background:rgba(67,217,162,.15);color:#43d9a2;border-color:rgba(67,217,162,.3);}
+    .status-badge.WARNING     {background:rgba(247,201,72,.15);color:#f7c948;border-color:rgba(247,201,72,.3);}
+    .status-badge.SUSPENDED   {background:rgba(255,107,107,.15);color:#ff6b6b;border-color:rgba(255,107,107,.3);}
+    .status-badge.REMOVED     {background:rgba(200,0,0,.15);color:#ff2222;border-color:rgba(200,0,0,.3);}
+    .status-badge.APPRECIATED {background:rgba(79,127,255,.15);color:#4f7fff;border-color:rgba(79,127,255,.3);}
+    .status-badge.UNKNOWN     {background:rgba(122,130,154,.12);color:#7a829a;border-color:rgba(122,130,154,.2);}
+
+    /* Stats */
     .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s;box-shadow:var(--shadow);}
     .stat-card:hover{transform:translateY(-3px);}
@@ -57,12 +72,14 @@
     .stat-card.yellow .stat-value{color:var(--accent);}
     .stat-card.red .stat-value{color:var(--accent2);}
     .stat-icon{position:absolute;top:16px;right:16px;font-size:1.5rem;opacity:.12;}
+
+    /* Card */
     .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
     .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .view-all{font-size:.78rem;color:var(--accent);text-decoration:none;font-weight:500;}
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{width:100%;border-collapse:collapse;min-width:400px;}
+    table{width:100%;border-collapse:collapse;min-width:360px;}
     thead th{padding:10px 18px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
@@ -72,6 +89,8 @@
     .pill-open{background:rgba(255,107,107,.12);color:var(--accent2);}
     .pill-review{background:rgba(247,201,72,.12);color:var(--accent);}
     .pill-resolved{background:rgba(67,217,162,.12);color:var(--accent3);}
+
+    /* Quick actions */
     .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px;}
     .quick-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:16px 10px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);text-decoration:none;color:var(--text);font-size:.78rem;font-weight:500;text-align:center;transition:all .18s;}
     .quick-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
@@ -92,6 +111,7 @@
     }
     @media(max-width:480px){
       .quick-grid{grid-template-columns:1fr 1fr;}
+      .theme-icon{display:none;}
     }
   </style>
 </head>
@@ -110,6 +130,7 @@
   <a href="/student/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
@@ -125,16 +146,29 @@
       <div class="avatar" th:text="${studentName != null} ? ${#strings.substring(studentName, 0, 1)} : 'S'">S</div>
     </div>
   </header>
+
   <div class="content">
-    <div class="welcome-card">
+
+    <!-- Welcome card — color changes with status -->
+    <div class="welcome-card"
+         th:classappend="${disciplineStatus != null} ? ${disciplineStatus.name()} : 'UNKNOWN'">
       <div class="welcome-text">
         <h2 th:text="'Welcome, ' + ${studentName != null ? studentName : 'Student'} + '!'">Welcome!</h2>
         <p>Here's an overview of your discipline record.</p>
       </div>
+      <!-- Status badge with icon -->
       <div class="status-badge"
-        th:classappend="'status-' + ${disciplineStatus != null ? disciplineStatus.name() : 'GOOD'}"
-        th:text="${disciplineStatus != null ? '● ' + disciplineStatus.name() : '● GOOD'}">● GOOD</div>
+           th:classappend="${disciplineStatus != null} ? ${disciplineStatus.name()} : 'UNKNOWN'">
+        <span th:text="${disciplineStatus != null and disciplineStatus.name() == 'GOOD'} ? '✅' :
+                       (${disciplineStatus != null and disciplineStatus.name() == 'WARNING'} ? '⚠️' :
+                       (${disciplineStatus != null and disciplineStatus.name() == 'SUSPENDED'} ? '🚫' :
+                       (${disciplineStatus != null and disciplineStatus.name() == 'REMOVED'} ? '❌' :
+                       (${disciplineStatus != null and disciplineStatus.name() == 'APPRECIATED'} ? '⭐' : '●'))))">●</span>
+        <span th:text="${disciplineStatus != null ? disciplineStatus.name() : 'UNKNOWN'}">UNKNOWN</span>
+      </div>
     </div>
+
+    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card yellow">
         <div class="stat-icon">⚠️</div>
@@ -147,6 +181,8 @@
         <div class="stat-value" th:text="${sanctionCount != null} ? ${sanctionCount} : 0">0</div>
       </div>
     </div>
+
+    <!-- Recent incidents -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Recent Incidents</div>
@@ -173,6 +209,8 @@
         </table>
       </div>
     </div>
+
+    <!-- Quick actions -->
     <div class="card">
       <div class="card-header"><div class="card-title">Quick Actions</div></div>
       <div class="quick-grid">
@@ -182,20 +220,27 @@
         <a href="/student/anonymous-report" class="quick-btn"><span class="qicon">🕵️</span>Report Issue</a>
       </div>
     </div>
+
   </div>
 </main>
+
 <script>
-  const html=document.documentElement;
-  const themeIcon=document.getElementById('themeIcon');
-  const saved=localStorage.getItem('sds-theme')||'dark';
-  html.setAttribute('data-theme',saved);
-  themeIcon.textContent=saved==='dark'?'🌙':'☀️';
-  function toggleTheme(){const next=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',next);localStorage.setItem('sds-theme',next);themeIcon.textContent=next==='dark'?'🌙':'☀️';}
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('sidebarOverlay');
-  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
-  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
-  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
 </script>
 </body>
 </html>

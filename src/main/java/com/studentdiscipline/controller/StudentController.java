@@ -41,13 +41,20 @@ public class StudentController {
             Student student = currentStudent(userDetails);
             model.addAttribute("student", student);
             model.addAttribute("studentName", student.getFullName());
-            model.addAttribute("disciplineStatus", studentService.calculateDisciplineStatus(student));
-            model.addAttribute("incidentCount", incidentService.getIncidentsByStudent(student).size());
-            model.addAttribute("sanctionCount", sanctionService.getSanctionsByStudent(student).size());
-            model.addAttribute("recentIncidents", incidentService.getIncidentsByStudent(student)
-                    .stream().limit(3).collect(java.util.stream.Collectors.toList()));
+
+            // ✅ Read disciplineStatus directly from DB — reflects manual changes by admin/teacher
+            model.addAttribute("disciplineStatus", student.getDisciplineStatus());
+
+            model.addAttribute("incidentCount",
+                    incidentService.getIncidentsByStudent(student).size());
+            model.addAttribute("sanctionCount",
+                    sanctionService.getSanctionsByStudent(student).size());
+            model.addAttribute("recentIncidents",
+                    incidentService.getIncidentsByStudent(student)
+                            .stream().limit(3).collect(java.util.stream.Collectors.toList()));
         } catch (Exception e) {
             model.addAttribute("studentName", "Student");
+            model.addAttribute("disciplineStatus", null);
             model.addAttribute("incidentCount", 0);
             model.addAttribute("sanctionCount", 0);
             model.addAttribute("recentIncidents", new ArrayList<>());
@@ -61,7 +68,8 @@ public class StudentController {
             Student student = currentStudent(userDetails);
             model.addAttribute("student", student);
             model.addAttribute("incidents", incidentService.getIncidentsByStudent(student));
-            model.addAttribute("disciplineStatus", studentService.calculateDisciplineStatus(student));
+            // ✅ Read from DB directly
+            model.addAttribute("disciplineStatus", student.getDisciplineStatus());
         } catch (Exception e) {
             model.addAttribute("incidents", new ArrayList<>());
         }
