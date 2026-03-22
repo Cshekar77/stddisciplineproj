@@ -114,7 +114,9 @@
   <div class="nav-section">System</div>
   <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
-  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+  <div class="sidebar-footer"><form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit" class="logout-btn">🚪 Logout</button>
+      </form></div>
 </aside>
 
 <main class="main">
@@ -129,7 +131,9 @@
         <div class="theme-toggle" onclick="toggleTheme()"></div>
       </div>
       
-      <a href="/logout" class="mobile-logout">Logout</a>
+      <form th:action="@{/logout}" method="post" style="display:inline;">
+        <button type="submit" class="mobile-logout">Logout</button>
+      </form>
       <span class="badge">ADMIN</span>
       <div class="avatar">A</div>
     </div>
