@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -7,10 +7,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
-    :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
+    :root{--nav-w:240px;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;--chart-grid:#252a3a;--chart-text:#7a829a;--doughnut-border:#151820;}
+    [data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--surface2:#f5f7ff;--border:#e2e6f0;--text:#1a1d2e;--muted:#6b7494;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;--chart-grid:#e2e6f0;--chart-text:#6b7494;--doughnut-border:#ffffff;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
-    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+
+    /* ── Sidebar ── */
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
     .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
     .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
@@ -20,19 +24,36 @@
     .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
     .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
     .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+
+    /* ── Main ── */
     .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
-    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);transition:var(--transition);}
     .topbar-left{display:flex;align-items:center;gap:14px;}
-    .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
-    .topbar-meta{display:flex;align-items:center;gap:16px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
     .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);}
     .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+
+    /* Theme toggle */
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform .3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+
+    /* Hamburger */
     .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
     .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+
+    /* ── Content ── */
     .content{padding:28px 32px;flex:1;}
+
+    /* Stats */
     .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,border-color .2s;}
+    .stat-card:hover{transform:translateY(-2px);}
     .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
     .stat-card.c1::before{background:var(--accent);}
     .stat-card.c2::before{background:var(--accent2);}
@@ -44,14 +65,18 @@
     .stat-card.c2 .stat-value{color:var(--accent2);}
     .stat-card.c3 .stat-value{color:var(--accent3);}
     .stat-card.c4 .stat-value{color:var(--accent4);}
+
+    /* Charts */
     .charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
-    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
     .chart-header{padding:18px 22px;border-bottom:1px solid var(--border);}
     .chart-title{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700;}
     .chart-subtitle{font-size:.75rem;color:var(--muted);margin-top:2px;}
     .chart-body{padding:22px;}
     .chart-body canvas{max-height:240px;}
     .full-width{grid-column:1/-1;}
+
+    /* Top students list */
     .top-list{padding:8px 0;}
     .top-item{display:flex;align-items:center;gap:14px;padding:12px 22px;border-bottom:1px solid var(--border);}
     .top-item:last-child{border-bottom:none;}
@@ -60,9 +85,11 @@
     .top-id{font-size:.75rem;color:var(--muted);font-family:monospace;}
     .top-count{font-family:'Syne',sans-serif;font-weight:700;font-size:.87rem;color:var(--accent2);min-width:30px;text-align:right;}
 
+    /* ── Responsive ── */
     @media(max-width:1024px){
       .stats-row{grid-template-columns:repeat(2,1fr);}
       .charts-grid{grid-template-columns:1fr;}
+      .content{padding:20px 24px;}
     }
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
@@ -76,7 +103,15 @@
       .badge{display:none;}
       .stats-row{grid-template-columns:1fr 1fr;gap:12px;}
       .stat-value{font-size:1.6rem;}
+      .stat-card{padding:16px;}
       .chart-body{padding:14px;}
+      .top-item{padding:10px 16px;gap:10px;}
+      .top-id{display:none;}
+    }
+    @media(max-width:480px){
+      .theme-icon{display:none;}
+      .stats-row{gap:10px;}
+      .stat-value{font-size:1.4rem;}
     }
   </style>
 </head>
@@ -88,6 +123,7 @@
   <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
   <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
   <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
   <div class="nav-section">Records</div>
   <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
   <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
@@ -98,21 +134,33 @@
   <a href="/admin/analytics" class="nav-link active"><span class="icon">📊</span> Analytics</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
       <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
       <div class="topbar-title">Analytics & Reports</div>
     </div>
-    <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <span class="badge">ADMIN</span>
+      <div class="avatar">A</div>
+    </div>
   </header>
+
   <div class="content">
+    <!-- Stats -->
     <div class="stats-row">
       <div class="stat-card c1"><div class="stat-label">Total Incidents</div><div class="stat-value" th:text="${totalIncidents}">0</div></div>
       <div class="stat-card c2"><div class="stat-label">Open Cases</div><div class="stat-value" th:text="${openIncidents}">0</div></div>
       <div class="stat-card c3"><div class="stat-label">Resolution Rate</div><div class="stat-value" th:text="${resolutionRate} + '%'">0%</div></div>
       <div class="stat-card c4"><div class="stat-label">Sanctions Issued</div><div class="stat-value" th:text="${totalSanctions}">0</div></div>
     </div>
+
+    <!-- Charts -->
     <div class="charts-grid">
       <div class="chart-card">
         <div class="chart-header"><div class="chart-title">Incidents Over Time</div><div class="chart-subtitle">Monthly breakdown</div></div>
@@ -127,10 +175,12 @@
         <div class="chart-body"><canvas id="sanctionsByType"></canvas></div>
       </div>
       <div class="chart-card">
-        <div class="chart-header"><div class="chart-title">Incidents by Grade</div><div class="chart-subtitle">Per grade level</div></div>
+        <div class="chart-header"><div class="chart-title">Incidents by Class</div><div class="chart-subtitle">Per class level</div></div>
         <div class="chart-body"><canvas id="byGrade"></canvas></div>
       </div>
     </div>
+
+    <!-- Top students -->
     <div class="chart-card full-width">
       <div class="chart-header"><div class="chart-title">Students with Most Incidents</div><div class="chart-subtitle">Top 5</div></div>
       <div class="top-list">
@@ -146,28 +196,169 @@
     </div>
   </div>
 </main>
-<script th:inline="javascript">
-  Chart.defaults.color='#7a829a';Chart.defaults.borderColor='#252a3a';Chart.defaults.font.family="'DM Sans',sans-serif";
-  const monthLabels=/*[[${monthLabels}]]*/[];
-  const incidentsPerMonth=/*[[${incidentsPerMonth}]]*/[];
-  const incidentTypeLabels=/*[[${incidentTypeLabels}]]*/[];
-  const incidentTypeCounts=/*[[${incidentTypeCounts}]]*/[];
-  const sanctionTypeLabels=/*[[${sanctionTypeLabels}]]*/[];
-  const sanctionTypeCounts=/*[[${sanctionTypeCounts}]]*/[];
-  const gradeLevelLabels=/*[[${gradeLevelLabels}]]*/[];
-  const gradeIncidentCounts=/*[[${gradeIncidentCounts}]]*/[];
 
-  new Chart(document.getElementById('incidentsTrend'),{type:'line',data:{labels:monthLabels,datasets:[{label:'Incidents',data:incidentsPerMonth,borderColor:'#4f7fff',backgroundColor:'rgba(79,127,255,0.08)',borderWidth:2,pointBackgroundColor:'#4f7fff',pointRadius:4,fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{color:'#252a3a'}},y:{grid:{color:'#252a3a'},beginAtZero:true,ticks:{stepSize:1}}}}});
-  new Chart(document.getElementById('incidentsByType'),{type:'doughnut',data:{labels:incidentTypeLabels,datasets:[{data:incidentTypeCounts,backgroundColor:['#ff6b6b','#f7c948','#4f7fff','#43d9a2','#a78bfa','#fb923c','#34d399'],borderColor:'#151820',borderWidth:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{padding:12,font:{size:11}}}},cutout:'65%'}});
-  new Chart(document.getElementById('sanctionsByType'),{type:'bar',data:{labels:sanctionTypeLabels,datasets:[{label:'Count',data:sanctionTypeCounts,backgroundColor:['rgba(247,201,72,0.6)','rgba(255,107,107,0.6)','rgba(255,68,68,0.6)','rgba(200,0,0,0.6)','rgba(79,127,255,0.6)','rgba(67,217,162,0.6)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#252a3a'},beginAtZero:true,ticks:{stepSize:1}}}}});
-  new Chart(document.getElementById('byGrade'),{type:'bar',data:{labels:gradeLevelLabels,datasets:[{label:'Incidents',data:gradeIncidentCounts,backgroundColor:'rgba(67,217,162,0.5)',borderColor:'#43d9a2',borderWidth:1,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#252a3a'},beginAtZero:true,ticks:{stepSize:1}}}}});
+<script th:inline="javascript">
+  // ── Chart data from Thymeleaf ──────────────────────────────────────────────
+  const monthLabels         = /*[[${monthLabels}]]*/ [];
+  const incidentsPerMonth   = /*[[${incidentsPerMonth}]]*/ [];
+  const incidentTypeLabels  = /*[[${incidentTypeLabels}]]*/ [];
+  const incidentTypeCounts  = /*[[${incidentTypeCounts}]]*/ [];
+  const sanctionTypeLabels  = /*[[${sanctionTypeLabels}]]*/ [];
+  const sanctionTypeCounts  = /*[[${sanctionTypeCounts}]]*/ [];
+  const gradeLevelLabels    = /*[[${gradeLevelLabels}]]*/ [];
+  const gradeIncidentCounts = /*[[${gradeIncidentCounts}]]*/ [];
+
+  // ── Theme-aware colors ─────────────────────────────────────────────────────
+  function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+  function gridColor()   { return isDark() ? '#252a3a' : '#e2e6f0'; }
+  function textColor()   { return isDark() ? '#7a829a' : '#6b7494'; }
+  function borderColor() { return isDark() ? '#151820' : '#ffffff'; }
+
+  Chart.defaults.font.family = "'DM Sans', sans-serif";
+
+  function applyChartTheme() {
+    Chart.defaults.color = textColor();
+    Chart.defaults.borderColor = gridColor();
+  }
+  applyChartTheme();
+
+  // ── Build charts ───────────────────────────────────────────────────────────
+  const chartLine = new Chart(document.getElementById('incidentsTrend'), {
+    type: 'line',
+    data: {
+      labels: monthLabels,
+      datasets: [{
+        label: 'Incidents',
+        data: incidentsPerMonth,
+        borderColor: '#4f7fff',
+        backgroundColor: 'rgba(79,127,255,0.08)',
+        borderWidth: 2,
+        pointBackgroundColor: '#4f7fff',
+        pointRadius: 4,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor() } },
+        y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+
+  const chartDoughnut = new Chart(document.getElementById('incidentsByType'), {
+    type: 'doughnut',
+    data: {
+      labels: incidentTypeLabels,
+      datasets: [{
+        data: incidentTypeCounts,
+        backgroundColor: ['#ff6b6b','#f7c948','#4f7fff','#43d9a2','#a78bfa','#fb923c','#34d399'],
+        borderColor: borderColor(),
+        borderWidth: 3
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'right', labels: { padding: 12, font: { size: 11 }, color: textColor() } } },
+      cutout: '65%'
+    }
+  });
+
+  const chartSanctions = new Chart(document.getElementById('sanctionsByType'), {
+    type: 'bar',
+    data: {
+      labels: sanctionTypeLabels,
+      datasets: [{
+        label: 'Count',
+        data: sanctionTypeCounts,
+        backgroundColor: ['rgba(247,201,72,0.6)','rgba(255,107,107,0.6)','rgba(255,68,68,0.6)','rgba(200,0,0,0.6)','rgba(79,127,255,0.6)','rgba(67,217,162,0.6)'],
+        borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor() } },
+        y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1, color: textColor() } }
+      }
+    }
+  });
+
+  const chartGrade = new Chart(document.getElementById('byGrade'), {
+    type: 'bar',
+    data: {
+      labels: gradeLevelLabels,
+      datasets: [{
+        label: 'Incidents',
+        data: gradeIncidentCounts,
+        backgroundColor: 'rgba(67,217,162,0.5)',
+        borderColor: '#43d9a2',
+        borderWidth: 1, borderRadius: 6, borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor() } },
+        y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1, color: textColor() } }
+      }
+    }
+  });
+
+  // ── Update charts when theme changes ───────────────────────────────────────
+  function updateChartsTheme() {
+    applyChartTheme();
+    const gc = gridColor();
+    const tc = textColor();
+    const bc = borderColor();
+
+    // Line chart grids
+    chartLine.options.scales.x.grid.color = gc;
+    chartLine.options.scales.y.grid.color = gc;
+    chartLine.update();
+
+    // Doughnut border + legend
+    chartDoughnut.data.datasets[0].borderColor = bc;
+    chartDoughnut.options.plugins.legend.labels.color = tc;
+    chartDoughnut.update();
+
+    // Bar charts
+    [chartSanctions, chartGrade].forEach(c => {
+      c.options.scales.x.ticks.color = tc;
+      c.options.scales.y.grid.color = gc;
+      c.options.scales.y.ticks.color = tc;
+      c.update();
+    });
+  }
 </script>
+
 <script>
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('sidebarOverlay');
-  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
-  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
-  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+  // ── Theme ──────────────────────────────────────────────────────────────────
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+    updateChartsTheme(); // re-theme all charts instantly
+  }
+
+  // ── Sidebar ────────────────────────────────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
 </script>
 </body>
 </html>

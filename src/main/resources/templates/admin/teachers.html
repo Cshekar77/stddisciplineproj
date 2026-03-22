@@ -70,7 +70,7 @@
     .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
     .modal-overlay.open{display:flex;}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:500px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:460px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
     .modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:22px;}
     .form-group{margin-bottom:16px;}
     .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
@@ -78,8 +78,7 @@
     .form-control:focus{border-color:var(--accent);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
     .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
-    .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
-    .section-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+    .info-note{background:rgba(79,127,255,.07);border:1px solid rgba(79,127,255,.2);border-radius:8px;padding:10px 14px;font-size:.78rem;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
@@ -158,20 +157,23 @@
               <th>Email</th>
               <th>Department</th>
               <th>Employee ID</th>
-              <th>Status</th>
+              <th>Account</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr th:each="teacher : ${teachers}">
               <td th:text="${teacher.firstName + ' ' + teacher.lastName}">—</td>
-              <td th:text="${teacher.email}">—</td>
+              <td th:text="${teacher.email != null ? teacher.email : '—'}">—</td>
               <td th:text="${teacher.department}">—</td>
               <td style="font-family:monospace;font-size:.82rem;color:var(--muted);" th:text="${teacher.employeeId}">—</td>
-              <td><span class="pill pill-active">Active</span></td>
+              <td>
+                <span class="pill"
+                  th:classappend="${teacher.user != null} ? 'pill-active' : 'style=&quot;background:rgba(255,107,107,.12);color:#ff6b6b&quot;'"
+                  th:text="${teacher.user != null} ? '✅ Active' : '❌ No Account'">—</span>
+              </td>
               <td>
                 <div class="td-actions">
-                  <!-- ✅ FIXED: use data-* attributes instead of th:onclick strings -->
                   <button class="btn btn-sm btn-warning edit-btn"
                     th:data-id="${teacher.id}"
                     th:data-firstname="${teacher.firstName}"
@@ -181,7 +183,7 @@
                   </button>
                   <form th:action="@{/admin/teachers/delete/{id}(id=${teacher.id})}" method="post" style="display:inline;"
                         onsubmit="return confirm('Delete this teacher?')">
-                    <button type="submit" class="btn btn-sm btn-danger">🗑️ Delete</button>
+                    <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
                   </form>
                 </div>
               </td>
@@ -196,12 +198,12 @@
   </div>
 </main>
 
-<!-- Add Teacher Modal -->
+<!-- Add Teacher Modal — NO credentials fields -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
     <div class="modal-title">➕ Add New Teacher</div>
+    <div class="info-note">🔑 Login credentials can be set separately via <strong>Credentials</strong> in the sidebar.</div>
     <form th:action="@{/admin/teachers/add}" method="post">
-      <div class="section-label">Personal Info</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First Name *</label>
@@ -216,15 +218,9 @@
         <label class="form-label">Department</label>
         <input class="form-control" type="text" name="department" placeholder="Mathematics"/>
       </div>
-      <hr class="divider"/>
-      <div class="section-label">Login Credentials</div>
       <div class="form-group">
-        <label class="form-label">Email / Username *</label>
-        <input class="form-control" type="email" name="email" required placeholder="john.doe@school.edu"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password *</label>
-        <input class="form-control" type="password" name="password" required placeholder="••••••••"/>
+        <label class="form-label">Email (Optional)</label>
+        <input class="form-control" type="email" name="email" placeholder="john.doe@school.edu"/>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
@@ -262,7 +258,6 @@
 </div>
 
 <script>
-  // Theme
   const html = document.documentElement;
   const themeIcon = document.getElementById('themeIcon');
   const saved = localStorage.getItem('sds-theme') || 'dark';
@@ -274,31 +269,19 @@
     localStorage.setItem('sds-theme', next);
     themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
-
-  // Sidebar
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
   document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
-
-  // Close modals on backdrop click
   document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
   document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
-
-  // ✅ FIXED: Read data-* attributes instead of using th:onclick strings
   document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      const id         = this.getAttribute('data-id');
-      const firstName  = this.getAttribute('data-firstname');
-      const lastName   = this.getAttribute('data-lastname');
-      const department = this.getAttribute('data-department') || '';
-
-      document.getElementById('editForm').action = '/admin/teachers/edit/' + id;
-      document.getElementById('editFirstName').value  = firstName;
-      document.getElementById('editLastName').value   = lastName;
-      document.getElementById('editDepartment').value = department;
-
+      document.getElementById('editForm').action = '/admin/teachers/edit/' + this.getAttribute('data-id');
+      document.getElementById('editFirstName').value  = this.getAttribute('data-firstname');
+      document.getElementById('editLastName').value   = this.getAttribute('data-lastname');
+      document.getElementById('editDepartment').value = this.getAttribute('data-department') || '';
       document.getElementById('editModal').classList.add('open');
     });
   });

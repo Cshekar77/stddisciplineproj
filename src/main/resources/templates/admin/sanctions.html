@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sanctions — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
-    :root{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--text:#e8eaf2;--muted:#7a829a;--nav-w:240px;}
+    :root{--nav-w:240px;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;}
+    [data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--surface2:#f5f7ff;--border:#e2e6f0;--text:#1a1d2e;--muted:#6b7494;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;}
-    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
     .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
     .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
@@ -19,27 +21,33 @@
     .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
     .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
     .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
     .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
-    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:50;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);transition:var(--transition);}
     .topbar-left{display:flex;align-items:center;gap:14px;}
-    .topbar-title{font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:700;}
-    .topbar-meta{display:flex;align-items:center;gap:16px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
     .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);}
     .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform .3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
     .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
     .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
     .content{padding:28px 32px;flex:1;}
     .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;}
-    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;min-width:200px;max-width:300px;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;min-width:180px;max-width:300px;}
     .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;flex:1;}
     .search-box input::placeholder{color:var(--muted);}
     .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
     .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{width:100%;border-collapse:collapse;min-width:550px;}
+    table{width:100%;border-collapse:collapse;min-width:520px;}
     thead th{padding:11px 20px;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
@@ -69,7 +77,9 @@
       .topbar-title{font-size:1rem;}
       .content{padding:16px;}
       .badge{display:none;}
+      .search-box{min-width:0;flex:1;}
     }
+    @media(max-width:480px){.theme-icon{display:none;}}
   </style>
 </head>
 <body>
@@ -80,6 +90,7 @@
   <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
   <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
   <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
   <div class="nav-section">Records</div>
   <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
   <a href="/admin/sanctions" class="nav-link active"><span class="icon">🔒</span> Sanctions</a>
@@ -90,14 +101,23 @@
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
       <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
       <div class="topbar-title">All Sanctions</div>
     </div>
-    <div class="topbar-meta"><span class="badge">ADMIN</span><div class="avatar">A</div></div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <span class="badge">ADMIN</span>
+      <div class="avatar">A</div>
+    </div>
   </header>
+
   <div class="content">
     <div class="toolbar">
       <form method="get" action="/admin/sanctions" style="display:flex;gap:10px;flex:1;flex-wrap:wrap;">
@@ -112,6 +132,7 @@
         </select>
       </form>
     </div>
+
     <div class="card">
       <div class="card-header">
         <div class="card-title">Sanction Records</div>
@@ -159,12 +180,24 @@
     </div>
   </div>
 </main>
+
 <script>
-  const sidebar=document.getElementById('sidebar');
-  const overlay=document.getElementById('sidebarOverlay');
-  function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
-  function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
-  document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
 </script>
 </body>
 </html>

@@ -17,6 +17,21 @@ public class TeacherService {
     @Autowired private TeacherRepository teacherRepository;
     @Autowired private UserService userService;
 
+    // ── Create teacher WITHOUT credentials (credentials set separately) ────────
+    public Teacher createTeacherNoCredentials(String firstName, String lastName,
+                                               String department, String email) {
+        String employeeId = "EMP-" + System.currentTimeMillis();
+        Teacher teacher = new Teacher();
+        teacher.setFirstName(firstName);
+        teacher.setLastName(lastName);
+        teacher.setEmployeeId(employeeId);
+        teacher.setDepartment(department != null && !department.isBlank() ? department : "General");
+        teacher.setEmail(email);
+        teacher.setUser(null); // no account yet — set via Credentials page
+        return teacherRepository.save(teacher);
+    }
+
+    // ── Create teacher WITH credentials (used internally or via old flow) ──────
     public Teacher createTeacher(String firstName, String lastName, String email,
                                   String department, String password) {
         String employeeId = "EMP-" + System.currentTimeMillis();
@@ -33,27 +48,7 @@ public class TeacherService {
         return teacherRepository.save(teacher);
     }
 
-    public Teacher createTeacher(String firstName, String lastName, String employeeId,
-                                  String department, String email, String contactNumber,
-                                  String username, String password) {
-        if (teacherRepository.existsByEmployeeId(employeeId)) {
-            throw new RuntimeException("Employee ID already exists: " + employeeId);
-        }
-        User user = userService.createUser(username, password, Role.TEACHER);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        Teacher teacher = new Teacher();
-        teacher.setFirstName(firstName);
-        teacher.setLastName(lastName);
-        teacher.setEmployeeId(employeeId);
-        teacher.setDepartment(department);
-        teacher.setEmail(email);
-        teacher.setContactNumber(contactNumber);
-        teacher.setUser(user);
-        return teacherRepository.save(teacher);
-    }
-
-    // Save/update a teacher directly (used by credentials endpoint)
+    // ── Save/update directly ──────────────────────────────────────────────────
     public Teacher saveTeacher(Teacher teacher) {
         return teacherRepository.save(teacher);
     }
@@ -86,9 +81,9 @@ public class TeacherService {
                 .orElseThrow(() -> new RuntimeException("Teacher not found with id: " + id));
         teacher.setFirstName(firstName);
         teacher.setLastName(lastName);
-        teacher.setDepartment(department);
-        teacher.setEmail(email);
-        teacher.setContactNumber(contactNumber);
+        if (department != null) teacher.setDepartment(department);
+        if (email != null) teacher.setEmail(email);
+        if (contactNumber != null) teacher.setContactNumber(contactNumber);
         return teacherRepository.save(teacher);
     }
 
@@ -97,9 +92,8 @@ public class TeacherService {
     }
 
     public void deleteTeacher(Long id) {
-        if (!teacherRepository.existsById(id)) {
+        if (!teacherRepository.existsById(id))
             throw new RuntimeException("Teacher not found with id: " + id);
-        }
         teacherRepository.deleteById(id);
     }
 

@@ -59,7 +59,7 @@
     .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{width:100%;border-collapse:collapse;min-width:550px;}
+    table{width:100%;border-collapse:collapse;min-width:560px;}
     thead th{padding:11px 20px;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
@@ -75,7 +75,7 @@
     .status-EXPELLED{background:rgba(200,0,0,.15);color:#ff2222;}
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
     .modal-overlay.open{display:flex;}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:520px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
     .modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:22px;}
     .form-group{margin-bottom:16px;}
     .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
@@ -83,8 +83,7 @@
     .form-control:focus{border-color:var(--accent);}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
     .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
-    .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
-    .section-label{font-size:.72rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;}
+    .info-note{background:rgba(79,127,255,.07);border:1px solid rgba(79,127,255,.2);border-radius:8px;padding:10px 14px;font-size:.78rem;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
     @keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
@@ -146,9 +145,10 @@
           <span>🔍</span>
           <input type="text" name="search" placeholder="Search students…" th:value="${search}"/>
         </div>
+        <!-- Filter label says "Class" but the param name stays "grade" for backend compatibility -->
         <select class="filter-select" name="grade" onchange="this.form.submit()">
-          <option value="">All Grades</option>
-          <option th:each="g : ${grades}" th:value="${g}" th:text="${g}" th:selected="${g == selectedGrade}">Grade</option>
+          <option value="">All Classes</option>
+          <option th:each="g : ${grades}" th:value="${g}" th:text="${g}" th:selected="${g == selectedGrade}">Class</option>
         </select>
       </form>
       <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Student</button>
@@ -165,9 +165,10 @@
             <tr>
               <th>Name</th>
               <th>Student ID</th>
-              <th>Grade</th>
+              <th>Class</th><!-- ← Changed from Grade -->
               <th>Section</th>
               <th>Status</th>
+              <th>Account</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -175,7 +176,7 @@
             <tr th:each="student : ${students}">
               <td th:text="${student.firstName + ' ' + student.lastName}">—</td>
               <td style="font-family:monospace;font-size:.82rem;color:var(--muted);" th:text="${student.studentId}">—</td>
-              <td th:text="${student.grade}">—</td>
+              <td th:text="${student.grade}">—</td><!-- field is still 'grade' in model -->
               <td th:text="${student.section}">—</td>
               <td>
                 <span class="status-pill"
@@ -183,8 +184,12 @@
                   th:text="${student.disciplineStatus != null ? student.disciplineStatus.name() : 'GOOD'}">GOOD</span>
               </td>
               <td>
+                <span style="font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;"
+                  th:style="${student.user != null} ? 'background:rgba(67,217,162,.12);color:#43d9a2' : 'background:rgba(255,107,107,.12);color:#ff6b6b'"
+                  th:text="${student.user != null} ? '✅ Active' : '❌ No Account'">—</span>
+              </td>
+              <td>
                 <div class="td-actions">
-                  <!-- ✅ FIXED: data-* attributes instead of th:onclick strings -->
                   <button class="btn btn-sm btn-warning edit-btn"
                     th:data-id="${student.id}"
                     th:data-firstname="${student.firstName}"
@@ -201,7 +206,7 @@
               </td>
             </tr>
             <tr th:if="${#lists.isEmpty(students)}">
-              <td colspan="6" class="empty-state">No students found</td>
+              <td colspan="7" class="empty-state">No students found</td>
             </tr>
           </tbody>
         </table>
@@ -214,8 +219,8 @@
 <div class="modal-overlay" id="addModal">
   <div class="modal">
     <div class="modal-title">➕ Add New Student</div>
+    <div class="info-note">🔑 Login credentials can be set via <strong>Credentials</strong> in the sidebar.</div>
     <form th:action="@{/admin/students/add}" method="post">
-      <div class="section-label">Personal Info</div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">First Name *</label>
@@ -226,29 +231,19 @@
           <input class="form-control" type="text" name="lastName" required/>
         </div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Student ID *</label>
+        <input class="form-control" type="text" name="studentId" required placeholder="e.g. STU-2024-001"/>
+      </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Student ID *</label>
-          <input class="form-control" type="text" name="studentId" required placeholder="e.g. STU-2024-001"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Grade</label>
+          <label class="form-label">Class</label><!-- ← Changed from Grade -->
           <input class="form-control" type="text" name="grade" placeholder="e.g. Grade 10"/>
         </div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Section</label>
-        <input class="form-control" type="text" name="section" placeholder="e.g. Section A"/>
-      </div>
-      <hr class="divider"/>
-      <div class="section-label">Login Credentials</div>
-      <div class="form-group">
-        <label class="form-label">Email / Username *</label>
-        <input class="form-control" type="email" name="email" required placeholder="student@school.edu"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password *</label>
-        <input class="form-control" type="password" name="password" required placeholder="••••••••"/>
+        <div class="form-group">
+          <label class="form-label">Section</label>
+          <input class="form-control" type="text" name="section" placeholder="e.g. Section A"/>
+        </div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
@@ -275,7 +270,7 @@
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Grade</label>
+          <label class="form-label">Class</label><!-- ← Changed from Grade -->
           <input class="form-control" type="text" name="grade" id="editGrade"/>
         </div>
         <div class="form-group">
@@ -292,7 +287,6 @@
 </div>
 
 <script>
-  // Theme
   const html = document.documentElement;
   const themeIcon = document.getElementById('themeIcon');
   const saved = localStorage.getItem('sds-theme') || 'dark';
@@ -304,33 +298,20 @@
     localStorage.setItem('sds-theme', next);
     themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
-
-  // Sidebar
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
   document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
-
-  // Close modals on backdrop click
   document.getElementById('addModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
   document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
-
-  // ✅ FIXED: Read data-* attributes instead of th:onclick strings
   document.querySelectorAll('.edit-btn').forEach(btn => {
     btn.addEventListener('click', function() {
-      const id        = this.getAttribute('data-id');
-      const firstName = this.getAttribute('data-firstname');
-      const lastName  = this.getAttribute('data-lastname');
-      const grade     = this.getAttribute('data-grade') || '';
-      const section   = this.getAttribute('data-section') || '';
-
-      document.getElementById('editForm').action    = '/admin/students/edit/' + id;
-      document.getElementById('editFirstName').value = firstName;
-      document.getElementById('editLastName').value  = lastName;
-      document.getElementById('editGrade').value     = grade;
-      document.getElementById('editSection').value   = section;
-
+      document.getElementById('editForm').action    = '/admin/students/edit/' + this.getAttribute('data-id');
+      document.getElementById('editFirstName').value = this.getAttribute('data-firstname');
+      document.getElementById('editLastName').value  = this.getAttribute('data-lastname');
+      document.getElementById('editGrade').value     = this.getAttribute('data-grade') || '';
+      document.getElementById('editSection').value   = this.getAttribute('data-section') || '';
       document.getElementById('editModal').classList.add('open');
     });
   });
