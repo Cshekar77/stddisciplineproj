@@ -1,5 +1,6 @@
 package com.studentdiscipline.controller;
 
+import com.studentdiscipline.enums.DisciplineStatus;
 import com.studentdiscipline.enums.IncidentStatus;
 import com.studentdiscipline.enums.IncidentType;
 import com.studentdiscipline.enums.SanctionType;
@@ -68,7 +69,6 @@ public class AdminController {
         return "admin/credentials";
     }
 
-    /** Create new credentials for teacher (no account yet) */
     @PostMapping("/credentials/teacher")
     public String createTeacherCredentials(@RequestParam Long teacherId,
                                            @RequestParam String username,
@@ -77,134 +77,93 @@ public class AdminController {
                                            RedirectAttributes ra) {
         try {
             teacherService.findById(teacherId).ifPresent(teacher -> {
-                if (teacher.getUser() != null) {
+                if (teacher.getUser() != null)
                     throw new RuntimeException("Teacher already has an account. Use Edit or Reset instead.");
-                }
-                User user = userService.createUser(username, password,
-                        com.studentdiscipline.enums.Role.TEACHER);
+                User user = userService.createUser(username, password, com.studentdiscipline.enums.Role.TEACHER);
                 user.setFirstName(teacher.getFirstName());
                 user.setLastName(teacher.getLastName());
                 teacher.setUser(user);
                 teacherService.saveTeacher(teacher);
-                activityLogService.log(currentUser(userDetails),
-                        "Admin created credentials for teacher: " + teacher.getFullName());
+                activityLogService.log(currentUser(userDetails), "Admin created credentials for teacher: " + teacher.getFullName());
             });
             ra.addFlashAttribute("success", "Teacher credentials created successfully.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/credentials";
     }
 
-    /** Edit username for teacher (already has account) */
     @PostMapping("/credentials/teacher/edit")
-    public String editTeacherCredentials(@RequestParam Long teacherId,
-                                         @RequestParam String username,
-                                         @AuthenticationPrincipal UserDetails userDetails,
-                                         RedirectAttributes ra) {
+    public String editTeacherCredentials(@RequestParam Long teacherId, @RequestParam String username,
+                                         @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             teacherService.findById(teacherId).ifPresent(teacher -> {
-                if (teacher.getUser() == null)
-                    throw new RuntimeException("Teacher has no account yet.");
+                if (teacher.getUser() == null) throw new RuntimeException("Teacher has no account yet.");
                 userService.updateUsername(teacher.getUser().getId(), username);
-                activityLogService.log(currentUser(userDetails),
-                        "Admin updated username for teacher: " + teacher.getFullName());
+                activityLogService.log(currentUser(userDetails), "Admin updated username for teacher: " + teacher.getFullName());
             });
             ra.addFlashAttribute("success", "Teacher username updated.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/credentials";
     }
 
-    /** Reset password for teacher */
     @PostMapping("/credentials/teacher/reset")
-    public String resetTeacherPassword(@RequestParam Long teacherId,
-                                       @RequestParam String password,
-                                       @AuthenticationPrincipal UserDetails userDetails,
-                                       RedirectAttributes ra) {
+    public String resetTeacherPassword(@RequestParam Long teacherId, @RequestParam String password,
+                                       @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             teacherService.findById(teacherId).ifPresent(teacher -> {
-                if (teacher.getUser() == null)
-                    throw new RuntimeException("Teacher has no account yet.");
+                if (teacher.getUser() == null) throw new RuntimeException("Teacher has no account yet.");
                 userService.updatePassword(teacher.getUser().getId(), password);
-                activityLogService.log(currentUser(userDetails),
-                        "Admin reset password for teacher: " + teacher.getFullName());
+                activityLogService.log(currentUser(userDetails), "Admin reset password for teacher: " + teacher.getFullName());
             });
             ra.addFlashAttribute("success", "Teacher password reset successfully.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/credentials";
     }
 
-    /** Create new credentials for student (no account yet) */
     @PostMapping("/credentials/student")
-    public String createStudentCredentials(@RequestParam Long studentId,
-                                           @RequestParam String username,
+    public String createStudentCredentials(@RequestParam Long studentId, @RequestParam String username,
                                            @RequestParam String password,
-                                           @AuthenticationPrincipal UserDetails userDetails,
-                                           RedirectAttributes ra) {
+                                           @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             studentService.findById(studentId).ifPresent(student -> {
-                if (student.getUser() != null) {
+                if (student.getUser() != null)
                     throw new RuntimeException("Student already has an account. Use Edit or Reset instead.");
-                }
-                User user = userService.createUser(username, password,
-                        com.studentdiscipline.enums.Role.STUDENT);
+                User user = userService.createUser(username, password, com.studentdiscipline.enums.Role.STUDENT);
                 user.setFirstName(student.getFirstName());
                 user.setLastName(student.getLastName());
                 student.setUser(user);
                 studentService.saveStudent(student);
-                activityLogService.log(currentUser(userDetails),
-                        "Admin created credentials for student: " + student.getFullName());
+                activityLogService.log(currentUser(userDetails), "Admin created credentials for student: " + student.getFullName());
             });
             ra.addFlashAttribute("success", "Student credentials created successfully.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/credentials";
     }
 
-    /** Edit username for student (already has account) */
     @PostMapping("/credentials/student/edit")
-    public String editStudentCredentials(@RequestParam Long studentId,
-                                         @RequestParam String username,
-                                         @AuthenticationPrincipal UserDetails userDetails,
-                                         RedirectAttributes ra) {
+    public String editStudentCredentials(@RequestParam Long studentId, @RequestParam String username,
+                                         @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             studentService.findById(studentId).ifPresent(student -> {
-                if (student.getUser() == null)
-                    throw new RuntimeException("Student has no account yet.");
+                if (student.getUser() == null) throw new RuntimeException("Student has no account yet.");
                 userService.updateUsername(student.getUser().getId(), username);
-                activityLogService.log(currentUser(userDetails),
-                        "Admin updated username for student: " + student.getFullName());
+                activityLogService.log(currentUser(userDetails), "Admin updated username for student: " + student.getFullName());
             });
             ra.addFlashAttribute("success", "Student username updated.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/credentials";
     }
 
-    /** Reset password for student */
     @PostMapping("/credentials/student/reset")
-    public String resetStudentPassword(@RequestParam Long studentId,
-                                       @RequestParam String password,
-                                       @AuthenticationPrincipal UserDetails userDetails,
-                                       RedirectAttributes ra) {
+    public String resetStudentPassword(@RequestParam Long studentId, @RequestParam String password,
+                                       @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             studentService.findById(studentId).ifPresent(student -> {
-                if (student.getUser() == null)
-                    throw new RuntimeException("Student has no account yet.");
+                if (student.getUser() == null) throw new RuntimeException("Student has no account yet.");
                 userService.updatePassword(student.getUser().getId(), password);
-                activityLogService.log(currentUser(userDetails),
-                        "Admin reset password for student: " + student.getFullName());
+                activityLogService.log(currentUser(userDetails), "Admin reset password for student: " + student.getFullName());
             });
             ra.addFlashAttribute("success", "Student password reset successfully.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/credentials";
     }
 
@@ -213,60 +172,47 @@ public class AdminController {
     @GetMapping("/teachers")
     public String teachers(@RequestParam(required = false) String search, Model model) {
         List<Teacher> teachers = (search != null && !search.isBlank())
-                ? teacherService.search(search)
-                : teacherService.findAll();
+                ? teacherService.search(search) : teacherService.findAll();
         model.addAttribute("teachers", teachers);
         model.addAttribute("search", search);
         return "admin/teachers";
     }
 
     @PostMapping("/teachers/add")
-    public String addTeacher(@RequestParam String firstName,
-                             @RequestParam String lastName,
+    public String addTeacher(@RequestParam String firstName, @RequestParam String lastName,
                              @RequestParam(required = false) String department,
                              @RequestParam(required = false) String email,
-                             @AuthenticationPrincipal UserDetails userDetails,
-                             RedirectAttributes ra) {
+                             @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             teacherService.createTeacherNoCredentials(firstName, lastName,
                     department != null && !department.isBlank() ? department : "General", email);
-            activityLogService.log(currentUser(userDetails),
-                    "Admin added teacher: " + firstName + " " + lastName);
+            activityLogService.log(currentUser(userDetails), "Admin added teacher: " + firstName + " " + lastName);
             ra.addFlashAttribute("success", "Teacher added. Set login credentials via Credentials page.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/teachers";
     }
 
     @PostMapping("/teachers/edit/{id}")
-    public String editTeacher(@PathVariable Long id,
-                              @RequestParam String firstName,
+    public String editTeacher(@PathVariable Long id, @RequestParam String firstName,
                               @RequestParam String lastName,
                               @RequestParam(required = false) String department,
-                              @AuthenticationPrincipal UserDetails userDetails,
-                              RedirectAttributes ra) {
+                              @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             teacherService.update(id, firstName, lastName, department);
             activityLogService.log(currentUser(userDetails), "Admin updated teacher ID " + id);
             ra.addFlashAttribute("success", "Teacher updated.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/teachers";
     }
 
     @PostMapping("/teachers/delete/{id}")
     public String deleteTeacher(@PathVariable Long id,
-                                @AuthenticationPrincipal UserDetails userDetails,
-                                RedirectAttributes ra) {
+                                @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             teacherService.deleteById(id);
             activityLogService.log(currentUser(userDetails), "Admin deleted teacher ID " + id);
             ra.addFlashAttribute("success", "Teacher deleted.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/teachers";
     }
 
@@ -274,74 +220,72 @@ public class AdminController {
 
     @GetMapping("/students")
     public String students(@RequestParam(required = false) String search,
-                           @RequestParam(required = false) String grade,
-                           Model model) {
+                           @RequestParam(required = false) String grade, Model model) {
         List<Student> students;
-        if (search != null && !search.isBlank()) {
-            students = studentService.search(search);
-        } else if (grade != null && !grade.isBlank()) {
-            students = studentService.findByGradeLevel(grade);
-        } else {
-            students = studentService.findAll();
-        }
+        if (search != null && !search.isBlank()) students = studentService.search(search);
+        else if (grade != null && !grade.isBlank()) students = studentService.findByGradeLevel(grade);
+        else students = studentService.findAll();
         model.addAttribute("students", students);
         model.addAttribute("search", search);
         model.addAttribute("selectedGrade", grade);
         model.addAttribute("grades", studentService.getAllGradeLevels());
+        model.addAttribute("disciplineStatuses", DisciplineStatus.values());
         return "admin/students";
     }
 
     @PostMapping("/students/add")
-    public String addStudent(@RequestParam String firstName,
-                             @RequestParam String lastName,
+    public String addStudent(@RequestParam String firstName, @RequestParam String lastName,
                              @RequestParam String studentId,
                              @RequestParam(required = false) String grade,
                              @RequestParam(required = false) String section,
-                             @AuthenticationPrincipal UserDetails userDetails,
-                             RedirectAttributes ra) {
+                             @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             studentService.createStudentNoCredentials(firstName, lastName, studentId,
-                    grade != null ? grade : "N/A",
-                    section != null ? section : "N/A");
-            activityLogService.log(currentUser(userDetails),
-                    "Admin added student: " + firstName + " " + lastName);
+                    grade != null ? grade : "N/A", section != null ? section : "N/A");
+            activityLogService.log(currentUser(userDetails), "Admin added student: " + firstName + " " + lastName);
             ra.addFlashAttribute("success", "Student added. Set login credentials via Credentials page.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/students";
     }
 
     @PostMapping("/students/edit/{id}")
-    public String editStudent(@PathVariable Long id,
-                              @RequestParam String firstName,
+    public String editStudent(@PathVariable Long id, @RequestParam String firstName,
                               @RequestParam String lastName,
                               @RequestParam(required = false) String grade,
                               @RequestParam(required = false) String section,
-                              @AuthenticationPrincipal UserDetails userDetails,
-                              RedirectAttributes ra) {
+                              @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             studentService.update(id, firstName, lastName, grade, section);
             studentService.updateDisciplineStatus(id);
             activityLogService.log(currentUser(userDetails), "Admin updated student ID " + id);
             ra.addFlashAttribute("success", "Student updated.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
+        return "redirect:/admin/students";
+    }
+
+    // ── NEW: Manual discipline status update ──────────────────────────────────
+    @PostMapping("/students/{id}/discipline-status")
+    public String updateDisciplineStatus(@PathVariable Long id,
+                                         @RequestParam String disciplineStatus,
+                                         @AuthenticationPrincipal UserDetails userDetails,
+                                         RedirectAttributes ra) {
+        try {
+            studentService.setDisciplineStatus(id, DisciplineStatus.valueOf(disciplineStatus));
+            activityLogService.log(currentUser(userDetails),
+                    "Admin set discipline status to " + disciplineStatus + " for student ID " + id);
+            ra.addFlashAttribute("success", "Discipline status updated.");
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/students";
     }
 
     @PostMapping("/students/delete/{id}")
     public String deleteStudent(@PathVariable Long id,
-                                @AuthenticationPrincipal UserDetails userDetails,
-                                RedirectAttributes ra) {
+                                @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             studentService.deleteById(id);
             activityLogService.log(currentUser(userDetails), "Admin deleted student ID " + id);
             ra.addFlashAttribute("success", "Student deleted.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/students";
     }
 
@@ -350,8 +294,7 @@ public class AdminController {
     @GetMapping("/incidents")
     public String incidents(@RequestParam(required = false) String status,
                             @RequestParam(required = false) String search,
-                            @RequestParam(required = false) String type,
-                            Model model) {
+                            @RequestParam(required = false) String type, Model model) {
         List<Incident> incidents = incidentService.findAll();
         if (status != null && !status.isBlank()) {
             IncidentStatus s = IncidentStatus.valueOf(status);
@@ -365,8 +308,7 @@ public class AdminController {
             String kw = search.toLowerCase();
             incidents = incidents.stream()
                     .filter(i -> i.getStudent() != null &&
-                            (i.getStudent().getFirstName() + " " + i.getStudent().getLastName())
-                                    .toLowerCase().contains(kw))
+                            (i.getStudent().getFirstName() + " " + i.getStudent().getLastName()).toLowerCase().contains(kw))
                     .collect(Collectors.toList());
         }
         model.addAttribute("incidents", incidents);
@@ -380,15 +322,12 @@ public class AdminController {
 
     @PostMapping("/incidents/{id}/resolve")
     public String resolveIncident(@PathVariable Long id,
-                                  @AuthenticationPrincipal UserDetails userDetails,
-                                  RedirectAttributes ra) {
+                                  @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             incidentService.updateStatus(id, IncidentStatus.RESOLVED);
             activityLogService.log(currentUser(userDetails), "Admin resolved incident ID " + id);
             ra.addFlashAttribute("success", "Incident marked as resolved.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/incidents";
     }
 
@@ -396,8 +335,7 @@ public class AdminController {
 
     @GetMapping("/sanctions")
     public String sanctions(@RequestParam(required = false) String search,
-                            @RequestParam(required = false) String type,
-                            Model model) {
+                            @RequestParam(required = false) String type, Model model) {
         List<Sanction> sanctions = sanctionService.findAll();
         if (type != null && !type.isBlank()) {
             SanctionType st = SanctionType.valueOf(type);
@@ -407,8 +345,7 @@ public class AdminController {
             String kw = search.toLowerCase();
             sanctions = sanctions.stream()
                     .filter(s -> s.getStudent() != null &&
-                            (s.getStudent().getFirstName() + " " + s.getStudent().getLastName())
-                                    .toLowerCase().contains(kw))
+                            (s.getStudent().getFirstName() + " " + s.getStudent().getLastName()).toLowerCase().contains(kw))
                     .collect(Collectors.toList());
         }
         model.addAttribute("sanctions", sanctions);
@@ -418,15 +355,12 @@ public class AdminController {
 
     @PostMapping("/sanctions/delete/{id}")
     public String deleteSanction(@PathVariable Long id,
-                                 @AuthenticationPrincipal UserDetails userDetails,
-                                 RedirectAttributes ra) {
+                                 @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             sanctionService.deleteById(id);
             activityLogService.log(currentUser(userDetails), "Admin deleted sanction ID " + id);
             ra.addFlashAttribute("success", "Sanction removed.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/sanctions";
     }
 
@@ -434,24 +368,19 @@ public class AdminController {
 
     @GetMapping("/feedback")
     public String feedback(@RequestParam(required = false) String role, Model model) {
-        model.addAttribute("feedbackList",
-                (role != null && !role.isBlank())
-                        ? feedbackService.getFeedbackByRole(role)
-                        : feedbackService.getAllFeedback());
+        model.addAttribute("feedbackList", (role != null && !role.isBlank())
+                ? feedbackService.getFeedbackByRole(role) : feedbackService.getAllFeedback());
         model.addAttribute("roleFilter", role);
         return "admin/feedback";
     }
 
     @PostMapping("/feedback/delete/{id}")
     public String deleteFeedback(@PathVariable Long id,
-                                 @AuthenticationPrincipal UserDetails userDetails,
-                                 RedirectAttributes ra) {
+                                 @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             feedbackService.deleteFeedback(id, currentUser(userDetails));
             ra.addFlashAttribute("success", "Feedback deleted.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
+        } catch (RuntimeException e) { ra.addFlashAttribute("error", e.getMessage()); }
         return "redirect:/admin/feedback";
     }
 
@@ -527,9 +456,7 @@ public class AdminController {
             model.addAttribute("gradeLevelLabels", incidentService.getGradeLevelLabels());
             model.addAttribute("gradeIncidentCounts", incidentService.getCountsPerGradeLevel());
             model.addAttribute("topStudents", incidentService.getTopStudentsByIncidentCount(5));
-        } catch (Exception e) {
-            model.addAttribute("error", "Could not load analytics: " + e.getMessage());
-        }
+        } catch (Exception e) { model.addAttribute("error", "Could not load analytics: " + e.getMessage()); }
         return "admin/analytics";
     }
 }

@@ -41,7 +41,7 @@
     .alert-success{background:rgba(67,217,162,.12);border:1px solid rgba(67,217,162,.25);color:var(--accent3);}
     .alert-error{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--accent2);}
     .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:16px;flex-wrap:wrap;}
-    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:320px;}
+    .search-box{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;flex:1;max-width:300px;}
     .search-box input{background:none;border:none;outline:none;color:var(--text);font-size:.88rem;font-family:'DM Sans',sans-serif;flex:1;}
     .search-box input::placeholder{color:var(--muted);}
     .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;}
@@ -59,20 +59,27 @@
     .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{width:100%;border-collapse:collapse;min-width:560px;}
+    table{width:100%;border-collapse:collapse;min-width:620px;}
     thead th{padding:11px 20px;text-align:left;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
     tbody tr:hover{background:var(--surface2);}
-    tbody td{padding:14px 20px;font-size:.87rem;}
-    .td-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    tbody td{padding:12px 20px;font-size:.87rem;}
+    .td-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
     .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
-    .status-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;}
-    .status-GOOD{background:rgba(67,217,162,.12);color:var(--accent3);}
-    .status-WARNING{background:rgba(247,201,72,.12);color:var(--accent4);}
-    .status-CRITICAL{background:rgba(255,107,107,.12);color:var(--accent2);}
-    .status-SUSPENDED{background:rgba(255,68,68,.15);color:#ff4444;}
-    .status-EXPELLED{background:rgba(200,0,0,.15);color:#ff2222;}
+    /* Discipline status pills */
+    .ds{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.7rem;font-weight:600;}
+    .ds-GOOD{background:rgba(67,217,162,.12);color:#43d9a2;}
+    .ds-WARNING{background:rgba(247,201,72,.12);color:#f7c948;}
+    .ds-SUSPENDED{background:rgba(255,107,107,.15);color:#ff6b6b;}
+    .ds-REMOVED{background:rgba(200,0,0,.15);color:#ff2222;}
+    .ds-APPRECIATED{background:rgba(79,127,255,.12);color:#4f7fff;}
+    /* Inline status select */
+    .status-form{display:flex;align-items:center;gap:6px;}
+    .status-select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.75rem;outline:none;cursor:pointer;}
+    .btn-status{padding:5px 10px;border-radius:7px;font-size:.73rem;font-weight:600;cursor:pointer;border:1px solid rgba(79,127,255,.3);background:rgba(79,127,255,.1);color:var(--accent);font-family:'DM Sans',sans-serif;transition:all .18s;white-space:nowrap;}
+    .btn-status:hover{background:rgba(79,127,255,.2);}
+    /* Modals */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
     .modal-overlay.open{display:flex;}
     .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
@@ -97,6 +104,7 @@
       .badge{display:none;}
       .form-row{grid-template-columns:1fr;}
     }
+    @media(max-width:480px){.theme-icon{display:none;}}
   </style>
 </head>
 <body>
@@ -145,7 +153,6 @@
           <span>🔍</span>
           <input type="text" name="search" placeholder="Search students…" th:value="${search}"/>
         </div>
-        <!-- Filter label says "Class" but the param name stays "grade" for backend compatibility -->
         <select class="filter-select" name="grade" onchange="this.form.submit()">
           <option value="">All Classes</option>
           <option th:each="g : ${grades}" th:value="${g}" th:text="${g}" th:selected="${g == selectedGrade}">Class</option>
@@ -165,9 +172,9 @@
             <tr>
               <th>Name</th>
               <th>Student ID</th>
-              <th>Class</th><!-- ← Changed from Grade -->
+              <th>Class</th>
               <th>Section</th>
-              <th>Status</th>
+              <th>Discipline Status</th>
               <th>Account</th>
               <th>Actions</th>
             </tr>
@@ -176,12 +183,19 @@
             <tr th:each="student : ${students}">
               <td th:text="${student.firstName + ' ' + student.lastName}">—</td>
               <td style="font-family:monospace;font-size:.82rem;color:var(--muted);" th:text="${student.studentId}">—</td>
-              <td th:text="${student.grade}">—</td><!-- field is still 'grade' in model -->
+              <td th:text="${student.grade}">—</td>
               <td th:text="${student.section}">—</td>
               <td>
-                <span class="status-pill"
-                  th:classappend="'status-' + ${student.disciplineStatus != null ? student.disciplineStatus.name() : 'GOOD'}"
-                  th:text="${student.disciplineStatus != null ? student.disciplineStatus.name() : 'GOOD'}">GOOD</span>
+                <!-- Inline status change -->
+                <form th:action="@{/admin/students/{id}/discipline-status(id=${student.id})}" method="post" class="status-form">
+                  <select class="status-select" name="disciplineStatus">
+                    <option th:each="ds : ${disciplineStatuses}"
+                            th:value="${ds}"
+                            th:text="${ds}"
+                            th:selected="${student.disciplineStatus == ds}">Status</option>
+                  </select>
+                  <button type="submit" class="btn-status">✔ Set</button>
+                </form>
               </td>
               <td>
                 <span style="font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:20px;display:inline-block;"
@@ -219,31 +233,16 @@
 <div class="modal-overlay" id="addModal">
   <div class="modal">
     <div class="modal-title">➕ Add New Student</div>
-    <div class="info-note">🔑 Login credentials can be set via <strong>Credentials</strong> in the sidebar.</div>
+    <div class="info-note">🔑 Set login credentials via <strong>Credentials</strong> in the sidebar.</div>
     <form th:action="@{/admin/students/add}" method="post">
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">First Name *</label>
-          <input class="form-control" type="text" name="firstName" required/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Last Name *</label>
-          <input class="form-control" type="text" name="lastName" required/>
-        </div>
+        <div class="form-group"><label class="form-label">First Name *</label><input class="form-control" type="text" name="firstName" required/></div>
+        <div class="form-group"><label class="form-label">Last Name *</label><input class="form-control" type="text" name="lastName" required/></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Student ID *</label>
-        <input class="form-control" type="text" name="studentId" required placeholder="e.g. STU-2024-001"/>
-      </div>
+      <div class="form-group"><label class="form-label">Student ID *</label><input class="form-control" type="text" name="studentId" required placeholder="e.g. STU-2024-001"/></div>
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Class</label><!-- ← Changed from Grade -->
-          <input class="form-control" type="text" name="grade" placeholder="e.g. Grade 10"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Section</label>
-          <input class="form-control" type="text" name="section" placeholder="e.g. Section A"/>
-        </div>
+        <div class="form-group"><label class="form-label">Class</label><input class="form-control" type="text" name="grade" placeholder="e.g. Grade 10"/></div>
+        <div class="form-group"><label class="form-label">Section</label><input class="form-control" type="text" name="section" placeholder="e.g. Section A"/></div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
@@ -259,24 +258,12 @@
     <div class="modal-title">✏️ Edit Student</div>
     <form id="editForm" method="post">
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">First Name *</label>
-          <input class="form-control" type="text" name="firstName" id="editFirstName" required/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Last Name *</label>
-          <input class="form-control" type="text" name="lastName" id="editLastName" required/>
-        </div>
+        <div class="form-group"><label class="form-label">First Name *</label><input class="form-control" type="text" name="firstName" id="editFirstName" required/></div>
+        <div class="form-group"><label class="form-label">Last Name *</label><input class="form-control" type="text" name="lastName" id="editLastName" required/></div>
       </div>
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Class</label><!-- ← Changed from Grade -->
-          <input class="form-control" type="text" name="grade" id="editGrade"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Section</label>
-          <input class="form-control" type="text" name="section" id="editSection"/>
-        </div>
+        <div class="form-group"><label class="form-label">Class</label><input class="form-control" type="text" name="grade" id="editGrade"/></div>
+        <div class="form-group"><label class="form-label">Section</label><input class="form-control" type="text" name="section" id="editSection"/></div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn btn-ghost" onclick="document.getElementById('editModal').classList.remove('open')">Cancel</button>

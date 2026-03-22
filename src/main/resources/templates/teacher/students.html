@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Students — Teacher</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
@@ -52,17 +53,23 @@
     .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{width:100%;border-collapse:collapse;min-width:480px;}
+    table{width:100%;border-collapse:collapse;min-width:560px;}
     thead th{padding:10px 18px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
     tbody tr:hover{background:var(--surface2);}
     tbody td{padding:12px 18px;font-size:.85rem;}
-    .td-actions{display:flex;gap:6px;flex-wrap:wrap;}
+    .td-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
     .empty-state{padding:48px;text-align:center;color:var(--muted);font-size:.9rem;}
+    /* Status select */
+    .status-form{display:flex;align-items:center;gap:6px;}
+    .status-select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:5px 8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.75rem;outline:none;cursor:pointer;}
+    .btn-status{padding:5px 10px;border-radius:7px;font-size:.73rem;font-weight:600;cursor:pointer;border:1px solid rgba(67,217,162,.3);background:rgba(67,217,162,.1);color:var(--accent);font-family:'DM Sans',sans-serif;transition:all .18s;white-space:nowrap;}
+    .btn-status:hover{background:rgba(67,217,162,.2);}
+    /* Modals */
     .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center;padding:16px;}
     .modal-overlay.open{display:flex;}
-    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:480px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:460px;animation:fadeUp .25s ease;max-height:90vh;overflow-y:auto;}
     .modal-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px;}
     .form-group{margin-bottom:16px;}
     .form-label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
@@ -85,6 +92,7 @@
       .badge{display:none;}
       .form-row{grid-template-columns:1fr;}
     }
+    @media(max-width:480px){.theme-icon{display:none;}}
   </style>
 </head>
 <body>
@@ -102,6 +110,7 @@
   <a href="/teacher/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
@@ -113,15 +122,17 @@
       <span class="badge">TEACHER</span><div class="avatar">T</div>
     </div>
   </header>
+
   <div class="content">
     <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
     <div th:if="${error}" class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
     <div class="toolbar">
       <form method="get" action="/teacher/students" style="display:flex;gap:10px;flex:1;">
         <div class="search-box"><span>🔍</span><input type="text" name="search" placeholder="Search students…" th:value="${search}"/></div>
       </form>
-      <button class="btn btn-primary" onclick="document.getElementById('addModal').classList.add('open')">➕ Add Student</button>
     </div>
+
     <div class="card">
       <div class="card-header">
         <div class="card-title">All Students</div>
@@ -129,13 +140,34 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Name</th><th>Student ID</th><th>Grade</th><th>Section</th><th>Actions</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Student ID</th>
+              <th>Class</th>
+              <th>Section</th>
+              <th>Discipline Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
           <tbody>
             <tr th:each="student : ${students}">
               <td th:text="${student.firstName + ' ' + student.lastName}">—</td>
               <td style="font-family:monospace;font-size:.82rem;color:var(--muted);" th:text="${student.studentId}">—</td>
               <td th:text="${student.grade}">—</td>
               <td th:text="${student.section}">—</td>
+              <td>
+                <!-- Inline discipline status update -->
+                <form th:action="@{/teacher/students/{id}/discipline-status(id=${student.id})}" method="post" class="status-form">
+                  <select class="status-select" name="disciplineStatus">
+                    <option th:each="ds : ${disciplineStatuses}"
+                            th:value="${ds}"
+                            th:text="${ds}"
+                            th:selected="${student.disciplineStatus == ds}">Status</option>
+                  </select>
+                  <button type="submit" class="btn-status">✔ Set</button>
+                </form>
+              </td>
               <td>
                 <div class="td-actions">
                   <form th:action="@{/teacher/students/delete/{id}(id=${student.id})}" method="post" style="display:inline;" onsubmit="return confirm('Delete this student?')">
@@ -144,38 +176,16 @@
                 </div>
               </td>
             </tr>
-            <tr th:if="${students == null or #lists.isEmpty(students)}"><td colspan="5" class="empty-state">No students found</td></tr>
+            <tr th:if="${students == null or #lists.isEmpty(students)}">
+              <td colspan="6" class="empty-state">No students found</td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
   </div>
 </main>
-<div class="modal-overlay" id="addModal">
-  <div class="modal">
-    <div class="modal-title">➕ Add New Student</div>
-    <form th:action="@{/teacher/students/add}" method="post">
-      <div class="section-label">Personal Info</div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">First Name *</label><input class="form-control" type="text" name="firstName" required/></div>
-        <div class="form-group"><label class="form-label">Last Name *</label><input class="form-control" type="text" name="lastName" required/></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Student ID *</label><input class="form-control" type="text" name="studentId" required placeholder="STU-2024-001"/></div>
-        <div class="form-group"><label class="form-label">Grade</label><input class="form-control" type="text" name="grade" placeholder="Grade 10"/></div>
-      </div>
-      <div class="form-group"><label class="form-label">Section</label><input class="form-control" type="text" name="section" placeholder="Section A"/></div>
-      <hr class="divider"/>
-      <div class="section-label">Login Credentials</div>
-      <div class="form-group"><label class="form-label">Email / Username *</label><input class="form-control" type="email" name="email" required placeholder="student@school.edu"/></div>
-      <div class="form-group"><label class="form-label">Password *</label><input class="form-control" type="password" name="password" required placeholder="••••••••"/></div>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" onclick="document.getElementById('addModal').classList.remove('open')">Cancel</button>
-        <button type="submit" class="btn btn-primary">Add Student</button>
-      </div>
-    </form>
-  </div>
-</div>
+
 <script>
   const html=document.documentElement;const themeIcon=document.getElementById('themeIcon');
   const saved=localStorage.getItem('sds-theme')||'dark';html.setAttribute('data-theme',saved);themeIcon.textContent=saved==='dark'?'🌙':'☀️';
@@ -184,7 +194,6 @@
   function openSidebar(){sidebar.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
   function closeSidebar(){sidebar.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
   document.querySelectorAll('.nav-link').forEach(l=>l.addEventListener('click',()=>{if(window.innerWidth<=768)closeSidebar();}));
-  document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 </script>
 </body>
 </html>

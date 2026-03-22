@@ -23,12 +23,11 @@ public class StudentService {
     @Autowired private UserService userService;
     @Autowired private IncidentRepository incidentRepository;
 
-    // ── Create student WITHOUT credentials (credentials set separately) ────────
+    // ── Create without credentials ────────────────────────────────────────────
     public Student createStudentNoCredentials(String firstName, String lastName,
                                                String studentId, String grade, String section) {
         if (studentRepository.existsByStudentId(studentId))
             throw new RuntimeException("Student ID already exists: " + studentId);
-
         Student student = new Student();
         student.setFirstName(firstName);
         student.setLastName(lastName);
@@ -37,21 +36,18 @@ public class StudentService {
         student.setSection(section);
         student.setDateEnrolled(LocalDate.now());
         student.setDisciplineStatus(DisciplineStatus.GOOD);
-        student.setUser(null); // no account yet — set via Credentials page
+        student.setUser(null);
         return studentRepository.save(student);
     }
 
-    // ── Create student WITH credentials (used internally or via old flow) ──────
+    // ── Create with credentials ───────────────────────────────────────────────
     public Student createStudent(String firstName, String lastName, String studentId,
                                   String grade, String section, String email, String password) {
         if (studentRepository.existsByStudentId(studentId))
             throw new RuntimeException("Student ID already exists: " + studentId);
-
-        User user = userService.createUser(email, password,
-                com.studentdiscipline.enums.Role.STUDENT);
+        User user = userService.createUser(email, password, com.studentdiscipline.enums.Role.STUDENT);
         user.setFirstName(firstName);
         user.setLastName(lastName);
-
         Student student = new Student();
         student.setFirstName(firstName);
         student.setLastName(lastName);
@@ -66,23 +62,29 @@ public class StudentService {
     }
 
     // ── Save/update directly ──────────────────────────────────────────────────
-    public Student saveStudent(Student student) {
-        return studentRepository.save(student);
-    }
+    public Student saveStudent(Student student) { return studentRepository.save(student); }
 
-    // ── Discipline status ─────────────────────────────────────────────────────
+    // ── Discipline status — auto-calculate from incidents ─────────────────────
     public DisciplineStatus calculateDisciplineStatus(Student student) {
         List<Incident> incidents = incidentRepository.findByStudent(student);
         long open = incidents.stream().filter(i -> i.getStatus() == IncidentStatus.OPEN).count();
         if (open == 0) return DisciplineStatus.GOOD;
         else if (open <= 2) return DisciplineStatus.WARNING;
-        else return DisciplineStatus.CRITICAL;
+        else return DisciplineStatus.SUSPENDED;
     }
 
     public Student updateDisciplineStatus(Long id) {
         Student student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         student.setDisciplineStatus(calculateDisciplineStatus(student));
+        return studentRepository.save(student);
+    }
+
+    // ── Discipline status — set manually ──────────────────────────────────────
+    public Student setDisciplineStatus(Long id, DisciplineStatus status) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found with id: " + id));
+        student.setDisciplineStatus(status);
         return studentRepository.save(student);
     }
 
@@ -132,8 +134,7 @@ public class StudentService {
     }
 
     public void deleteStudent(Long id) {
-        if (!studentRepository.existsById(id))
-            throw new RuntimeException("Student not found with id: " + id);
+        if (!studentRepository.existsById(id)) throw new RuntimeException("Student not found with id: " + id);
         studentRepository.deleteById(id);
     }
 
