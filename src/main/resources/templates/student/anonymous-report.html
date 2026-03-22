@@ -82,9 +82,7 @@
   <a href="/student/anonymous-report" class="nav-link active"><span class="icon">🕵️</span> Report Issue</a>
   <div class="nav-section">System</div>
   <a href="/student/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
-  <div class="sidebar-footer"><form th:action="@{/logout}" method="post" style="margin:0;">
-        <button type="submit" class="logout-btn">🚪 Logout</button>
-      </form></div>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
 <main class="main">
   <header class="topbar">
@@ -94,9 +92,7 @@
     </div>
     <div class="topbar-meta">
       
-      <form th:action="@{/logout}" method="post" style="display:inline;">
-        <button type="submit" class="mobile-logout">Logout</button>
-      </form>
+      <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">STUDENT</span>
       <div class="avatar">S</div>
     </div>

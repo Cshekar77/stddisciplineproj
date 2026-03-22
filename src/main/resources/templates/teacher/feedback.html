@@ -81,9 +81,7 @@
   <a href="/teacher/feedback" class="nav-link active"><span class="icon">💬</span> Feedback</a>
   <div class="nav-section">System</div>
   <a href="/teacher/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
-  <div class="sidebar-footer"><form th:action="@{/logout}" method="post" style="margin:0;">
-        <button type="submit" class="logout-btn">🚪 Logout</button>
-      </form></div>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
 <main class="main">
   <header class="topbar">
@@ -91,9 +89,7 @@
     <div class="topbar-meta">
       <div class="theme-toggle-wrap"><span class="theme-icon" id="themeIcon">🌙</span><div class="theme-toggle" onclick="toggleTheme()"></div></div>
       
-      <form th:action="@{/logout}" method="post" style="display:inline;">
-        <button type="submit" class="mobile-logout">Logout</button>
-      </form>
+      <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">TEACHER</span><div class="avatar">T</div>
     </div>
   </header>
