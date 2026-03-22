@@ -13,7 +13,7 @@
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
 
     /* ── Sidebar ── */
-    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;overflow-y:auto;max-height:100vh;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
     .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
     .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
@@ -98,6 +98,10 @@
       .theme-icon{display:none;}
       .rc-date{display:none;}
     }
+  
+    /* Mobile logout in topbar */
+    .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
+    @media(max-width:768px){.mobile-logout{display:flex;}}
   </style>
 </head>
 <body>
@@ -131,6 +135,8 @@
         <span class="theme-icon" id="themeIcon">🌙</span>
         <div class="theme-toggle" onclick="toggleTheme()"></div>
       </div>
+      
+      <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">ADMIN</span>
       <div class="avatar">A</div>
     </div>

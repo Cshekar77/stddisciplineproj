@@ -172,6 +172,10 @@
       .badge { display: none; }
       .theme-icon { display: none; }
     }
+  
+    /* Mobile logout in topbar */
+    .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
+    @media(max-width:768px){.mobile-logout{display:flex;}}
   </style>
 </head>
 <body>
@@ -209,6 +213,8 @@
         <span class="theme-icon" id="themeIcon">🌙</span>
         <div class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark"></div>
       </div>
+      
+      <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">ADMIN</span>
       <div class="avatar" th:text="${adminName != null} ? ${#strings.substring(adminName, 0, 1)} : 'A'">A</div>
       <span class="admin-name" th:text="${adminName != null} ? ${adminName} : 'Administrator'">Administrator</span>
