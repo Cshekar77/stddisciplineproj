@@ -1,42 +1,631 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <title>Activity History</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Activity History — Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <style>
+        /* ── CSS Variables ─────────────────────────────── */
+        :root {
+            --bg: #0f0f13;
+            --surface: #18181f;
+            --surface2: #22222c;
+            --border: #2e2e3a;
+            --text: #e8e8f0;
+            --muted: #7a7a90;
+            --accent: #7c6ef7;
+            --accent2: #5eead4;
+            --danger: #f87171;
+            --warn: #fbbf24;
+            --success: #4ade80;
+            --sidebar-w: 240px;
+            --radius: 12px;
+        }
+        [data-theme="light"] {
+            --bg: #f4f4f8;
+            --surface: #ffffff;
+            --surface2: #ececf3;
+            --border: #d8d8e8;
+            --text: #18181f;
+            --muted: #6b6b80;
+        }
+
+        /* ── Reset ─────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: flex;
+            min-height: 100vh;
+            transition: background .3s, color .3s;
+        }
+
+        /* ── Sidebar ───────────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            z-index: 100;
+            transition: transform .3s;
+        }
+        .sidebar-brand {
+            padding: 24px 20px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .brand-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: .02em;
+            color: var(--text);
+        }
+        .brand-sub {
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .nav-section {
+            font-size: .65rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            color: var(--muted);
+            text-transform: uppercase;
+            padding: 12px 10px 4px;
+        }
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: .82rem;
+            font-weight: 500;
+            transition: background .15s, color .15s;
+        }
+        .nav-link:hover { background: var(--surface2); color: var(--text); }
+        .nav-link.active { background: var(--accent); color: #fff; }
+        .nav-link .icon { font-size: 1rem; width: 20px; text-align: center; }
+        .sidebar-footer {
+            padding: 12px 10px;
+            border-top: 1px solid var(--border);
+        }
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: .82rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .logout-btn:hover { background: rgba(248,113,113,.1); }
+
+        /* ── Topbar ────────────────────────────────────── */
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-w);
+            right: 0;
+            height: 60px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 90;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .mobile-logout {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 7px;
+            background: rgba(248,113,113,.1);
+            border: 1px solid rgba(248,113,113,.25);
+            color: var(--danger);
+            font-size: .78rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .mobile-logout:hover { background: rgba(248,113,113,.2); }
+        .theme-toggle {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: .85rem;
+            color: var(--text);
+            transition: background .15s;
+        }
+        .theme-toggle:hover { background: var(--border); }
+        .admin-badge {
+            background: var(--accent);
+            color: #fff;
+            font-size: .7rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            letter-spacing: .05em;
+        }
+
+        /* ── Main ──────────────────────────────────────── */
+        .main {
+            margin-left: var(--sidebar-w);
+            padding-top: 60px;
+            flex: 1;
+            min-width: 0;
+        }
+        .content { padding: 28px 24px; max-width: 1200px; }
+
+        /* ── Page Header ───────────────────────────────── */
+        .page-header {
+            margin-bottom: 24px;
+        }
+        .page-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .page-header p { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+
+        /* ── Stats Row ─────────────────────────────────── */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .stat-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        .stat-icon.purple { background: rgba(124,110,247,.15); }
+        .stat-icon.teal   { background: rgba(94,234,212,.15); }
+        .stat-icon.yellow { background: rgba(251,191,36,.15); }
+        .stat-icon.red    { background: rgba(248,113,113,.15); }
+        .stat-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .stat-lbl { font-size: .72rem; color: var(--muted); margin-top: 1px; }
+
+        /* ── Filter Bar ────────────────────────────────── */
+        .filter-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-bar input,
+        .filter-bar select {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .83rem;
+            outline: none;
+            transition: border .15s;
+        }
+        .filter-bar input { min-width: 220px; }
+        .filter-bar input:focus,
+        .filter-bar select:focus { border-color: var(--accent); }
+        .filter-bar select option { background: var(--surface); }
+        .btn-filter {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: .83rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: opacity .15s;
+        }
+        .btn-filter:hover { opacity: .85; }
+        .btn-clear {
+            background: var(--surface2);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: .83rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            transition: background .15s, color .15s;
+        }
+        .btn-clear:hover { background: var(--border); color: var(--text); }
+        .filter-spacer { flex: 1; }
+
+        /* ── Log Table ─────────────────────────────────── */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+        .table-head-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+        }
+        .table-head-row h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: .92rem;
+            font-weight: 700;
+        }
+        .log-count {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3px 10px;
+            font-size: .72rem;
+            color: var(--muted);
+        }
+        .table-wrap { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: .83rem;
+        }
+        thead th {
+            background: var(--surface2);
+            padding: 10px 16px;
+            text-align: left;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+            color: var(--muted);
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-top: 1px solid var(--border);
+            transition: background .12s;
+        }
+        tbody tr:hover { background: var(--surface2); }
+        td {
+            padding: 12px 16px;
+            vertical-align: middle;
+        }
+        .ts-cell {
+            color: var(--muted);
+            font-size: .78rem;
+            white-space: nowrap;
+        }
+        .user-cell { display: flex; align-items: center; gap: 8px; }
+        .avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .72rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .avatar.admin   { background: rgba(124,110,247,.2); color: var(--accent); }
+        .avatar.teacher { background: rgba(94,234,212,.2);  color: var(--accent2); }
+        .avatar.student { background: rgba(251,191,36,.2);  color: var(--warn); }
+        .avatar.system  { background: rgba(122,122,144,.15); color: var(--muted); }
+        .user-name { font-weight: 500; }
+        .role-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: .68rem;
+            font-weight: 700;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+        .role-badge.ADMIN   { background: rgba(124,110,247,.15); color: var(--accent); }
+        .role-badge.TEACHER { background: rgba(94,234,212,.15);  color: var(--accent2); }
+        .role-badge.STUDENT { background: rgba(251,191,36,.15);  color: var(--warn); }
+        .role-badge.SYSTEM  { background: rgba(122,122,144,.15); color: var(--muted); }
+        .desc-cell { color: var(--text); max-width: 420px; }
+        .empty-row td {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--muted);
+        }
+        .empty-icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+
+        /* ── Sidebar overlay ───────────────────────────── */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.5);
+            z-index: 99;
+        }
+        .overlay.show { display: block; }
+
+        /* ── Responsive ────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .topbar { left: 0; }
+            .main { margin-left: 0; }
+            .hamburger { display: flex; }
+            .mobile-logout { display: flex; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .filter-bar { gap: 8px; }
+            .filter-bar input { min-width: 0; flex: 1; }
+            td.hide-mobile, th.hide-mobile { display: none; }
+            .admin-badge { display: none; }
+            .content { padding: 20px 14px; }
+        }
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .topbar { padding: 0 12px; }
+            .page-title { font-size: .9rem; }
+        }
+    </style>
 </head>
 <body>
-    <h1>Activity History</h1>
-    
-    <form method="get">
-        <input type="text" name="search" placeholder="Search..." th:value="${search}"/>
-        <select name="role">
-            <option value="">All Roles</option>
-            <option value="ADMIN">Admin</option>
-            <option value="TEACHER">Teacher</option>
-            <option value="STUDENT">Student</option>
-        </select>
-        <button type="submit">Filter</button>
-        <a href="/admin/activity-history">Clear</a>
-    </form>
 
-    <table border="1">
-        <thead>
-            <tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th></tr>
-        </thead>
-        <tbody>
-            <tr th:each="log : ${logs}">
-                <td th:text="${log.timestamp}">-</td>
-                <td><span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}"></span><span th:if="${log.user == null}">System</span></td>
-                <td><span th:if="${log.user}" th:text="${log.user.role}"></span><span th:if="${log.user == null}">SYSTEM</span></td>
-                <td th:text="${log.description}">-</td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(logs)}">
-                <td colspan="4">No activity logs found</td>
-            </tr>
-        </tbody>
-    </table>
-    
-    <br/>
-    <a href="/admin/dashboard">Back to Dashboard</a>
+<!-- Sidebar overlay -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-name">DisciplineOS</div>
+        <div class="brand-sub">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Main</div>
+        <a href="/admin/dashboard"       class="nav-link"><span class="icon">🏠</span> Dashboard</a>
+
+        <div class="nav-section">Management</div>
+        <a href="/admin/teachers"        class="nav-link"><span class="icon">👨‍🏫</span> Teachers</a>
+        <a href="/admin/students"        class="nav-link"><span class="icon">🎓</span> Students</a>
+        <a href="/admin/credentials"     class="nav-link"><span class="icon">🔑</span> Credentials</a>
+
+        <div class="nav-section">Records</div>
+        <a href="/admin/incidents"       class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+        <a href="/admin/sanctions"       class="nav-link"><span class="icon">🚫</span> Sanctions</a>
+        <a href="/admin/feedback"        class="nav-link"><span class="icon">💬</span> Feedback</a>
+        <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anonymous Reports</a>
+
+        <div class="nav-section">Insights</div>
+        <a href="/admin/activity-history" class="nav-link active"><span class="icon">📋</span> Activity History</a>
+        <a href="/admin/analytics"       class="nav-link"><span class="icon">📊</span> Analytics</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a href="/logout" class="logout-btn"><span>🚪</span> Logout</a>
+    </div>
+</aside>
+
+<!-- Topbar -->
+<header class="topbar">
+    <div class="topbar-left">
+        <button class="hamburger" onclick="openSidebar()">☰</button>
+        <span class="page-title">Activity History</span>
+    </div>
+    <div class="topbar-right">
+        <a href="/logout" class="mobile-logout">🚪 Logout</a>
+        <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()">☀️</button>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+</header>
+
+<!-- Main content -->
+<div class="main">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>Activity History</h2>
+            <p>Full audit log of all actions performed across the system</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon purple">📋</div>
+                <div>
+                    <div class="stat-val" th:text="${totalLogs != null ? totalLogs : #lists.size(logs)}">0</div>
+                    <div class="stat-lbl">Total Logs</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon teal">👑</div>
+                <div>
+                    <div class="stat-val" th:text="${adminLogs != null ? adminLogs : '-'}">—</div>
+                    <div class="stat-lbl">Admin Actions</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon yellow">👨‍🏫</div>
+                <div>
+                    <div class="stat-val" th:text="${teacherLogs != null ? teacherLogs : '-'}">—</div>
+                    <div class="stat-lbl">Teacher Actions</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">🎓</div>
+                <div>
+                    <div class="stat-val" th:text="${studentLogs != null ? studentLogs : '-'}">—</div>
+                    <div class="stat-lbl">Student Actions</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <form method="get" action="/admin/activity-history">
+            <div class="filter-bar">
+                <input type="text" name="search" placeholder="🔍 Search actions..."
+                       th:value="${search}"/>
+                <select name="role">
+                    <option value="">All Roles</option>
+                    <option value="ADMIN"   th:selected="${role == 'ADMIN'}">Admin</option>
+                    <option value="TEACHER" th:selected="${role == 'TEACHER'}">Teacher</option>
+                    <option value="STUDENT" th:selected="${role == 'STUDENT'}">Student</option>
+                </select>
+                <button type="submit" class="btn-filter">Filter</button>
+                <a href="/admin/activity-history" class="btn-clear">Clear</a>
+            </div>
+        </form>
+
+        <!-- Log Table -->
+        <div class="table-card">
+            <div class="table-head-row">
+                <h3>Audit Logs</h3>
+                <span class="log-count" th:text="${#lists.size(logs)} + ' entries'">0 entries</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User</th>
+                            <th class="hide-mobile">Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="log : ${logs}">
+                            <td class="ts-cell"
+                                th:text="${#temporals.format(log.timestamp, 'MMM dd, yyyy HH:mm')}">—</td>
+                            <td>
+                                <div class="user-cell">
+                                    <!-- Admin avatar -->
+                                    <div th:if="${log.user != null and log.user.role.name() == 'ADMIN'}"
+                                         class="avatar admin"
+                                         th:text="${#strings.substring(log.user.firstName,0,1)}">A</div>
+                                    <!-- Teacher avatar -->
+                                    <div th:if="${log.user != null and log.user.role.name() == 'TEACHER'}"
+                                         class="avatar teacher"
+                                         th:text="${#strings.substring(log.user.firstName,0,1)}">T</div>
+                                    <!-- Student avatar -->
+                                    <div th:if="${log.user != null and log.user.role.name() == 'STUDENT'}"
+                                         class="avatar student"
+                                         th:text="${#strings.substring(log.user.firstName,0,1)}">S</div>
+                                    <!-- System avatar -->
+                                    <div th:if="${log.user == null}" class="avatar system">⚙</div>
+
+                                    <span class="user-name"
+                                          th:if="${log.user != null}"
+                                          th:text="${log.user.firstName + ' ' + log.user.lastName}">—</span>
+                                    <span class="user-name" th:if="${log.user == null}">System</span>
+                                </div>
+                            </td>
+                            <td class="hide-mobile">
+                                <span th:if="${log.user != null}"
+                                      class="role-badge"
+                                      th:classappend="${log.user.role.name()}"
+                                      th:text="${log.user.role}">—</span>
+                                <span th:if="${log.user == null}"
+                                      class="role-badge SYSTEM">SYSTEM</span>
+                            </td>
+                            <td class="desc-cell" th:text="${log.description}">—</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(logs)}" class="empty-row">
+                            <td colspan="4">
+                                <span class="empty-icon">📭</span>
+                                No activity logs found
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div><!-- /content -->
+</div><!-- /main -->
+
+<script th:inline="none">
+    /* ── Theme ───────────────────────────────────────── */
+    const html = document.documentElement;
+    const themeBtn = document.getElementById('themeBtn');
+    function applyTheme(t) {
+        html.setAttribute('data-theme', t);
+        themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    }
+    function toggleTheme() {
+        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('theme', next);
+        applyTheme(next);
+    }
+    applyTheme(localStorage.getItem('theme') || 'dark');
+
+    /* ── Sidebar ─────────────────────────────────────── */
+    function openSidebar() {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('overlay').classList.add('show');
+    }
+    function closeSidebar() {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('show');
+    }
+</script>
 </body>
 </html>
