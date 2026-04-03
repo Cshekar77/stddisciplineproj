@@ -6,9 +6,9 @@ import com.studentdiscipline.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
-// import org.springframework.stereotype.Component;  ← COMMENTED OUT
+import org.springframework.stereotype.Component;
 
-// @Component  ← DISABLED for first deployment
+@Component  // ✅ ENABLED - will create default users
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
@@ -19,10 +19,8 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("⚠️ DataInitializer is DISABLED - Tables will be created by Hibernate first");
+        System.out.println("✅ DataInitializer is ENABLED - Checking for existing users...");
         
-        // Code commented out until tables exist
-        /*
         // Create Admin if not exists
         if (userRepository.findByUsername("admin").isEmpty()) {
             User admin = new User();
@@ -34,6 +32,8 @@ public class DataInitializer implements CommandLineRunner {
             admin.setEnabled(true);
             userRepository.save(admin);
             System.out.println("✅ Admin user created - Username: admin, Password: admin123");
+        } else {
+            System.out.println("ℹ️ Admin user already exists - skipping");
         }
 
         // Create Teacher if not exists
@@ -47,6 +47,8 @@ public class DataInitializer implements CommandLineRunner {
             teacher.setEnabled(true);
             userRepository.save(teacher);
             System.out.println("✅ Teacher user created - Username: teacher, Password: teacher123");
+        } else {
+            System.out.println("ℹ️ Teacher user already exists - skipping");
         }
 
         // Create Student if not exists
@@ -60,7 +62,8 @@ public class DataInitializer implements CommandLineRunner {
             student.setEnabled(true);
             userRepository.save(student);
             System.out.println("✅ Student user created - Username: student, Password: student123");
+        } else {
+            System.out.println("ℹ️ Student user already exists - skipping");
         }
-        */
     }
 }
