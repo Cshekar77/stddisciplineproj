@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity History - Admin</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <h2>Admin Panel</h2>
+            <nav>
+                <a href="/admin/dashboard">Dashboard</a>
+                <a href="/admin/teachers">Teachers</a>
+                <a href="/admin/students">Students</a>
+                <a href="/admin/incidents">Incidents</a>
+                <a href="/admin/sanctions">Sanctions</a>
+                <a href="/admin/feedback">Feedback</a>
+                <a href="/admin/anonymous-reports">Anonymous Reports</a>
+                <a href="/admin/activity-history" class="active">Activity History</a>
+                <a href="/admin/analytics">Analytics</a>
+                <a href="/admin/credentials">Credentials</a>
+                <a href="/logout">Logout</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <h1>Activity History</h1>
+            
+            <form method="get" class="filter-form">
+                <input type="text" name="search" placeholder="Search..." th:value="${search}"/>
+                <select name="role">
+                    <option value="">All Roles</option>
+                    <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">Admin</option>
+                    <option value="TEACHER" th:selected="${roleFilter == 'TEACHER'}">Teacher</option>
+                    <option value="STUDENT" th:selected="${roleFilter == 'STUDENT'}">Student</option>
+                </select>
+                <button type="submit">Filter</button>
+                <a href="/admin/activity-history">Clear</a>
+            </form>
+
+            <table border="1" cellpadding="10" style="width:100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background:#f0f0f0;">
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="log : ${logs}" th:if="${logs}">
+                        <td th:text="${log.timestamp}"></td>
+                        <td>
+                            <span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}"></span>
+                            <span th:if="${log.user == null}">System</span>
+                        </td>
+                        <td>
+                            <span th:if="${log.user}" th:text="${log.user.role}"></span>
+                            <span th:if="${log.user == null}">SYSTEM</span>
+                        </td>
+                        <td th:text="${log.description}"></td>
+                    </tr>
+                    <tr th:if="${logs == null or logs.empty}">
+                        <td colspan="4" style="text-align:center">No activity logs found</td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+    </div>
+</body>
+</html>
