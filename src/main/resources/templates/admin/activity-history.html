@@ -71,7 +71,6 @@
     .system-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:600;background:var(--surface2);color:var(--muted);display:inline-block;}
     .text-center{text-align:center;padding:40px !important;color:var(--muted);}
 
-    /* Responsive */
     @media(max-width:1024px){.content{padding:20px 24px;}}
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
@@ -128,7 +127,6 @@
   </header>
 
   <div class="content">
-    <!-- Filters -->
     <div class="filters-card">
       <form method="get" action="/admin/activity-history" class="filter-form">
         <div class="filter-group">
@@ -144,42 +142,24 @@
             <option value="STUDENT" th:selected="${roleFilter == 'STUDENT'}">Student</option>
           </select>
         </div>
-        <div>
-          <button type="submit" class="btn-primary">Apply Filters</button>
-        </div>
-        <div>
-          <a href="/admin/activity-history" class="btn-secondary">Clear</a>
-        </div>
+        <div><button type="submit" class="btn-primary">Apply Filters</button></div>
+        <div><a href="/admin/activity-history" class="btn-secondary">Clear</a></div>
       </form>
     </div>
 
-    <!-- Table -->
     <div class="table-container">
       <table class="data-table">
         <thead>
-          <tr>
-            <th>Timestamp</th>
-            <th>User</th>
-            <th>Role</th>
-            <th>Action</th>
-          </tr>
+          <tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th></tr>
         </thead>
         <tbody>
           <tr th:each="log : ${logs}" th:if="${logs and !logs.empty}">
-            <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</td>
-            <td>
-              <span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}">User Name</span>
-              <span th:if="${log.user == null}">System</span>
-            </td>
-            <td>
-              <span th:if="${log.user}" th:class="'role-badge ' + ${log.user.role}" th:text="${log.user.role}"></span>
-              <span th:if="${log.user == null}" class="system-badge">SYSTEM</span>
-            </td>
-            <td th:text="${log.description}">Action description</td>
+            <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+            <td><span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}"></span><span th:if="${log.user == null}">System</span></td>
+            <td><span th:if="${log.user}" th:class="'role-badge ' + ${log.user.role}" th:text="${log.user.role}"></span><span th:if="${log.user == null}" class="system-badge">SYSTEM</span></td>
+            <td th:text="${log.description}">-</td>
           </tr>
-          <tr th:if="${logs == null or logs.empty}">
-            <td colspan="4" class="text-center">📭 No activity logs found</td>
-          </tr>
+          <tr th:if="${logs == null or logs.empty}"><td colspan="4" class="text-center">📭 No activity logs found</td></tr>
         </tbody>
       </table>
     </div>
@@ -187,7 +167,6 @@
 </main>
 
 <script>
-  // Theme toggle
   const html = document.documentElement;
   const themeIcon = document.getElementById('themeIcon');
   const saved = localStorage.getItem('sds-theme') || 'dark';
@@ -201,7 +180,6 @@
     themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
 
-  // Sidebar
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   function openSidebar()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
