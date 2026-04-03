@@ -12,7 +12,6 @@
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
 
-    /* Sidebar */
     .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;overflow-y:auto;max-height:100vh;}
     .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
     .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
@@ -26,7 +25,6 @@
     .logout-btn:hover{background:rgba(255,107,107,.18);}
     .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
 
-    /* Main */
     .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
     .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);transition:var(--transition);}
     .topbar-left{display:flex;align-items:center;gap:14px;}
@@ -43,10 +41,7 @@
     .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
     .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
 
-    /* Content */
     .content{padding:28px 32px;flex:1;}
-
-    /* Filters */
     .filters-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:24px;box-shadow:var(--shadow);}
     .filter-form{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
     .filter-group{flex:1;min-width:180px;}
@@ -58,7 +53,6 @@
     .btn-secondary{padding:10px 20px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;font-size:.85rem;font-weight:500;display:inline-block;text-align:center;transition:var(--transition);}
     .btn-secondary:hover{background:var(--surface2);}
 
-    /* Table */
     .table-container{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:auto;box-shadow:var(--shadow);}
     .data-table{width:100%;border-collapse:collapse;min-width:600px;}
     .data-table th{padding:16px 20px;text-align:left;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);}
@@ -153,13 +147,15 @@
           <tr><th>Timestamp</th><th>User</th><th>Role</th><th>Action</th></tr>
         </thead>
         <tbody>
-          <tr th:each="log : ${logs}" th:if="${logs and !logs.empty}">
+          <tr th:each="log : ${logs}" th:if="${logs != null}">
             <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">-</td>
-            <td><span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}"></span><span th:if="${log.user == null}">System</span></td>
-            <td><span th:if="${log.user}" th:class="'role-badge ' + ${log.user.role}" th:text="${log.user.role}"></span><span th:if="${log.user == null}" class="system-badge">SYSTEM</span></td>
+            <td><span th:if="${log.user != null}" th:text="${log.user.firstName + ' ' + log.user.lastName}"></span><span th:if="${log.user == null}">System</span></td>
+            <td><span th:if="${log.user != null}" th:class="'role-badge ' + ${log.user.role}" th:text="${log.user.role}"></span><span th:if="${log.user == null}" class="system-badge">SYSTEM</span></td>
             <td th:text="${log.description}">-</td>
           </tr>
-          <tr th:if="${logs == null or logs.empty}"><td colspan="4" class="text-center">📭 No activity logs found</td></tr>
+          <tr th:if="${logs == null or logs.size() == 0}">
+            <td colspan="4" class="text-center">📭 No activity logs found</td>
+          </tr>
         </tbody>
       </table>
     </div>
