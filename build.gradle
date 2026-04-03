@@ -32,9 +32,8 @@ dependencies {
 	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
 	compileOnly 'org.projectlombok:lombok'
 
-	// ✅ SQLite instead of MySQL
-	runtimeOnly 'org.xerial:sqlite-jdbc:3.45.3.0'
-	implementation 'org.hibernate.orm:hibernate-community-dialects:6.6.0.Final'
+	// ✅ MySQL
+	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
