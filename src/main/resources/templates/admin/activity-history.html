@@ -1,73 +1,212 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity History - Admin</title>
-    <link rel="stylesheet" href="/css/style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity History — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--nav-w:240px;--accent:#4f7fff;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;--table-hover:#1c2030;}
+    [data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--surface2:#f5f7ff;--border:#e2e6f0;--text:#1a1d2e;--muted:#6b7494;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;--table-hover:#f5f7ff;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+
+    /* Sidebar */
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;overflow-y:auto;max-height:100vh;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(79,127,255,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+
+    /* Main */
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);transition:var(--transition);}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(79,127,255,.15);color:var(--accent);}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#fff;}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform .3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
+
+    /* Content */
+    .content{padding:28px 32px;flex:1;}
+
+    /* Filters */
+    .filters-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:24px;box-shadow:var(--shadow);}
+    .filter-form{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;}
+    .filter-group{flex:1;min-width:180px;}
+    .filter-group label{display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;}
+    .filter-group input,.filter-group select{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.85rem;transition:var(--transition);}
+    .filter-group input:focus,.filter-group select:focus{outline:none;border-color:var(--accent);}
+    .btn-primary{padding:10px 20px;background:var(--accent);border:none;border-radius:10px;color:white;font-weight:600;cursor:pointer;transition:opacity .2s;}
+    .btn-primary:hover{opacity:0.85;}
+    .btn-secondary{padding:10px 20px;background:transparent;border:1px solid var(--border);border-radius:10px;color:var(--text);text-decoration:none;font-size:.85rem;font-weight:500;display:inline-block;text-align:center;transition:var(--transition);}
+    .btn-secondary:hover{background:var(--surface2);}
+
+    /* Table */
+    .table-container{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:auto;box-shadow:var(--shadow);}
+    .data-table{width:100%;border-collapse:collapse;min-width:600px;}
+    .data-table th{padding:16px 20px;text-align:left;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);}
+    .data-table td{padding:14px 20px;font-size:.85rem;border-bottom:1px solid var(--border);}
+    .data-table tr:hover td{background:var(--table-hover);}
+    .role-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:600;display:inline-block;}
+    .role-badge.ADMIN{background:rgba(79,127,255,.15);color:var(--accent);}
+    .role-badge.TEACHER{background:rgba(67,217,162,.15);color:var(--accent3);}
+    .role-badge.STUDENT{background:rgba(247,201,72,.15);color:var(--accent4);}
+    .system-badge{padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:600;background:var(--surface2);color:var(--muted);display:inline-block;}
+    .text-center{text-align:center;padding:40px !important;color:var(--muted);}
+
+    /* Responsive */
+    @media(max-width:1024px){.content{padding:20px 24px;}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+      .mobile-logout{display:flex;}
+      .filter-form{flex-direction:column;align-items:stretch;}
+      .btn-primary,.btn-secondary{text-align:center;}
+    }
+    @media(max-width:480px){.theme-icon{display:none;}}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <h2>Admin Panel</h2>
-            <nav>
-                <a href="/admin/dashboard">Dashboard</a>
-                <a href="/admin/teachers">Teachers</a>
-                <a href="/admin/students">Students</a>
-                <a href="/admin/incidents">Incidents</a>
-                <a href="/admin/sanctions">Sanctions</a>
-                <a href="/admin/feedback">Feedback</a>
-                <a href="/admin/anonymous-reports">Anonymous Reports</a>
-                <a href="/admin/activity-history" class="active">Activity History</a>
-                <a href="/admin/analytics">Analytics</a>
-                <a href="/admin/credentials">Credentials</a>
-                <a href="/logout">Logout</a>
-            </nav>
-        </aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link active"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
 
-        <main class="main-content">
-            <h1>Activity History</h1>
-            
-            <form method="get" class="filter-form">
-                <input type="text" name="search" placeholder="Search..." th:value="${search}"/>
-                <select name="role">
-                    <option value="">All Roles</option>
-                    <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">Admin</option>
-                    <option value="TEACHER" th:selected="${roleFilter == 'TEACHER'}">Teacher</option>
-                    <option value="STUDENT" th:selected="${roleFilter == 'STUDENT'}">Student</option>
-                </select>
-                <button type="submit">Filter</button>
-                <a href="/admin/activity-history">Clear</a>
-            </form>
-
-            <table border="1" cellpadding="10" style="width:100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background:#f0f0f0;">
-                        <th>Timestamp</th>
-                        <th>User</th>
-                        <th>Role</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="log : ${logs}" th:if="${logs}">
-                        <td th:text="${log.timestamp}"></td>
-                        <td>
-                            <span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}"></span>
-                            <span th:if="${log.user == null}">System</span>
-                        </td>
-                        <td>
-                            <span th:if="${log.user}" th:text="${log.user.role}"></span>
-                            <span th:if="${log.user == null}">SYSTEM</span>
-                        </td>
-                        <td th:text="${log.description}"></td>
-                    </tr>
-                    <tr th:if="${logs == null or logs.empty}">
-                        <td colspan="4" style="text-align:center">No activity logs found</td>
-                    </tr>
-                </tbody>
-            </table>
-        </main>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Activity History</div>
     </div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <a href="/logout" class="mobile-logout">Logout</a>
+      <span class="badge">ADMIN</span>
+      <div class="avatar">A</div>
+    </div>
+  </header>
+
+  <div class="content">
+    <!-- Filters -->
+    <div class="filters-card">
+      <form method="get" action="/admin/activity-history" class="filter-form">
+        <div class="filter-group">
+          <label>🔍 Search</label>
+          <input type="text" name="search" placeholder="Search by action..." th:value="${search}"/>
+        </div>
+        <div class="filter-group">
+          <label>👤 Role</label>
+          <select name="role">
+            <option value="">All Roles</option>
+            <option value="ADMIN" th:selected="${roleFilter == 'ADMIN'}">Admin</option>
+            <option value="TEACHER" th:selected="${roleFilter == 'TEACHER'}">Teacher</option>
+            <option value="STUDENT" th:selected="${roleFilter == 'STUDENT'}">Student</option>
+          </select>
+        </div>
+        <div>
+          <button type="submit" class="btn-primary">Apply Filters</button>
+        </div>
+        <div>
+          <a href="/admin/activity-history" class="btn-secondary">Clear</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="log : ${logs}" th:if="${logs and !logs.empty}">
+            <td th:text="${#temporals.format(log.timestamp, 'yyyy-MM-dd HH:mm:ss')}">2024-01-01 12:00:00</td>
+            <td>
+              <span th:if="${log.user}" th:text="${log.user.firstName + ' ' + log.user.lastName}">User Name</span>
+              <span th:if="${log.user == null}">System</span>
+            </td>
+            <td>
+              <span th:if="${log.user}" th:class="'role-badge ' + ${log.user.role}" th:text="${log.user.role}"></span>
+              <span th:if="${log.user == null}" class="system-badge">SYSTEM</span>
+            </td>
+            <td th:text="${log.description}">Action description</td>
+          </tr>
+          <tr th:if="${logs == null or logs.empty}">
+            <td colspan="4" class="text-center">📭 No activity logs found</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Theme toggle
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+
+  // Sidebar
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar()  { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }));
+</script>
 </body>
 </html>
