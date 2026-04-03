@@ -6,9 +6,9 @@ import com.studentdiscipline.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+// import org.springframework.stereotype.Component;  ← COMMENTED OUT
 
-@Component
+// @Component  ← DISABLED for first deployment
 public class DataInitializer implements CommandLineRunner {
 
     @Autowired
@@ -19,6 +19,10 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        System.out.println("⚠️ DataInitializer is DISABLED - Tables will be created by Hibernate first");
+        
+        // Code commented out until tables exist
+        /*
         // Create Admin if not exists
         if (userRepository.findByUsername("admin").isEmpty()) {
             User admin = new User();
@@ -57,5 +61,6 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(student);
             System.out.println("✅ Student user created - Username: student, Password: student123");
         }
+        */
     }
 }
