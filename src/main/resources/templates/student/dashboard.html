@@ -40,7 +40,6 @@
 
     /* Welcome card */
     .welcome-card{border-radius:16px;padding:24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;border:1px solid;}
-    /* Dynamic color based on status */
     .welcome-card.GOOD        {background:linear-gradient(135deg,rgba(67,217,162,.12),rgba(67,217,162,.04));border-color:rgba(67,217,162,.25);}
     .welcome-card.WARNING     {background:linear-gradient(135deg,rgba(247,201,72,.12),rgba(247,201,72,.04));border-color:rgba(247,201,72,.25);}
     .welcome-card.SUSPENDED   {background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04));border-color:rgba(255,107,107,.25);}
@@ -51,7 +50,6 @@
     .welcome-text h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:4px;}
     .welcome-text p{font-size:.88rem;color:var(--muted);}
 
-    /* Status badge */
     .status-badge{padding:9px 18px;border-radius:20px;font-size:.85rem;font-weight:700;font-family:'Syne',sans-serif;display:flex;align-items:center;gap:6px;border:1px solid;}
     .status-badge.GOOD        {background:rgba(67,217,162,.15);color:#43d9a2;border-color:rgba(67,217,162,.3);}
     .status-badge.WARNING     {background:rgba(247,201,72,.15);color:#f7c948;border-color:rgba(247,201,72,.3);}
@@ -113,8 +111,7 @@
       .quick-grid{grid-template-columns:1fr 1fr;}
       .theme-icon{display:none;}
     }
-  
-    /* Mobile logout in topbar */
+
     .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
     @media(max-width:768px){.mobile-logout{display:flex;}}
   </style>
@@ -132,6 +129,8 @@
   <a href="/student/anonymous-report" class="nav-link"><span class="icon">🕵️</span> Report Issue</a>
   <div class="nav-section">System</div>
   <a href="/student/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <div class="nav-section">Account</div>
+  <a href="/student/change-password" class="nav-link"><span class="icon">🔐</span> Change Password</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
 
@@ -146,7 +145,6 @@
         <span class="theme-icon" id="themeIcon">🌙</span>
         <div class="theme-toggle" onclick="toggleTheme()"></div>
       </div>
-      
       <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">STUDENT</span>
       <div class="avatar" th:text="${studentName != null} ? ${#strings.substring(studentName, 0, 1)} : 'S'">S</div>
@@ -155,14 +153,12 @@
 
   <div class="content">
 
-    <!-- Welcome card — color changes with status -->
     <div class="welcome-card"
          th:classappend="${disciplineStatus != null} ? ${disciplineStatus.name()} : 'UNKNOWN'">
       <div class="welcome-text">
         <h2 th:text="'Welcome, ' + ${studentName != null ? studentName : 'Student'} + '!'">Welcome!</h2>
         <p>Here's an overview of your discipline record.</p>
       </div>
-      <!-- Status badge with icon -->
       <div class="status-badge"
            th:classappend="${disciplineStatus != null} ? ${disciplineStatus.name()} : 'UNKNOWN'">
         <span th:text="${disciplineStatus != null and disciplineStatus.name() == 'GOOD'} ? '✅' :
@@ -174,7 +170,6 @@
       </div>
     </div>
 
-    <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card yellow">
         <div class="stat-icon">⚠️</div>
@@ -188,7 +183,6 @@
       </div>
     </div>
 
-    <!-- Recent incidents -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Recent Incidents</div>
@@ -216,7 +210,6 @@
       </div>
     </div>
 
-    <!-- Quick actions -->
     <div class="card">
       <div class="card-header"><div class="card-title">Quick Actions</div></div>
       <div class="quick-grid">

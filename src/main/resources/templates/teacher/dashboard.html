@@ -94,8 +94,7 @@
       .stats-grid{grid-template-columns:1fr 1fr;}
       .stat-value{font-size:1.4rem;}
     }
-  
-    /* Mobile logout in topbar */
+
     .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
     @media(max-width:768px){.mobile-logout{display:flex;}}
   </style>
@@ -113,8 +112,11 @@
   <a href="/teacher/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
   <div class="nav-section">System</div>
   <a href="/teacher/activity" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <div class="nav-section">Account</div>
+  <a href="/teacher/change-password" class="nav-link"><span class="icon">🔐</span> Change Password</a>
   <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
+
 <main class="main">
   <header class="topbar">
     <div class="topbar-left">
@@ -126,7 +128,6 @@
         <span class="theme-icon" id="themeIcon">🌙</span>
         <div class="theme-toggle" onclick="toggleTheme()"></div>
       </div>
-      
       <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">TEACHER</span>
       <div class="avatar" th:text="${teacherName != null} ? ${#strings.substring(teacherName, 0, 1)} : 'T'">T</div>
@@ -192,6 +193,7 @@
     </div>
   </div>
 </main>
+
 <script>
   const html=document.documentElement;
   const themeIcon=document.getElementById('themeIcon');
