@@ -103,7 +103,6 @@ public class TeacherController {
         return "redirect:/teacher/students";
     }
 
-    // ── NEW: Teacher can also update discipline status ─────────────────────────
     @PostMapping("/students/{id}/discipline-status")
     public String updateDisciplineStatus(@PathVariable Long id,
                                          @RequestParam String disciplineStatus,
@@ -256,5 +255,40 @@ public class TeacherController {
             model.addAttribute("teacherName", user.getFirstName() + " " + user.getLastName());
         } catch (Exception e) { model.addAttribute("logs", new ArrayList<>()); }
         return "teacher/activity-history";
+    }
+
+    // ── CHANGE PASSWORD ───────────────────────────────────────────────────────
+
+    @GetMapping("/change-password")
+    public String changePasswordPage() {
+        return "teacher/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
+                                 @RequestParam String confirmPassword,
+                                 @AuthenticationPrincipal UserDetails userDetails,
+                                 RedirectAttributes ra) {
+        if (!newPassword.equals(confirmPassword)) {
+            ra.addFlashAttribute("error", "New password and confirm password do not match.");
+            return "redirect:/teacher/change-password";
+        }
+
+        if (newPassword.length() < 6) {
+            ra.addFlashAttribute("error", "New password must be at least 6 characters.");
+            return "redirect:/teacher/change-password";
+        }
+
+        boolean success = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
+
+        if (!success) {
+            ra.addFlashAttribute("error", "Current password is incorrect.");
+            return "redirect:/teacher/change-password";
+        }
+
+        activityLogService.log(currentUser(userDetails), "Teacher changed their own password.");
+        ra.addFlashAttribute("success", "Password changed successfully!");
+        return "redirect:/teacher/change-password";
     }
 }

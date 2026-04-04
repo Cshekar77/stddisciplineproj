@@ -41,10 +41,7 @@ public class StudentController {
             Student student = currentStudent(userDetails);
             model.addAttribute("student", student);
             model.addAttribute("studentName", student.getFullName());
-
-            // ✅ Read disciplineStatus directly from DB — reflects manual changes by admin/teacher
             model.addAttribute("disciplineStatus", student.getDisciplineStatus());
-
             model.addAttribute("incidentCount",
                     incidentService.getIncidentsByStudent(student).size());
             model.addAttribute("sanctionCount",
@@ -68,7 +65,6 @@ public class StudentController {
             Student student = currentStudent(userDetails);
             model.addAttribute("student", student);
             model.addAttribute("incidents", incidentService.getIncidentsByStudent(student));
-            // ✅ Read from DB directly
             model.addAttribute("disciplineStatus", student.getDisciplineStatus());
         } catch (Exception e) {
             model.addAttribute("incidents", new ArrayList<>());
@@ -143,5 +139,40 @@ public class StudentController {
             model.addAttribute("logs", new ArrayList<>());
         }
         return "student/activity-history";
+    }
+
+    // ── CHANGE PASSWORD ───────────────────────────────────────────────────────
+
+    @GetMapping("/change-password")
+    public String changePasswordPage() {
+        return "student/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
+                                 @RequestParam String confirmPassword,
+                                 @AuthenticationPrincipal UserDetails userDetails,
+                                 RedirectAttributes ra) {
+        if (!newPassword.equals(confirmPassword)) {
+            ra.addFlashAttribute("error", "New password and confirm password do not match.");
+            return "redirect:/student/change-password";
+        }
+
+        if (newPassword.length() < 6) {
+            ra.addFlashAttribute("error", "New password must be at least 6 characters.");
+            return "redirect:/student/change-password";
+        }
+
+        boolean success = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
+
+        if (!success) {
+            ra.addFlashAttribute("error", "Current password is incorrect.");
+            return "redirect:/student/change-password";
+        }
+
+        activityLogService.log(currentUser(userDetails), "Student changed their own password.");
+        ra.addFlashAttribute("success", "Password changed successfully!");
+        return "redirect:/student/change-password";
     }
 }

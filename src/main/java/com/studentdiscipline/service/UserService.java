@@ -30,7 +30,6 @@ public class UserService {
     public Optional<User> getUserById(Long id) { return userRepository.findById(id); }
     public Optional<User> getUserByUsername(String username) { return userRepository.findByUsername(username); }
 
-    // Used by AdminController — searches by username (login name)
     public Optional<User> findByEmail(String email) {
         return userRepository.findByUsername(email);
     }
@@ -45,11 +44,25 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    // ── Change password (validates current password first) ────────────────────
+    public boolean changePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        // Check current password matches
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return false; // current password wrong
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        return true;
+    }
+
     // ── Update username ───────────────────────────────────────────────────────
     public User updateUsername(Long id, String newUsername) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-        // Check if new username is taken by someone else
         Optional<User> existing = userRepository.findByUsername(newUsername);
         if (existing.isPresent() && !existing.get().getId().equals(id))
             throw new RuntimeException("Username already taken: " + newUsername);

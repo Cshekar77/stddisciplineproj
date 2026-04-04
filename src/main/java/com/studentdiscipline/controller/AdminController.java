@@ -167,6 +167,43 @@ public class AdminController {
         return "redirect:/admin/credentials";
     }
 
+    // ── CHANGE PASSWORD ───────────────────────────────────────────────────────
+
+    @GetMapping("/change-password")
+    public String changePasswordPage() {
+        return "admin/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
+                                 @RequestParam String confirmPassword,
+                                 @AuthenticationPrincipal UserDetails userDetails,
+                                 RedirectAttributes ra) {
+        // Check new password and confirm match
+        if (!newPassword.equals(confirmPassword)) {
+            ra.addFlashAttribute("error", "New password and confirm password do not match.");
+            return "redirect:/admin/change-password";
+        }
+
+        // Check minimum length
+        if (newPassword.length() < 6) {
+            ra.addFlashAttribute("error", "New password must be at least 6 characters.");
+            return "redirect:/admin/change-password";
+        }
+
+        boolean success = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
+
+        if (!success) {
+            ra.addFlashAttribute("error", "Current password is incorrect.");
+            return "redirect:/admin/change-password";
+        }
+
+        activityLogService.log(currentUser(userDetails), "Admin changed their own password.");
+        ra.addFlashAttribute("success", "Password changed successfully!");
+        return "redirect:/admin/change-password";
+    }
+
     // ── TEACHERS ──────────────────────────────────────────────────────────────
 
     @GetMapping("/teachers")
@@ -263,7 +300,6 @@ public class AdminController {
         return "redirect:/admin/students";
     }
 
-    // ── NEW: Manual discipline status update ──────────────────────────────────
     @PostMapping("/students/{id}/discipline-status")
     public String updateDisciplineStatus(@PathVariable Long id,
                                          @RequestParam String disciplineStatus,
