@@ -56,7 +56,7 @@ public class CaseService {
 
     public CaseNote addCaseNote(Long caseId, CaseNote note) {
         Case existingCase = getCaseById(caseId);
-        note.setCase(existingCase);
+        note.setDisciplineCase(existingCase);   // ✅ FIXED HERE
         return caseNoteRepository.save(note);
     }
 
