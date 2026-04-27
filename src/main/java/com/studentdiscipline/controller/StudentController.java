@@ -97,11 +97,12 @@ public class StudentController {
 
     @PostMapping("/feedback/submit")
     public String submitFeedback(@RequestParam String message,
+                                 @RequestParam String category,
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  RedirectAttributes ra) {
         try {
             User user = currentUser(userDetails);
-            feedbackService.submitFeedback(message, user);
+            feedbackService.submitFeedback(message, category, user);
             ra.addFlashAttribute("success", "Feedback submitted successfully.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());

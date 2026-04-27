@@ -24,16 +24,17 @@ public class FeedbackService {
     /**
      * Submit new feedback from a user (teacher or student).
      */
-    public Feedback submitFeedback(String content, User submittedBy) {
+    public Feedback submitFeedback(String content, String category, User submittedBy) {
         Feedback feedback = new Feedback();
         feedback.setContent(content);
+        feedback.setCategory(category);
         feedback.setSubmittedBy(submittedBy);
         Feedback saved = feedbackRepository.save(feedback);
 
         activityLogService.log(
             submittedBy,
             submittedBy.getFirstName() + " " + submittedBy.getLastName()
-                + " submitted feedback."
+                + " submitted feedback (Category: " + category + ")"
         );
 
         return saved;
