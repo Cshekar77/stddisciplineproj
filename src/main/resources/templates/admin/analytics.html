@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -229,92 +229,96 @@
   applyChartTheme();
 
   // ── Build charts ───────────────────────────────────────────────────────────
-  const chartLine = new Chart(document.getElementById('incidentsTrend'), {
-    type: 'line',
-    data: {
-      labels: monthLabels,
-      datasets: [{
-        label: 'Incidents',
-        data: incidentsPerMonth,
-        borderColor: '#4f7fff',
-        backgroundColor: 'rgba(79,127,255,0.08)',
-        borderWidth: 2,
-        pointBackgroundColor: '#4f7fff',
-        pointRadius: 4,
-        fill: true,
-        tension: 0.4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { color: gridColor() } },
-        y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1 } }
-      }
-    }
-  });
+  let chartLine, chartDoughnut, chartSanctions, chartGrade;
 
-  const chartDoughnut = new Chart(document.getElementById('incidentsByType'), {
-    type: 'doughnut',
-    data: {
-      labels: incidentTypeLabels,
-      datasets: [{
-        data: incidentTypeCounts,
-        backgroundColor: ['#ff6b6b','#f7c948','#4f7fff','#43d9a2','#a78bfa','#fb923c','#34d399'],
-        borderColor: borderColor(),
-        borderWidth: 3
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { position: 'right', labels: { padding: 12, font: { size: 11 }, color: textColor() } } },
-      cutout: '65%'
-    }
-  });
-
-  const chartSanctions = new Chart(document.getElementById('sanctionsByType'), {
-    type: 'bar',
-    data: {
-      labels: sanctionTypeLabels,
-      datasets: [{
-        label: 'Count',
-        data: sanctionTypeCounts,
-        backgroundColor: ['rgba(247,201,72,0.6)','rgba(255,107,107,0.6)','rgba(255,68,68,0.6)','rgba(200,0,0,0.6)','rgba(79,127,255,0.6)','rgba(67,217,162,0.6)'],
-        borderRadius: 6, borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor() } },
-        y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1, color: textColor() } }
+  function initCharts() {
+    chartLine = new Chart(document.getElementById('incidentsTrend'), {
+      type: 'line',
+      data: {
+        labels: monthLabels,
+        datasets: [{
+          label: 'Incidents',
+          data: incidentsPerMonth,
+          borderColor: '#4f7fff',
+          backgroundColor: 'rgba(79,127,255,0.08)',
+          borderWidth: 2,
+          pointBackgroundColor: '#4f7fff',
+          pointRadius: 4,
+          fill: true,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor() } },
+          y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1 } }
+        }
       }
-    }
-  });
+    });
 
-  const chartGrade = new Chart(document.getElementById('byGrade'), {
-    type: 'bar',
-    data: {
-      labels: gradeLevelLabels,
-      datasets: [{
-        label: 'Incidents',
-        data: gradeIncidentCounts,
-        backgroundColor: 'rgba(67,217,162,0.5)',
-        borderColor: '#43d9a2',
-        borderWidth: 1, borderRadius: 6, borderSkipped: false
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor() } },
-        y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1, color: textColor() } }
+    chartDoughnut = new Chart(document.getElementById('incidentsByType'), {
+      type: 'doughnut',
+      data: {
+        labels: incidentTypeLabels,
+        datasets: [{
+          data: incidentTypeCounts,
+          backgroundColor: ['#ff6b6b','#f7c948','#4f7fff','#43d9a2','#a78bfa','#fb923c','#34d399'],
+          borderColor: borderColor(),
+          borderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { position: 'right', labels: { padding: 12, font: { size: 11 }, color: textColor() } } },
+        cutout: '65%'
       }
-    }
-  });
+    });
+
+    chartSanctions = new Chart(document.getElementById('sanctionsByType'), {
+      type: 'bar',
+      data: {
+        labels: sanctionTypeLabels,
+        datasets: [{
+          label: 'Count',
+          data: sanctionTypeCounts,
+          backgroundColor: ['rgba(247,201,72,0.6)','rgba(255,107,107,0.6)','rgba(255,68,68,0.6)','rgba(200,0,0,0.6)','rgba(79,127,255,0.6)','rgba(67,217,162,0.6)'],
+          borderRadius: 6, borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: textColor() } },
+          y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1, color: textColor() } }
+        }
+      }
+    });
+
+    chartGrade = new Chart(document.getElementById('byGrade'), {
+      type: 'bar',
+      data: {
+        labels: gradeLevelLabels,
+        datasets: [{
+          label: 'Incidents',
+          data: gradeIncidentCounts,
+          backgroundColor: 'rgba(67,217,162,0.5)',
+          borderColor: '#43d9a2',
+          borderWidth: 1, borderRadius: 6, borderSkipped: false
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: textColor() } },
+          y: { grid: { color: gridColor() }, beginAtZero: true, ticks: { stepSize: 1, color: textColor() } }
+        }
+      }
+    });
+  }
 
   // ── Update charts when theme changes ───────────────────────────────────────
   function updateChartsTheme() {
@@ -323,22 +327,25 @@
     const tc = textColor();
     const bc = borderColor();
 
-    // Line chart grids
-    chartLine.options.scales.x.grid.color = gc;
-    chartLine.options.scales.y.grid.color = gc;
-    chartLine.update();
+    if (chartLine) {
+      chartLine.options.scales.x.grid.color = gc;
+      chartLine.options.scales.y.grid.color = gc;
+      chartLine.update();
+    }
 
-    // Doughnut border + legend
-    chartDoughnut.data.datasets[0].borderColor = bc;
-    chartDoughnut.options.plugins.legend.labels.color = tc;
-    chartDoughnut.update();
+    if (chartDoughnut) {
+      chartDoughnut.data.datasets[0].borderColor = bc;
+      chartDoughnut.options.plugins.legend.labels.color = tc;
+      chartDoughnut.update();
+    }
 
-    // Bar charts
     [chartSanctions, chartGrade].forEach(c => {
-      c.options.scales.x.ticks.color = tc;
-      c.options.scales.y.grid.color = gc;
-      c.options.scales.y.ticks.color = tc;
-      c.update();
+      if (c) {
+        c.options.scales.x.ticks.color = tc;
+        c.options.scales.y.grid.color = gc;
+        c.options.scales.y.ticks.color = tc;
+        c.update();
+      }
     });
   }
 </script>
@@ -347,7 +354,8 @@
   // ── Theme ──────────────────────────────────────────────────────────────────
   const html = document.documentElement;
   const themeIcon = document.getElementById('themeIcon');
-  const saved = localStorage.getItem('sds-theme') || 'dark';
+  // Load saved theme from localStorage, default to 'light'
+  const saved = localStorage.getItem('sds-theme') || 'light';
   html.setAttribute('data-theme', saved);
   themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
 
@@ -356,8 +364,13 @@
     html.setAttribute('data-theme', next);
     localStorage.setItem('sds-theme', next);
     themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
-    updateChartsTheme(); // re-theme all charts instantly
+    updateChartsTheme();
   }
+
+  // Initialize charts after page load
+  document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+  });
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
   const sidebar = document.getElementById('sidebar');

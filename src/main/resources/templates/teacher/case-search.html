@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -58,13 +58,14 @@
   .badge-warning{background:rgba(245,158,11,.15);color:#f59e0b}
   .badge-success{background:rgba(16,185,129,.15);color:#10b981}
   .badge-info{background:rgba(79,142,247,.15);color:var(--accent)}
-  .action-btn{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:.15s}
+  .action-btn{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:.15s;text-decoration:none;display:inline-block}
   .action-btn:hover{border-color:var(--accent);color:var(--accent)}
   .pagination{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-top:1px solid var(--border)}
   .page-info{font-size:13px;color:var(--muted)}
   .page-btns{display:flex;gap:6px}
   .page-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-family:inherit;transition:.15s}
   .page-btn.active,.page-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .empty-state{text-align:center;padding:48px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -72,32 +73,32 @@
   <div class="logo">Discipline<span>Pro</span></div>
   <div class="nav-section">
     <div class="nav-label">Overview</div>
-    <a href="dashboard.html" class="nav-item">
+    <a href="/teacher/dashboard" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
     </a>
   </div>
   <div class="nav-section">
     <div class="nav-label">Cases</div>
-    <a href="case-search.html" class="nav-item active">
+    <a href="/teacher/case-search" class="nav-item active">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search Cases
     </a>
-    <a href="case-timeline.html" class="nav-item">
+    <a href="/teacher/case-timeline" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Timeline
     </a>
-    <a href="case-reports.html" class="nav-item">
+    <a href="/teacher/case-reports" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2z"/></svg>Reports
     </a>
   </div>
   <div class="nav-section">
     <div class="nav-label">Account</div>
-    <a href="profile.html" class="nav-item">
+    <a href="/teacher/change-password" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
     </a>
   </div>
   <div class="sidebar-footer">
     <div class="user-info">
-      <div class="avatar">JD</div>
-      <div><div class="user-name">Jane Doe</div><div class="user-role">Teacher</div></div>
+      <div class="avatar" th:text="${#strings.substring(teacherName, 0, 1)}">T</div>
+      <div><div class="user-name" th:text="${teacherName}">Teacher</div><div class="user-role">Teacher</div></div>
     </div>
   </div>
 </aside>
@@ -106,53 +107,66 @@
     <div class="page-title">Case Search</div>
     <div class="page-sub">Search and filter all discipline cases</div>
   </div>
-  <div class="search-box">
-    <div class="search-row">
-      <div class="search-input-wrap">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input class="search-input" type="text" placeholder="Search by student name, case ID, or description..."/>
+
+  <!-- Search Form - Submits to backend -->
+  <form method="get" action="/teacher/case-search">
+    <div class="search-box">
+      <div class="search-row">
+        <div class="search-input-wrap">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="search-input" type="text" name="search" placeholder="Search by student name, case ID..." th:value="${search}"/>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a href="/teacher/case-search" class="btn btn-ghost">Reset</a>
       </div>
-      <button class="btn btn-primary">Search</button>
-      <button class="btn btn-ghost">Reset</button>
+      <div class="filters">
+        <select name="status">
+          <option value="">All Statuses</option>
+          <option value="OPEN" th:selected="${statusFilter == 'OPEN'}">Open</option>
+          <option value="UNDER_REVIEW" th:selected="${statusFilter == 'UNDER_REVIEW'}">Under Review</option>
+          <option value="RESOLVED" th:selected="${statusFilter == 'RESOLVED'}">Resolved</option>
+          <option value="CLOSED" th:selected="${statusFilter == 'CLOSED'}">Closed</option>
+        </select>
+      </div>
     </div>
-    <div class="filters">
-      <select><option>All Statuses</option><option>Open</option><option>Under Review</option><option>Resolved</option><option>Closed</option></select>
-      <select><option>All Severity</option><option>Minor</option><option>Moderate</option><option>Major</option><option>Critical</option></select>
-      <select><option>All Types</option><option>Behavioral</option><option>Academic Dishonesty</option><option>Bullying</option><option>Attendance</option></select>
-      <input type="date" placeholder="From"/>
-      <input type="date" placeholder="To"/>
-    </div>
-  </div>
+  </form>
+
   <div class="results-header">
-    <div class="results-count">Showing <strong>24</strong> results</div>
-    <select><option>Newest First</option><option>Oldest First</option><option>Severity</option></select>
+    <div class="results-count">Showing <strong th:text="${#lists.size(cases)}">0</strong> results</div>
   </div>
+
   <div class="table-wrap">
     <table>
       <thead>
-        <tr><th>Case ID</th><th>Student</th><th>Type</th><th>Severity</th><th>Status</th><th>Date</th><th>Action</th></tr>
+        <tr>
+          <th>Case ID</th>
+          <th>Student</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Created Date</th>
+          <th>Action</th>
+        </tr>
       </thead>
       <tbody>
-        <tr><td>#C-1042</td><td>Marcus Green</td><td>Behavioral</td><td><span class="badge badge-danger">Critical</span></td><td><span class="badge badge-warning">Under Review</span></td><td>Apr 25, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1039</td><td>Sofia Ramirez</td><td>Academic Dishonesty</td><td><span class="badge badge-warning">Major</span></td><td><span class="badge badge-info">Open</span></td><td>Apr 22, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1035</td><td>James Park</td><td>Attendance</td><td><span class="badge badge-info">Minor</span></td><td><span class="badge badge-success">Resolved</span></td><td>Apr 18, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1030</td><td>Aisha Patel</td><td>Bullying</td><td><span class="badge badge-danger">Critical</span></td><td><span class="badge badge-success">Resolved</span></td><td>Apr 15, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1027</td><td>Liam Torres</td><td>Behavioral</td><td><span class="badge badge-warning">Moderate</span></td><td><span class="badge badge-warning">Under Review</span></td><td>Apr 12, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1021</td><td>Priya Nair</td><td>Attendance</td><td><span class="badge badge-info">Minor</span></td><td><span class="badge badge-success">Closed</span></td><td>Apr 8, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1018</td><td>David Kim</td><td>Academic Dishonesty</td><td><span class="badge badge-warning">Major</span></td><td><span class="badge badge-info">Open</span></td><td>Apr 5, 2026</td><td><button class="action-btn">View</button></td></tr>
-        <tr><td>#C-1014</td><td>Zara Chen</td><td>Behavioral</td><td><span class="badge badge-warning">Moderate</span></td><td><span class="badge badge-success">Resolved</span></td><td>Apr 1, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr th:each="case : ${cases}">
+          <td th:text="${case.caseNumber}">#C-000</td>
+          <td th:text="${case.student != null ? case.student.fullName : 'N/A'}">Student Name</td>
+          <td th:text="${case.title}">Case Title</td>
+          <td>
+            <span class="badge" 
+                  th:classappend="${case.status.name() == 'OPEN'} ? 'badge-info' : 
+                                 ${case.status.name() == 'UNDER_REVIEW'} ? 'badge-warning' : 
+                                 ${case.status.name() == 'RESOLVED'} ? 'badge-success' : 'badge-danger'"
+                  th:text="${case.status}">OPEN</span>
+          </td>
+          <td th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</td>
+          <td><a th:href="@{/teacher/case-profile(id=${case.id})}" class="action-btn">View</a></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(cases)}">
+          <td colspan="6" class="empty-state">No cases found</td>
+        </tr>
       </tbody>
     </table>
-    <div class="pagination">
-      <div class="page-info">Page 1 of 3</div>
-      <div class="page-btns">
-        <button class="page-btn">‹</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <button class="page-btn">›</button>
-      </div>
-    </div>
   </div>
 </main>
 </body>

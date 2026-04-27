@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -27,22 +27,25 @@
   .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
   .page-title{font-size:24px;font-weight:700;margin-bottom:4px}
   .page-sub{color:var(--muted);font-size:14px}
-  .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;font-family:inherit}
+  .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;font-family:inherit;text-decoration:none;display:inline-block}
   .btn-primary{background:var(--accent);color:#fff}
   .btn-primary:hover{background:#3b7de8}
-  .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  select,input[type=date]{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none}
-  select:focus,input[type=date]:focus{border-color:var(--accent)}
-  .filter-label{font-size:13px;color:var(--muted);font-weight:500}
+  .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
+  .btn-secondary:hover{background:var(--card)}
+  .case-info-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  .case-details{display:flex;gap:24px;flex-wrap:wrap}
+  .case-detail-item{font-size:13px}
+  .case-detail-label{color:var(--muted);margin-right:6px}
+  .case-detail-value{font-weight:600}
   .layout{display:grid;grid-template-columns:1fr 300px;gap:24px}
   .timeline{position:relative}
   .month-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:12px 0;margin-bottom:4px}
   .timeline-item{display:flex;gap:16px;margin-bottom:4px;position:relative}
   .timeline-line{display:flex;flex-direction:column;align-items:center;width:40px;flex-shrink:0}
   .timeline-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);flex-shrink:0;margin-top:4px;z-index:1}
-  .timeline-dot.danger{border-color:var(--danger)}
-  .timeline-dot.warning{border-color:var(--warning)}
-  .timeline-dot.success{border-color:var(--success)}
+  .timeline-dot.note{border-color:var(--accent)}
+  .timeline-dot.status{border-color:var(--warning)}
+  .timeline-dot.create{border-color:var(--success)}
   .timeline-connector{width:2px;flex:1;background:var(--border);margin-top:4px;min-height:24px}
   .timeline-content{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:.15s}
   .timeline-content:hover{border-color:rgba(79,142,247,.4)}
@@ -50,25 +53,20 @@
   .tc-title{font-size:14px;font-weight:600}
   .tc-time{font-size:12px;color:var(--muted)}
   .tc-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px}
-  .tc-footer{display:flex;gap:8px;align-items:center}
+  .tc-footer{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
   .badge-danger{background:rgba(239,68,68,.15);color:#ef4444}
   .badge-warning{background:rgba(245,158,11,.15);color:#f59e0b}
   .badge-success{background:rgba(16,185,129,.15);color:#10b981}
   .badge-info{background:rgba(79,142,247,.15);color:var(--accent)}
   .tc-author{font-size:12px;color:var(--muted)}
-  /* Side panel */
   .side-panel .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
   .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
   .stat-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid var(--border)}
   .stat-row:last-child{border-bottom:none}
   .stat-label{color:var(--muted)}
   .stat-val{font-weight:600}
-  .activity-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
-  .activity-item:last-child{border-bottom:none}
-  .activity-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0}
-  .activity-text{color:var(--muted);line-height:1.5}
-  .activity-text strong{color:var(--text)}
+  .empty-state{text-align:center;padding:48px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -76,115 +74,107 @@
   <div class="logo">Discipline<span>Pro</span></div>
   <div class="nav-section">
     <div class="nav-label">Overview</div>
-    <a href="dashboard.html" class="nav-item">
+    <a href="/teacher/dashboard" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
     </a>
   </div>
   <div class="nav-section">
     <div class="nav-label">Cases</div>
-    <a href="case-search.html" class="nav-item">
+    <a href="/teacher/case-search" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search Cases
     </a>
-    <a href="case-timeline.html" class="nav-item active">
+    <a href="/teacher/case-timeline" class="nav-item active">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Timeline
     </a>
-    <a href="case-reports.html" class="nav-item">
+    <a href="/teacher/case-reports" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2z"/></svg>Reports
     </a>
   </div>
   <div class="nav-section">
     <div class="nav-label">Account</div>
-    <a href="profile.html" class="nav-item">
+    <a href="/teacher/change-password" class="nav-item">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
     </a>
   </div>
   <div class="sidebar-footer">
     <div class="user-info">
-      <div class="avatar-sm">JD</div>
-      <div><div class="user-name">Jane Doe</div><div class="user-role">Teacher</div></div>
+      <div class="avatar-sm" th:text="${#strings.substring(teacherName, 0, 1)}">T</div>
+      <div><div class="user-name" th:text="${teacherName}">Teacher</div><div class="user-role">Teacher</div></div>
     </div>
   </div>
 </aside>
 <main class="main">
   <div class="page-header">
-    <div><div class="page-title">Case Timeline</div><div class="page-sub">Chronological view of all case activities</div></div>
-    <button class="btn btn-primary">+ Log Activity</button>
+    <div>
+      <div class="page-title">Case Timeline</div>
+      <div class="page-sub" th:text="'Case #' + ${case.caseNumber} + ' - ' + ${case.title}">Case Timeline</div>
+    </div>
+    <a href="/teacher/case-profile?id=${case.id}" class="btn btn-secondary">← Back to Case</a>
   </div>
-  <div class="filter-bar">
-    <span class="filter-label">Filter:</span>
-    <select><option>All Cases</option><option>#C-1042</option><option>#C-1039</option></select>
-    <select><option>All Types</option><option>Status Change</option><option>Note Added</option><option>Document</option><option>Meeting</option></select>
-    <input type="date"/>
-    <input type="date"/>
+
+  <!-- Case Information Bar -->
+  <div class="case-info-bar" th:if="${case != null}">
+    <div class="case-details">
+      <div class="case-detail-item"><span class="case-detail-label">Case Number:</span><span class="case-detail-value" th:text="${case.caseNumber}">—</span></div>
+      <div class="case-detail-item"><span class="case-detail-label">Student:</span><span class="case-detail-value" th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</span></div>
+      <div class="case-detail-item"><span class="case-detail-label">Status:</span><span class="case-detail-value" th:text="${case.status}">—</span></div>
+      <div class="case-detail-item"><span class="case-detail-label">Created:</span><span class="case-detail-value" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span></div>
+    </div>
   </div>
+
   <div class="layout">
     <div class="timeline">
-      <div class="month-label">April 2026</div>
-      <div class="timeline-item">
-        <div class="timeline-line"><div class="timeline-dot danger"></div><div class="timeline-connector"></div></div>
-        <div class="timeline-content">
-          <div class="tc-header"><div class="tc-title">Case #C-1042 — Incident Reported</div><div class="tc-time">Apr 25 · 10:55 AM</div></div>
-          <div class="tc-desc">Physical altercation reported in Building B corridor involving Marcus Green. Three witnesses present. Security footage retrieved.</div>
-          <div class="tc-footer"><span class="badge badge-danger">Critical</span><span class="tc-author">by Jane Doe</span></div>
-        </div>
+      <div th:if="${#lists.isEmpty(notes)}" class="empty-state">
+        <div>📭</div>
+        <div>No timeline events yet</div>
+        <div style="font-size:12px;margin-top:8px">Add case notes to see them here</div>
       </div>
-      <div class="timeline-item">
-        <div class="timeline-line"><div class="timeline-dot warning"></div><div class="timeline-connector"></div></div>
-        <div class="timeline-content">
-          <div class="tc-header"><div class="tc-title">Case #C-1042 — Parent Notified</div><div class="tc-time">Apr 25 · 2:30 PM</div></div>
-          <div class="tc-desc">Phone call made to Robert Green (guardian). Informed about the incident and requested meeting. Meeting scheduled for Apr 27.</div>
-          <div class="tc-footer"><span class="badge badge-warning">Under Review</span><span class="tc-author">by Principal Adams</span></div>
-        </div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-line"><div class="timeline-dot"></div><div class="timeline-connector"></div></div>
-        <div class="timeline-content">
-          <div class="tc-header"><div class="tc-title">Case #C-1039 — New Case Filed</div><div class="tc-time">Apr 22 · 9:10 AM</div></div>
-          <div class="tc-desc">Academic dishonesty case opened for Sofia Ramirez. Copied assignment detected during mid-term review. Documentation submitted.</div>
-          <div class="tc-footer"><span class="badge badge-info">Open</span><span class="tc-author">by Jane Doe</span></div>
-        </div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-line"><div class="timeline-dot success"></div><div class="timeline-connector"></div></div>
-        <div class="timeline-content">
-          <div class="tc-header"><div class="tc-title">Case #C-1035 — Resolved</div><div class="tc-time">Apr 20 · 11:00 AM</div></div>
-          <div class="tc-desc">Attendance case for James Park resolved. Student's guardian confirmed medical documentation. Absences excused and case closed.</div>
-          <div class="tc-footer"><span class="badge badge-success">Resolved</span><span class="tc-author">by Jane Doe</span></div>
-        </div>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-line"><div class="timeline-dot warning"></div><div class="timeline-connector"></div></div>
-        <div class="timeline-content">
-          <div class="tc-header"><div class="tc-title">Case #C-1030 — Review Meeting Held</div><div class="tc-time">Apr 18 · 1:15 PM</div></div>
-          <div class="tc-desc">Counselor meeting with Aisha Patel and parents. Anti-bullying agreement signed. Student placed on behavioral monitoring for 30 days.</div>
-          <div class="tc-footer"><span class="badge badge-warning">Under Review</span><span class="tc-author">by Counselor Lee</span></div>
-        </div>
-      </div>
-      <div class="month-label">March 2026</div>
-      <div class="timeline-item">
-        <div class="timeline-line"><div class="timeline-dot success"></div><div class="timeline-connector"></div></div>
-        <div class="timeline-content">
-          <div class="tc-header"><div class="tc-title">Case #C-1027 — Status Updated</div><div class="tc-time">Mar 30 · 3:45 PM</div></div>
-          <div class="tc-desc">Liam Torres case updated from Open to Under Review. Awaiting parent response to scheduled meeting request.</div>
-          <div class="tc-footer"><span class="badge badge-success">Resolved</span><span class="tc-author">by Jane Doe</span></div>
+      
+      <!-- Timeline Events from Case Notes -->
+      <div th:each="note : ${notes}">
+        <div class="timeline-item">
+          <div class="timeline-line">
+            <div class="timeline-dot note"></div>
+            <div class="timeline-connector" th:if="${!noteStat.last}"></div>
+          </div>
+          <div class="timeline-content">
+            <div class="tc-header">
+              <div class="tc-title">Note Added</div>
+              <div class="tc-time" th:text="${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</div>
+            </div>
+            <div class="tc-desc" th:text="${note.content}">Note content here...</div>
+            <div class="tc-footer">
+              <span class="badge badge-info">Case Note</span>
+              <span class="tc-author" th:text="'by ' + ${note.createdBy != null ? note.createdBy.firstName + ' ' + note.createdBy.lastName : 'System'}">by User</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
     <div class="side-panel">
       <div class="card">
-        <div class="card-title">Summary</div>
-        <div class="stat-row"><span class="stat-label">Total Activities</span><span class="stat-val">42</span></div>
-        <div class="stat-row"><span class="stat-label">This Month</span><span class="stat-val">18</span></div>
-        <div class="stat-row"><span class="stat-label">My Cases</span><span class="stat-val">9</span></div>
-        <div class="stat-row"><span class="stat-label">Pending Follow-up</span><span class="stat-val" style="color:var(--warning)">3</span></div>
+        <div class="card-title">Case Summary</div>
+        <div class="stat-row"><span class="stat-label">Case ID</span><span class="stat-val" th:text="${case.caseNumber}">—</span></div>
+        <div class="stat-row"><span class="stat-label">Student</span><span class="stat-val" th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</span></div>
+        <div class="stat-row"><span class="stat-label">Status</span><span class="stat-val" th:text="${case.status}">—</span></div>
+        <div class="stat-row"><span class="stat-label">Created</span><span class="stat-val" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span></div>
+        <div class="stat-row"><span class="stat-label">Last Updated</span><span class="stat-val" th:text="${#temporals.format(case.updatedDate, 'MMM dd, yyyy')}">—</span></div>
       </div>
+      
       <div class="card">
-        <div class="card-title">Recent Activity</div>
-        <div class="activity-item"><div class="activity-dot"></div><div class="activity-text"><strong>Marcus Green</strong> case escalated to Critical</div></div>
-        <div class="activity-item"><div class="activity-dot" style="background:var(--warning)"></div><div class="activity-text">Meeting scheduled for <strong>Apr 27</strong></div></div>
-        <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-text"><strong>James Park</strong> case resolved</div></div>
-        <div class="activity-item"><div class="activity-dot"></div><div class="activity-text">New case filed for <strong>Sofia Ramirez</strong></div></div>
-        <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-text"><strong>Aisha Patel</strong> agreement signed</div></div>
+        <div class="card-title">Timeline Stats</div>
+        <div class="stat-row"><span class="stat-label">Total Events</span><span class="stat-val" th:text="${#lists.size(notes)}">0</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Quick Actions</div>
+        <a th:href="@{/teacher/case-profile(id=${case.id})}" style="display:block;margin-bottom:10px;text-decoration:none">
+          <button class="btn btn-primary" style="width:100%">View Full Case</button>
+        </a>
+        <a th:href="@{/teacher/case-search}" style="display:block;text-decoration:none">
+          <button class="btn btn-secondary" style="width:100%">Back to Search</button>
+        </a>
       </div>
     </div>
   </div>
