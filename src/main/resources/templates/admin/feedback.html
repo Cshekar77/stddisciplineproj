@@ -151,15 +151,15 @@
       <div class="feedback-card" th:each="fb : ${feedbackList}">
         <div class="fc-header">
           <div class="fc-author">
-            <div class="fc-avatar" th:text="${#strings.substring(fb.submittedBy.firstName, 0, 1)}">?</div>
+            <div class="fc-avatar" th:text="${fb.submittedBy != null ? #strings.substring(fb.submittedBy.firstName, 0, 1) : '?'}">?</div>
             <div>
-              <div class="fc-name" th:text="${fb.submittedBy.firstName + ' ' + fb.submittedBy.lastName}">Name</div>
-              <div class="fc-role-text" th:text="${fb.submittedBy.role}">Role</div>
+              <div class="fc-name" th:text="${fb.submittedBy != null ? fb.submittedBy.firstName + ' ' + fb.submittedBy.lastName : 'Anonymous'}">Name</div>
+              <div class="fc-role-text" th:text="${fb.submittedBy != null ? fb.submittedBy.role : 'UNKNOWN'}">Role</div>
             </div>
           </div>
           <span class="pill"
-            th:classappend="${fb.submittedBy.role.name() == 'TEACHER'} ? 'pill-teacher' : 'pill-student'"
-            th:text="${fb.submittedBy.role}">—</span>
+            th:classappend="${fb.submittedBy != null && fb.submittedBy.role.name() == 'TEACHER'} ? 'pill-teacher' : 'pill-student'"
+            th:text="${fb.submittedBy != null ? fb.submittedBy.role : 'UNKNOWN'}">—</span>
         </div>
         <div class="fc-body" th:text="${fb.content}">Feedback content here…</div>
         <div class="fc-footer">

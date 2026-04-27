@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -138,7 +138,17 @@
   </div>
 </div>
 
-<!-- ✅ External JS file — Thymeleaf never processes .js files, so no parsing conflicts ever -->
 <script src="/js/login.js"></script>
+<!-- Theme fallback to ensure sync -->
+<script>
+  (function() {
+    const saved = localStorage.getItem('sds-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeBtn');
+    if (btn) {
+      btn.textContent = saved === 'dark' ? '🌙' : '☀️';
+    }
+  })();
+</script>
 </body>
 </html>
