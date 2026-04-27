@@ -1,5 +1,6 @@
 package com.studentdiscipline.controller;
 
+import com.studentdiscipline.enums.CaseStatus;
 import com.studentdiscipline.enums.DisciplineStatus;
 import com.studentdiscipline.enums.IncidentStatus;
 import com.studentdiscipline.enums.IncidentType;
@@ -16,6 +17,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/teacher")
@@ -28,6 +31,7 @@ public class TeacherController {
     @Autowired private FeedbackService feedbackService;
     @Autowired private ActivityLogService activityLogService;
     @Autowired private UserService userService;
+    @Autowired private CaseService caseService; // ✅ ADDED
 
     private User currentUser(UserDetails userDetails) {
         return userService.findByEmail(userDetails.getUsername())
@@ -51,7 +55,7 @@ public class TeacherController {
             model.addAttribute("openIncidents", incidentService.getIncidentsByTeacher(teacher)
                     .stream().filter(i -> i.getStatus() == IncidentStatus.OPEN).count());
             model.addAttribute("recentIncidents", incidentService.getIncidentsByTeacher(teacher)
-                    .stream().limit(5).collect(java.util.stream.Collectors.toList()));
+                    .stream().limit(5).collect(Collectors.toList()));
         } catch (Exception e) {
             model.addAttribute("teacherName", "Teacher");
             model.addAttribute("totalStudents", 0);
@@ -274,21 +278,71 @@ public class TeacherController {
             ra.addFlashAttribute("error", "New password and confirm password do not match.");
             return "redirect:/teacher/change-password";
         }
-
         if (newPassword.length() < 6) {
             ra.addFlashAttribute("error", "New password must be at least 6 characters.");
             return "redirect:/teacher/change-password";
         }
-
         boolean success = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
-
         if (!success) {
             ra.addFlashAttribute("error", "Current password is incorrect.");
             return "redirect:/teacher/change-password";
         }
-
         activityLogService.log(currentUser(userDetails), "Teacher changed their own password.");
         ra.addFlashAttribute("success", "Password changed successfully!");
         return "redirect:/teacher/change-password";
+    }
+
+    // ── CASE MANAGEMENT ───────────────────────────────────────────────────────  ✅ ADDED
+
+    @GetMapping("/case-search")
+    public String caseSearch(@RequestParam(required = false) String search,
+                             @RequestParam(required = false) String status, Model model) {
+        List<Case> cases = caseService.getAllCases();
+        if (status != null && !status.isBlank()) {
+            CaseStatus cs = CaseStatus.valueOf(status);
+            cases = cases.stream().filter(c -> c.getStatus() == cs).collect(Collectors.toList());
+        }
+        if (search != null && !search.isBlank()) {
+            String kw = search.toLowerCase();
+            cases = cases.stream()
+                    .filter(c -> c.getStudent() != null &&
+                            (c.getStudent().getFirstName() + " " + c.getStudent().getLastName()).toLowerCase().contains(kw)
+                            || c.getCaseNumber().toLowerCase().contains(kw))
+                    .collect(Collectors.toList());
+        }
+        model.addAttribute("cases", cases);
+        model.addAttribute("search", search);
+        model.addAttribute("statusFilter", status);
+        model.addAttribute("caseStatuses", CaseStatus.values());
+        return "teacher/case-search";
+    }
+
+    @GetMapping("/case-profile")
+    public String caseProfile(@RequestParam Long id, Model model) {
+        Case c = caseService.getCaseById(id);
+        model.addAttribute("case", c);
+        model.addAttribute("notes", caseService.getCaseNotes(id));
+        model.addAttribute("caseStatuses", CaseStatus.values());
+        return "teacher/case-profile";
+    }
+
+    @GetMapping("/case-timeline")
+    public String caseTimeline(@RequestParam Long id, Model model) {
+        Case c = caseService.getCaseById(id);
+        model.addAttribute("case", c);
+        model.addAttribute("notes", caseService.getCaseNotes(id));
+        return "teacher/case-timeline";
+    }
+
+    @GetMapping("/case-reports")
+    public String caseReports(Model model) {
+        model.addAttribute("totalCases", caseService.getAllCases().size());
+        model.addAttribute("openCases", caseService.getCasesByStatus(CaseStatus.OPEN).size());
+        model.addAttribute("resolvedCases", caseService.getCasesByStatus(CaseStatus.RESOLVED).size());
+        model.addAttribute("closedCases", caseService.getCasesByStatus(CaseStatus.CLOSED).size());
+        model.addAttribute("underReviewCases", caseService.getCasesByStatus(CaseStatus.UNDER_REVIEW).size());
+        model.addAttribute("appealPendingCases", caseService.getCasesByStatus(CaseStatus.APPEAL_PENDING).size());
+        model.addAttribute("allCases", caseService.getAllCases());
+        return "teacher/case-reports";
     }
 }
