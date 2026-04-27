@@ -44,13 +44,22 @@ public class TeacherController {
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
     }
 
+    // ✅ ADDED: Helper method to get student IDs for the current teacher
+    private List<Long> getTeacherStudentIds(Teacher teacher) {
+        return studentService.findByTeacherId(teacher.getId())
+                .stream()
+                .map(Student::getId)
+                .collect(Collectors.toList());
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Teacher teacher = currentTeacher(userDetails);
             model.addAttribute("teacher", teacher);
             model.addAttribute("teacherName", teacher.getFullName());
-            model.addAttribute("totalStudents", studentService.countAll());
+            // ✅ FIXED: Use countByTeacherId instead of countAll
+            model.addAttribute("totalStudents", studentService.countByTeacherId(teacher.getId()));
             model.addAttribute("myIncidents", incidentService.getIncidentsByTeacher(teacher).size());
             model.addAttribute("openIncidents", incidentService.getIncidentsByTeacher(teacher)
                     .stream().filter(i -> i.getStatus() == IncidentStatus.OPEN).count());
@@ -67,10 +76,23 @@ public class TeacherController {
     }
 
     @GetMapping("/students")
-    public String students(@RequestParam(required = false) String search, Model model) {
+    public String students(@RequestParam(required = false) String search, 
+                          @AuthenticationPrincipal UserDetails userDetails, Model model) {
         try {
-            model.addAttribute("students", search != null && !search.isBlank()
-                    ? studentService.search(search) : studentService.findAll());
+            Teacher teacher = currentTeacher(userDetails);
+            // ✅ FIXED: Only show students assigned to this teacher
+            List<Student> students = studentService.findByTeacherId(teacher.getId());
+            
+            if (search != null && !search.isBlank()) {
+                String kw = search.toLowerCase();
+                students = students.stream()
+                        .filter(s -> s.getFirstName().toLowerCase().contains(kw) ||
+                                    s.getLastName().toLowerCase().contains(kw) ||
+                                    s.getStudentId().toLowerCase().contains(kw))
+                        .collect(Collectors.toList());
+            }
+            
+            model.addAttribute("students", students);
             model.addAttribute("search", search);
             model.addAttribute("disciplineStatuses", DisciplineStatus.values());
         } catch (Exception e) {
@@ -88,8 +110,10 @@ public class TeacherController {
                              @RequestParam String password,
                              @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
-            studentService.createStudent(firstName, lastName, studentId,
-                    grade != null ? grade : "N/A", section != null ? section : "N/A", email, password);
+            Teacher teacher = currentTeacher(userDetails);
+            // ✅ FIXED: Use createStudentForTeacher to link student to teacher
+            studentService.createStudentForTeacher(firstName, lastName, studentId,
+                    grade != null ? grade : "N/A", section != null ? section : "N/A", email, password, teacher);
             activityLogService.log(currentUser(userDetails), "Teacher added student: " + firstName + " " + lastName);
             ra.addFlashAttribute("success", "Student added successfully.");
         } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
@@ -126,7 +150,8 @@ public class TeacherController {
         try {
             Teacher teacher = currentTeacher(userDetails);
             model.addAttribute("incidents", incidentService.getIncidentsByTeacher(teacher));
-            model.addAttribute("students", studentService.findAll());
+            // ✅ FIXED: Only show students assigned to this teacher in dropdown
+            model.addAttribute("students", studentService.findByTeacherId(teacher.getId()));
             model.addAttribute("incidentTypes", IncidentType.values());
         } catch (Exception e) {
             model.addAttribute("incidents", new ArrayList<>());
@@ -172,8 +197,16 @@ public class TeacherController {
     public String sanctions(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Teacher teacher = currentTeacher(userDetails);
-            model.addAttribute("sanctions", sanctionService.findAll());
-            model.addAttribute("students", studentService.findAll());
+            List<Long> studentIds = getTeacherStudentIds(teacher);
+            
+            // ✅ FIXED: Only show sanctions for students assigned to this teacher
+            List<Sanction> filteredSanctions = sanctionService.findAll().stream()
+                    .filter(s -> s.getStudent() != null && studentIds.contains(s.getStudent().getId()))
+                    .collect(Collectors.toList());
+            
+            model.addAttribute("sanctions", filteredSanctions);
+            // ✅ FIXED: Only show students assigned to this teacher in dropdown
+            model.addAttribute("students", studentService.findByTeacherId(teacher.getId()));
             model.addAttribute("incidents", incidentService.getIncidentsByTeacher(teacher));
             model.addAttribute("sanctionTypes", SanctionType.values());
         } catch (Exception e) {
@@ -296,24 +329,36 @@ public class TeacherController {
 
     @GetMapping("/case-search")
     public String caseSearch(@RequestParam(required = false) String search,
-                             @RequestParam(required = false) String status, Model model) {
-        List<Case> cases = caseService.getAllCases();
-        if (status != null && !status.isBlank()) {
-            CaseStatus cs = CaseStatus.valueOf(status);
-            cases = cases.stream().filter(c -> c.getStatus() == cs).collect(Collectors.toList());
-        }
-        if (search != null && !search.isBlank()) {
-            String kw = search.toLowerCase();
-            cases = cases.stream()
-                    .filter(c -> c.getStudent() != null &&
-                            (c.getStudent().getFirstName() + " " + c.getStudent().getLastName()).toLowerCase().contains(kw)
-                            || c.getCaseNumber().toLowerCase().contains(kw))
+                             @RequestParam(required = false) String status, 
+                             @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        try {
+            Teacher teacher = currentTeacher(userDetails);
+            List<Long> studentIds = getTeacherStudentIds(teacher);
+            
+            // ✅ FIXED: Only show cases for students assigned to this teacher
+            List<Case> cases = caseService.getAllCases().stream()
+                    .filter(c -> c.getStudent() != null && studentIds.contains(c.getStudent().getId()))
                     .collect(Collectors.toList());
+            
+            if (status != null && !status.isBlank()) {
+                CaseStatus cs = CaseStatus.valueOf(status);
+                cases = cases.stream().filter(c -> c.getStatus() == cs).collect(Collectors.toList());
+            }
+            if (search != null && !search.isBlank()) {
+                String kw = search.toLowerCase();
+                cases = cases.stream()
+                        .filter(c -> c.getStudent() != null &&
+                                (c.getStudent().getFirstName() + " " + c.getStudent().getLastName()).toLowerCase().contains(kw)
+                                || c.getCaseNumber().toLowerCase().contains(kw))
+                        .collect(Collectors.toList());
+            }
+            model.addAttribute("cases", cases);
+            model.addAttribute("search", search);
+            model.addAttribute("statusFilter", status);
+            model.addAttribute("caseStatuses", CaseStatus.values());
+        } catch (Exception e) {
+            model.addAttribute("cases", new ArrayList<>());
         }
-        model.addAttribute("cases", cases);
-        model.addAttribute("search", search);
-        model.addAttribute("statusFilter", status);
-        model.addAttribute("caseStatuses", CaseStatus.values());
         return "teacher/case-search";
     }
 
@@ -335,14 +380,27 @@ public class TeacherController {
     }
 
     @GetMapping("/case-reports")
-    public String caseReports(Model model) {
-        model.addAttribute("totalCases", caseService.getAllCases().size());
-        model.addAttribute("openCases", caseService.getCasesByStatus(CaseStatus.OPEN).size());
-        model.addAttribute("resolvedCases", caseService.getCasesByStatus(CaseStatus.RESOLVED).size());
-        model.addAttribute("closedCases", caseService.getCasesByStatus(CaseStatus.CLOSED).size());
-        model.addAttribute("underReviewCases", caseService.getCasesByStatus(CaseStatus.UNDER_REVIEW).size());
-        model.addAttribute("appealPendingCases", caseService.getCasesByStatus(CaseStatus.APPEAL_PENDING).size());
-        model.addAttribute("allCases", caseService.getAllCases());
+    public String caseReports(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        try {
+            Teacher teacher = currentTeacher(userDetails);
+            List<Long> studentIds = getTeacherStudentIds(teacher);
+            
+            // ✅ FIXED: Only show case reports for students assigned to this teacher
+            List<Case> teacherCases = caseService.getAllCases().stream()
+                    .filter(c -> c.getStudent() != null && studentIds.contains(c.getStudent().getId()))
+                    .collect(Collectors.toList());
+            
+            model.addAttribute("totalCases", teacherCases.size());
+            model.addAttribute("openCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.OPEN).count());
+            model.addAttribute("resolvedCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.RESOLVED).count());
+            model.addAttribute("closedCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.CLOSED).count());
+            model.addAttribute("underReviewCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.UNDER_REVIEW).count());
+            model.addAttribute("appealPendingCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.APPEAL_PENDING).count());
+            model.addAttribute("allCases", teacherCases);
+        } catch (Exception e) {
+            model.addAttribute("totalCases", 0);
+            model.addAttribute("allCases", new ArrayList<>());
+        }
         return "teacher/case-reports";
     }
 }

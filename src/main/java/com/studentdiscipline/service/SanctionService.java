@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -83,11 +84,11 @@ public class SanctionService {
                 .collect(Collectors.toList());
     }
 
-    // NEWLY ADDED: Get counts per sanction type for analytics (Required by AdminController)
+    // ✅ FIXED: Added null safety for getCountsPerType
     public List<Long> getCountsPerType() {
         return Arrays.stream(SanctionType.values())
                 .map(type -> findAll().stream()
-                        .filter(s -> s.getSanctionType() == type)
+                        .filter(s -> s != null && s.getSanctionType() == type)
                         .count())
                 .collect(Collectors.toList());
     }

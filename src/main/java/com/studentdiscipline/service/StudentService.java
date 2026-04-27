@@ -4,6 +4,7 @@ import com.studentdiscipline.enums.DisciplineStatus;
 import com.studentdiscipline.enums.IncidentStatus;
 import com.studentdiscipline.model.Incident;
 import com.studentdiscipline.model.Student;
+import com.studentdiscipline.model.Teacher;
 import com.studentdiscipline.model.User;
 import com.studentdiscipline.repository.IncidentRepository;
 import com.studentdiscipline.repository.StudentRepository;
@@ -61,6 +62,15 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
+    // ✅ ADDED: Create student for a specific teacher (CRITICAL FIX)
+    public Student createStudentForTeacher(String firstName, String lastName, String studentId,
+                                            String grade, String section, String email, 
+                                            String password, Teacher teacher) {
+        Student student = createStudent(firstName, lastName, studentId, grade, section, email, password);
+        student.setTeacher(teacher);
+        return studentRepository.save(student);
+    }
+
     // ── Save/update directly ──────────────────────────────────────────────────
     public Student saveStudent(Student student) { return studentRepository.save(student); }
 
@@ -96,6 +106,16 @@ public class StudentService {
     public Optional<Student> getStudentByStudentId(String studentId) { return studentRepository.findByStudentId(studentId); }
     public Optional<Student> getStudentByUser(User user) { return studentRepository.findByUser(user); }
     public List<Student> getStudentsByGrade(String grade) { return studentRepository.findByGrade(grade); }
+
+    // ✅ ADDED: Find students by teacher ID (CRITICAL FIX)
+    public List<Student> findByTeacherId(Long teacherId) {
+        return studentRepository.findByTeacherId(teacherId);
+    }
+
+    // ✅ ADDED: Count students by teacher ID (CRITICAL FIX)
+    public long countByTeacherId(Long teacherId) {
+        return studentRepository.countByTeacherId(teacherId);
+    }
 
     public List<Student> search(String term) {
         String s = term.toLowerCase();

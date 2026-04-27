@@ -151,17 +151,15 @@
       <div class="feedback-card" th:each="fb : ${feedbackList}">
         <div class="fc-header">
           <div class="fc-author">
-            <div class="fc-avatar" th:text="${fb.submittedBy != null ? #strings.substring(fb.submittedBy.firstName, 0, 1) : '?'}">?</div>
+            <div class="fc-avatar">💬</div>
             <div>
-              <div class="fc-name" th:text="${fb.submittedBy != null ? fb.submittedBy.firstName + ' ' + fb.submittedBy.lastName : 'Anonymous'}">Name</div>
-              <div class="fc-role-text" th:text="${fb.submittedBy != null ? fb.submittedBy.role : 'UNKNOWN'}">Role</div>
+              <div class="fc-name" th:text="'Feedback #' + ${fb.id}">Feedback</div>
+              <div class="fc-role-text">User Feedback</div>
             </div>
           </div>
-          <span class="pill"
-            th:classappend="${fb.submittedBy != null && fb.submittedBy.role.name() == 'TEACHER'} ? 'pill-teacher' : 'pill-student'"
-            th:text="${fb.submittedBy != null ? fb.submittedBy.role : 'UNKNOWN'}">—</span>
+          <span class="pill pill-student">Feedback</span>
         </div>
-        <div class="fc-body" th:text="${fb.content}">Feedback content here…</div>
+        <div class="fc-body" th:text="${fb.content != null ? fb.content : fb.message}">Feedback content here…</div>
         <div class="fc-footer">
           <span class="fc-date" th:text="${fb.submittedAt != null ? #temporals.format(fb.submittedAt, 'MMM dd, yyyy · hh:mm a') : '—'}">—</span>
           <form th:action="@{/admin/feedback/delete/{id}(id=${fb.id})}" method="post"

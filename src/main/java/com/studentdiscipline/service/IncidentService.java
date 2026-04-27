@@ -76,15 +76,15 @@ public class IncidentService {
     // NEWLY ADDED: Count incidents by status (Required by AdminController)
     public long countByStatus(IncidentStatus status) {
         return findAll().stream()
-                .filter(i -> i.getStatus() == status)
+                .filter(i -> i != null && i.getStatus() == status)
                 .count();
     }
 
     // NEWLY ADDED: Get recent incidents (Required by AdminController)
-    // FIXED: Uses getDate() instead of getIncidentDate()
     public List<Incident> getRecent(int count) {
         return findAll().stream()
-                .sorted(Comparator.comparing(Incident::getDate).reversed())
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(Incident::getDate, Comparator.nullsLast(Comparator.reverseOrder())))
                 .limit(count)
                 .collect(Collectors.toList());
     }
@@ -111,7 +111,7 @@ public class IncidentService {
     public List<Long> getCountsPerType() {
         return Arrays.stream(IncidentType.values())
                 .map(type -> findAll().stream()
-                        .filter(i -> i.getIncidentType() == type)
+                        .filter(i -> i != null && i.getIncidentType() == type)
                         .count())
                 .collect(Collectors.toList());
     }
@@ -128,7 +128,6 @@ public class IncidentService {
     }
 
     // NEWLY ADDED: Get incident counts per month for analytics (Required by AdminController)
-    // FIXED: Uses getDate() instead of getIncidentDate()
     public List<Long> getCountsPerMonth() {
         List<Long> counts = new ArrayList<>();
         YearMonth currentMonth = YearMonth.now();
@@ -136,8 +135,8 @@ public class IncidentService {
         for (int i = 11; i >= 0; i--) {
             YearMonth month = currentMonth.minusMonths(i);
             long count = findAll().stream()
+                    .filter(incident -> incident != null && incident.getDate() != null)
                     .filter(incident -> {
-                        if (incident.getDate() == null) return false;
                         YearMonth incidentMonth = YearMonth.from(incident.getDate());
                         return incidentMonth.equals(month);
                     })
@@ -147,38 +146,40 @@ public class IncidentService {
         return counts;
     }
 
-    // NEWLY ADDED: Get grade level labels for analytics (Required by AdminController)
+    // ✅ FIXED: Added null safety for getGradeLevelLabels
     public List<String> getGradeLevelLabels() {
         return findAll().stream()
+                .filter(i -> i != null && i.getStudent() != null && i.getStudent().getGrade() != null)
                 .map(i -> i.getStudent().getGrade())
-                .filter(Objects::nonNull)
                 .distinct()
                 .sorted()
                 .collect(Collectors.toList());
     }
 
-    // NEWLY ADDED: Get counts per grade level for analytics (Required by AdminController)
+    // ✅ FIXED: Added null safety for getCountsPerGradeLevel
     public List<Long> getCountsPerGradeLevel() {
         return getGradeLevelLabels().stream()
                 .map(grade -> findAll().stream()
-                        .filter(i -> grade.equals(i.getStudent().getGrade()))
+                        .filter(i -> i != null && i.getStudent() != null && grade.equals(i.getStudent().getGrade()))
                         .count())
                 .collect(Collectors.toList());
     }
 
-    // NEWLY ADDED: Get top N students by incident count (Required by AdminController)
+    // ✅ FIXED: Added null safety for getTopStudentsByIncidentCount
     public List<Map<String, Object>> getTopStudentsByIncidentCount(int limit) {
         return findAll().stream()
+                .filter(i -> i != null && i.getStudent() != null)
                 .collect(Collectors.groupingBy(
-                        incident -> incident.getStudent(),
+                        Incident::getStudent,
                         Collectors.counting()
                 ))
                 .entrySet().stream()
+                .filter(entry -> entry.getKey() != null)
                 .map(entry -> {
                     Map<String, Object> map = new LinkedHashMap<>();
-                    map.put("studentName", entry.getKey().getFirstName() + " " + 
-                            entry.getKey().getLastName());
-                    map.put("studentId", entry.getKey().getStudentId());
+                    Student student = entry.getKey();
+                    map.put("studentName", student.getFirstName() + " " + student.getLastName());
+                    map.put("studentId", student.getStudentId());
                     map.put("incidentCount", entry.getValue());
                     return map;
                 })

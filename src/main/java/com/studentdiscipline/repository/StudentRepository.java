@@ -24,4 +24,10 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     List<Student> findByGradeAndSection(String grade, String section);
 
     List<Student> findByLastNameContainingIgnoreCase(String lastName);
+
+    // ✅ ADDED: Find students by teacher ID (CRITICAL FIX)
+    List<Student> findByTeacherId(Long teacherId);
+
+    // ✅ ADDED: Count students by teacher ID (CRITICAL FIX)
+    long countByTeacherId(Long teacherId);
 }

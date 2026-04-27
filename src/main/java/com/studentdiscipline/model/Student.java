@@ -44,6 +44,11 @@ public class Student {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Case> cases = new ArrayList<>();
 
+    // ✅ ADDED: Teacher relationship (CRITICAL FIX)
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private Teacher teacher;
+
     // Constructors
     public Student() {}
 
@@ -89,6 +94,10 @@ public class Student {
     // ✅ ADDED: Getter & Setter for cases
     public List<Case> getCases() { return cases; }
     public void setCases(List<Case> cases) { this.cases = cases; }
+
+    // ✅ ADDED: Getter & Setter for teacher
+    public Teacher getTeacher() { return teacher; }
+    public void setTeacher(Teacher teacher) { this.teacher = teacher; }
 
     // Helper
     public String getFullName() { return firstName + " " + lastName; }

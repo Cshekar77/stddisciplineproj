@@ -1,6 +1,8 @@
 package com.studentdiscipline.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "teachers")
@@ -29,6 +31,10 @@ public class Teacher {
     @OneToOne
     @JoinColumn(name = "user_id", unique = true)
     private User user;
+
+    // ✅ ADDED: One teacher can have many students (CRITICAL FIX)
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Student> students = new ArrayList<>();
 
     // Constructors
     public Teacher() {}
@@ -64,6 +70,10 @@ public class Teacher {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+
+    // ✅ ADDED: Getter & Setter for students
+    public List<Student> getStudents() { return students; }
+    public void setStudents(List<Student> students) { this.students = students; }
 
     // Helper
     public String getFullName() { return firstName + " " + lastName; }
