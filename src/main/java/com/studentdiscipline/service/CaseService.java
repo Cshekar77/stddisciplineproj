@@ -56,12 +56,12 @@ public class CaseService {
 
     public CaseNote addCaseNote(Long caseId, CaseNote note) {
         Case existingCase = getCaseById(caseId);
-        note.setDisciplineCase(existingCase);   // ✅ FIXED HERE
+        note.setDisciplineCase(existingCase);
         return caseNoteRepository.save(note);
     }
 
     public List<CaseNote> getCaseNotes(Long caseId) {
-        return caseNoteRepository.findByCaseIdOrderByCreatedDateDesc(caseId);
+        return caseNoteRepository.findByDisciplineCaseIdOrderByCreatedDateDesc(caseId);
     }
 
     public Case changeCaseStatus(Long caseId, CaseStatus status) {
