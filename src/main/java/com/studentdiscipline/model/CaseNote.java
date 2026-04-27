@@ -18,7 +18,7 @@ public class CaseNote {
 
     @ManyToOne
     @JoinColumn(name = "case_id")
-    private Case case;
+    private Case disciplineCase;  // ✅ FIXED: renamed from 'case'
 
     @ManyToOne
     @JoinColumn(name = "created_by")
@@ -39,8 +39,11 @@ public class CaseNote {
     public LocalDateTime getCreatedDate() { return createdDate; }
     public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
 
-    public Case getCase() { return case; }
-    public void setCase(Case case) { this.case = case; }
+    // ✅ FIXED: renamed getter
+    public Case getDisciplineCase() { return disciplineCase; }
+
+    // ✅ FIXED: renamed setter with parameter renamed
+    public void setDisciplineCase(Case disciplineCase) { this.disciplineCase = disciplineCase; }
 
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
