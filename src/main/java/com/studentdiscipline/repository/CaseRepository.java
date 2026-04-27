@@ -10,10 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface CaseRepository extends JpaRepository<Case, Long> {
-
     List<Case> findByStudentId(Long studentId);
-
     List<Case> findByStatus(CaseStatus status);
-
     Optional<Case> findByCaseNumber(String caseNumber);
 }

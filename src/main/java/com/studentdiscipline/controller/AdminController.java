@@ -1,5 +1,6 @@
 package com.studentdiscipline.controller;
 
+import com.studentdiscipline.enums.CaseStatus;
 import com.studentdiscipline.enums.DisciplineStatus;
 import com.studentdiscipline.enums.IncidentStatus;
 import com.studentdiscipline.enums.IncidentType;
@@ -29,6 +30,7 @@ public class AdminController {
     @Autowired private AnonymousReportService anonymousReportService;
     @Autowired private ActivityLogService activityLogService;
     @Autowired private UserService userService;
+    @Autowired private CaseService caseService; // ✅ ADDED
 
     private User currentUser(UserDetails userDetails) {
         return userService.findByEmail(userDetails.getUsername())
@@ -180,25 +182,19 @@ public class AdminController {
                                  @RequestParam String confirmPassword,
                                  @AuthenticationPrincipal UserDetails userDetails,
                                  RedirectAttributes ra) {
-        // Check new password and confirm match
         if (!newPassword.equals(confirmPassword)) {
             ra.addFlashAttribute("error", "New password and confirm password do not match.");
             return "redirect:/admin/change-password";
         }
-
-        // Check minimum length
         if (newPassword.length() < 6) {
             ra.addFlashAttribute("error", "New password must be at least 6 characters.");
             return "redirect:/admin/change-password";
         }
-
         boolean success = userService.changePassword(userDetails.getUsername(), currentPassword, newPassword);
-
         if (!success) {
             ra.addFlashAttribute("error", "Current password is incorrect.");
             return "redirect:/admin/change-password";
         }
-
         activityLogService.log(currentUser(userDetails), "Admin changed their own password.");
         ra.addFlashAttribute("success", "Password changed successfully!");
         return "redirect:/admin/change-password";
@@ -494,5 +490,59 @@ public class AdminController {
             model.addAttribute("topStudents", incidentService.getTopStudentsByIncidentCount(5));
         } catch (Exception e) { model.addAttribute("error", "Could not load analytics: " + e.getMessage()); }
         return "admin/analytics";
+    }
+
+    // ── CASE MANAGEMENT ───────────────────────────────────────────────────────  ✅ ADDED
+
+    @GetMapping("/case-search")
+    public String caseSearch(@RequestParam(required = false) String search,
+                             @RequestParam(required = false) String status, Model model) {
+        List<Case> cases = caseService.getAllCases();
+        if (status != null && !status.isBlank()) {
+            CaseStatus cs = CaseStatus.valueOf(status);
+            cases = cases.stream().filter(c -> c.getStatus() == cs).collect(Collectors.toList());
+        }
+        if (search != null && !search.isBlank()) {
+            String kw = search.toLowerCase();
+            cases = cases.stream()
+                    .filter(c -> c.getStudent() != null &&
+                            (c.getStudent().getFirstName() + " " + c.getStudent().getLastName()).toLowerCase().contains(kw)
+                            || c.getCaseNumber().toLowerCase().contains(kw))
+                    .collect(Collectors.toList());
+        }
+        model.addAttribute("cases", cases);
+        model.addAttribute("search", search);
+        model.addAttribute("statusFilter", status);
+        model.addAttribute("caseStatuses", CaseStatus.values());
+        return "admin/case-search";
+    }
+
+    @GetMapping("/case-profile")
+    public String caseProfile(@RequestParam Long id, Model model) {
+        Case c = caseService.getCaseById(id);
+        model.addAttribute("case", c);
+        model.addAttribute("notes", caseService.getCaseNotes(id));
+        model.addAttribute("caseStatuses", CaseStatus.values());
+        return "admin/case-profile";
+    }
+
+    @GetMapping("/case-timeline")
+    public String caseTimeline(@RequestParam Long id, Model model) {
+        Case c = caseService.getCaseById(id);
+        model.addAttribute("case", c);
+        model.addAttribute("notes", caseService.getCaseNotes(id));
+        return "admin/case-timeline";
+    }
+
+    @GetMapping("/case-reports")
+    public String caseReports(Model model) {
+        model.addAttribute("totalCases", caseService.getAllCases().size());
+        model.addAttribute("openCases", caseService.getCasesByStatus(CaseStatus.OPEN).size());
+        model.addAttribute("resolvedCases", caseService.getCasesByStatus(CaseStatus.RESOLVED).size());
+        model.addAttribute("closedCases", caseService.getCasesByStatus(CaseStatus.CLOSED).size());
+        model.addAttribute("underReviewCases", caseService.getCasesByStatus(CaseStatus.UNDER_REVIEW).size());
+        model.addAttribute("appealPendingCases", caseService.getCasesByStatus(CaseStatus.APPEAL_PENDING).size());
+        model.addAttribute("allCases", caseService.getAllCases());
+        return "admin/case-reports";
     }
 }

@@ -2,7 +2,8 @@ package com.studentdiscipline.model;
 
 import com.studentdiscipline.enums.CaseStatus;
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,18 +25,29 @@ public class Case {
     @Enumerated(EnumType.STRING)
     private CaseStatus status;
 
-    private LocalDate createdDate;
-    private LocalDate updatedDate;
+    private LocalDateTime createdDate;
+    private LocalDateTime updatedDate;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
 
-    @OneToMany(mappedBy = "disciplineCase", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CaseNote> notes;
+    @OneToMany(mappedBy = "case", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CaseNote> notes = new ArrayList<>();
 
-    // ─── Getters and Setters ───────────────────────────────
+    @PrePersist
+    protected void onCreate() {
+        createdDate = LocalDateTime.now();
+        updatedDate = LocalDateTime.now();
+        if (status == null) status = CaseStatus.OPEN;
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedDate = LocalDateTime.now();
+    }
+
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -51,11 +63,11 @@ public class Case {
     public CaseStatus getStatus() { return status; }
     public void setStatus(CaseStatus status) { this.status = status; }
 
-    public LocalDate getCreatedDate() { return createdDate; }
-    public void setCreatedDate(LocalDate createdDate) { this.createdDate = createdDate; }
+    public LocalDateTime getCreatedDate() { return createdDate; }
+    public void setCreatedDate(LocalDateTime createdDate) { this.createdDate = createdDate; }
 
-    public LocalDate getUpdatedDate() { return updatedDate; }
-    public void setUpdatedDate(LocalDate updatedDate) { this.updatedDate = updatedDate; }
+    public LocalDateTime getUpdatedDate() { return updatedDate; }
+    public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
 
     public Student getStudent() { return student; }
     public void setStudent(Student student) { this.student = student; }

@@ -13,7 +13,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // ✅ Strength 8 — 4x faster than 10, still secure for school use
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(8);
@@ -25,12 +24,13 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
 
             .authorizeHttpRequests(auth -> auth
-                // ✅ /ping is public for keep-alive monitors
                 .requestMatchers("/login", "/logout", "/ping",
                         "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/teacher/**").hasRole("TEACHER")
                 .requestMatchers("/student/**").hasRole("STUDENT")
+                // ✅ ADDED: /case/** REST API authorization rules
+                .requestMatchers("/case/**").hasAnyRole("ADMIN", "TEACHER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
