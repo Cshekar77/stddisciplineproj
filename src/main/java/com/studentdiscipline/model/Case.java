@@ -32,7 +32,7 @@ public class Case {
     @JoinColumn(name = "student_id")
     private Student student;
 
-    @OneToMany(mappedBy = "case", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "disciplineCase", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CaseNote> notes = new ArrayList<>();
 
     @PrePersist

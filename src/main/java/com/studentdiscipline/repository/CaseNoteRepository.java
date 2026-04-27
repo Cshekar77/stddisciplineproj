@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface CaseNoteRepository extends JpaRepository<CaseNote, Long> {
-    List<CaseNote> findByCaseIdOrderByCreatedDateDesc(Long caseId);
+    List<CaseNote> findByDisciplineCaseIdOrderByCreatedDateDesc(Long caseId);
 }
