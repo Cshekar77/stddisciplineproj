@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 @RequestMapping("/student")
@@ -23,6 +24,7 @@ public class StudentController {
     @Autowired private AnonymousReportService anonymousReportService;
     @Autowired private ActivityLogService activityLogService;
     @Autowired private UserService userService;
+    @Autowired private CaseService caseService; // ✅ ADDED for case management
 
     private User currentUser(UserDetails userDetails) {
         return userService.findByEmail(userDetails.getUsername())
@@ -140,6 +142,65 @@ public class StudentController {
             model.addAttribute("logs", new ArrayList<>());
         }
         return "student/activity-history";
+    }
+
+    // ── CASE MANAGEMENT FOR STUDENTS ─────────────────────────────────────────
+
+    @GetMapping("/my-cases")
+    public String viewMyCases(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Student student = currentStudent(userDetails);
+            List<Case> studentCases = caseService.getCasesByStudentId(student.getId());
+            model.addAttribute("cases", studentCases);
+            model.addAttribute("student", student);
+            model.addAttribute("totalCases", studentCases.size());
+        } catch (Exception e) {
+            model.addAttribute("cases", new ArrayList<>());
+            model.addAttribute("totalCases", 0);
+        }
+        return "student/my-cases";
+    }
+
+    @GetMapping("/case-profile")
+    public String viewCaseProfile(@RequestParam Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Student student = currentStudent(userDetails);
+            Case caseDetails = caseService.getCaseById(id);
+            
+            // Security: Ensure student can only view their own cases
+            if (caseDetails.getStudent() == null || !caseDetails.getStudent().getId().equals(student.getId())) {
+                throw new RuntimeException("You don't have permission to view this case");
+            }
+            
+            model.addAttribute("case", caseDetails);
+            model.addAttribute("notes", caseService.getCaseNotes(id));
+            model.addAttribute("student", student);
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/student/my-cases";
+        }
+        return "student/case-profile";
+    }
+
+    @GetMapping("/case-timeline")
+    public String viewCaseTimeline(@RequestParam Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Student student = currentStudent(userDetails);
+            Case caseDetails = caseService.getCaseById(id);
+            
+            // Security: Ensure student can only view their own cases
+            if (caseDetails.getStudent() == null || !caseDetails.getStudent().getId().equals(student.getId())) {
+                throw new RuntimeException("You don't have permission to view this timeline");
+            }
+            
+            model.addAttribute("case", caseDetails);
+            model.addAttribute("notes", caseService.getCaseNotes(id));
+            model.addAttribute("student", student);
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+            return "redirect:/student/my-cases";
+        }
+        return "student/case-timeline";
     }
 
     // ── CHANGE PASSWORD ───────────────────────────────────────────────────────

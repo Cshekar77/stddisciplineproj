@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add New Case — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --nav-w: 240px; --accent: #4f7fff; --accent2: #ff6b6b; --accent3: #43d9a2; --accent4: #f7c948; --transition: all 0.3s ease; }
+    [data-theme="dark"] { --bg: #0d0f14; --surface: #151820; --surface2: #1c2030; --border: #252a3a; --text: #e8eaf2; --muted: #7a829a; --shadow: 0 4px 24px rgba(0,0,0,0.4); --topbar-bg: #151820; }
+    [data-theme="light"] { --bg: #f0f2f8; --surface: #ffffff; --surface2: #f5f7ff; --border: #e2e6f0; --text: #1a1d2e; --muted: #6b7494; --shadow: 0 4px 24px rgba(0,0,0,0.08); --topbar-bg: #ffffff; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: var(--transition); }
+    .sidebar { width: var(--nav-w); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s ease, background 0.3s ease; overflow-y: auto; max-height: 100vh; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+    .sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+    .nav-section { padding: 16px 12px 8px; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; margin: 2px 8px; color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 500; transition: all .18s; }
+    .nav-link:hover { background: var(--surface2); color: var(--text); }
+    .nav-link.active { background: rgba(79,127,255,.12); color: var(--accent); }
+    .nav-link .icon { font-size: 1rem; width: 18px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; background: rgba(255,107,107,.08); color: var(--accent2); text-decoration: none; font-size: .85rem; font-weight: 500; }
+    .logout-btn:hover { background: rgba(255,107,107,.18); }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    .main { margin-left: var(--nav-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--topbar-bg); position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); transition: var(--transition); }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; color: #fff; flex-shrink: 0; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; background: rgba(79,127,255,.15); color: var(--accent); letter-spacing: .04em; }
+    .theme-toggle-wrap { display: flex; align-items: center; gap: 6px; }
+    .theme-icon { font-size: .9rem; cursor: pointer; user-select: none; }
+    .theme-toggle { width: 42px; height: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; position: relative; transition: var(--transition); flex-shrink: 0; }
+    .theme-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); transition: transform 0.3s ease; }
+    [data-theme="light"] .theme-toggle::after { transform: translateX(18px); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: var(--transition); }
+    .content { padding: 28px 32px; flex: 1; max-width: 800px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: .85rem; margin-bottom: 20px; }
+    .back-link:hover { color: var(--accent); }
+    .page-header { margin-bottom: 24px; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .card-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+    .card-body { padding: 20px; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: .78rem; font-weight: 600; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em; }
+    .form-control { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: .88rem; outline: none; transition: border-color .18s; font-family: 'DM Sans', sans-serif; }
+    .form-control:focus { border-color: var(--accent); }
+    select.form-control { cursor: pointer; }
+    textarea.form-control { resize: vertical; min-height: 100px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all .18s; font-family: 'DM Sans', sans-serif; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #3d6be0; }
+    .btn-secondary { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--surface2); color: var(--text); }
+    .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+    .alert { padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-size: .85rem; display: flex; align-items: center; gap: 10px; }
+    .alert-success { background: rgba(67,217,162,.12); border: 1px solid rgba(67,217,162,.25); color: var(--accent3); }
+    .alert-error { background: rgba(255,107,107,.12); border: 1px solid rgba(255,107,107,.25); color: var(--accent2); }
+    .mobile-logout { display: none; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 8px; background: rgba(255,107,107,.1); color: #ff6b6b; border: 1px solid rgba(255,107,107,.25); text-decoration: none; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+    @media(max-width:768px) {
+      .sidebar { transform: translateX(-100%); z-index: 200; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .hamburger { display: flex; }
+      .topbar { padding: 14px 16px; }
+      .content { padding: 16px; }
+      .mobile-logout { display: flex; }
+      .badge { display: none; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">Case Management</div>
+  <a href="/admin/case-search" class="nav-link"><span class="icon">🗂️</span> Case Management</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="nav-section">Account</div>
+  <a href="/admin/change-password" class="nav-link"><span class="icon">🔐</span> Change Password</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Add New Case</div>
+    </div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <a href="/logout" class="mobile-logout">Logout</a>
+      <span class="badge">ADMIN</span>
+      <div class="avatar" th:text="${adminName != null} ? ${#strings.substring(adminName, 0, 1)} : 'A'">A</div>
+      <span style="font-size:.87rem;font-weight:500;" th:text="${adminName != null} ? ${adminName} : 'Administrator'">Administrator</span>
+    </div>
+  </header>
+
+  <div class="content">
+    <a href="/admin/case-search" class="back-link">← Back to Case Management</a>
+    
+    <div class="page-header">
+      <div class="page-title">Create New Case</div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success">✅ <span th:text="${success}"></span></div>
+    <div th:if="${error}" class="alert alert-error">❌ <span th:text="${error}"></span></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Case Information</div>
+      </div>
+      <div class="card-body">
+        <form th:action="@{/admin/case-add}" method="post">
+          <div class="form-group">
+            <label class="form-label">Select Student *</label>
+            <select class="form-control" name="studentId" required>
+              <option value="">-- Select Student --</option>
+              <option th:each="student : ${students}" th:value="${student.id}" th:text="${student.fullName + ' (' + student.studentId + ')'}"></option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Case Number *</label>
+              <input type="text" class="form-control" name="caseNumber" placeholder="e.g., CASE-2024-001" required/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-control" name="status">
+                <option value="OPEN">Open</option>
+                <option value="UNDER_REVIEW">Under Review</option>
+                <option value="RESOLVED">Resolved</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Case Title *</label>
+            <input type="text" class="form-control" name="title" placeholder="Brief title for the case" required/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" name="description" placeholder="Detailed description of the case..."></textarea>
+          </div>
+
+          <div class="btn-group">
+            <button type="submit" class="btn btn-primary">+ Create Case</button>
+            <a href="/admin/case-search" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'light';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+  
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+</script>
+</body>
+</html>

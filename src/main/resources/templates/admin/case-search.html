@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -137,7 +137,10 @@
   <div class="content">
     <div class="page-header">
       <div class="page-title">Case Management</div>
-      <a href="/admin/case-reports" class="btn btn-outline">📊 Reports</a>
+      <div style="display: flex; gap: 10px;">
+        <a href="/admin/case-add" class="btn btn-primary">+ New Case</a>
+        <a href="/admin/case-reports" class="btn btn-outline">📊 Reports</a>
+      </div>
     </div>
     <div class="card">
       <div class="card-header">
@@ -201,8 +204,8 @@
               <td>
                 <a th:href="@{/admin/case-profile(id=${case.id})}" class="action-link">View</a>
                 <a th:href="@{/admin/case-timeline(id=${case.id})}" class="action-link">Timeline</a>
-              </td>
-            </tr>
+               </td>
+             </tr>
             <tr th:if="${cases == null or #lists.isEmpty(cases)}">
               <td colspan="7">
                 <div class="empty-state">
@@ -210,9 +213,9 @@
                   <div>No cases found</div>
                 </div>
               </td>
-            </tr>
+             </tr>
           </tbody>
-        </table>
+         </table>
       </div>
       <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
         <span class="page-info" th:text="'Page ' + ${currentPage + 1} + ' of ' + ${totalPages}">Page 1</span>
@@ -231,20 +234,24 @@
 <script>
   const html = document.documentElement;
   const themeIcon = document.getElementById('themeIcon');
-  const saved = localStorage.getItem('sds-theme') || 'dark';
+  // Load saved theme from localStorage, default to 'light'
+  const saved = localStorage.getItem('sds-theme') || 'light';
   html.setAttribute('data-theme', saved);
   themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  
   function toggleTheme() {
     const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('sds-theme', next);
     themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
+  
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
   function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
   function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
   document.querySelectorAll('.nav-link').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+  
   function applyFilters() {
     const search = document.getElementById('searchInput').value;
     const status = document.getElementById('statusFilter').value;

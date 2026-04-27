@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class AdminController {
     @Autowired private AnonymousReportService anonymousReportService;
     @Autowired private ActivityLogService activityLogService;
     @Autowired private UserService userService;
-    @Autowired private CaseService caseService; // ✅ ADDED
+    @Autowired private CaseService caseService;
 
     private User currentUser(UserDetails userDetails) {
         return userService.findByEmail(userDetails.getUsername())
@@ -492,7 +493,7 @@ public class AdminController {
         return "admin/analytics";
     }
 
-    // ── CASE MANAGEMENT ───────────────────────────────────────────────────────  ✅ ADDED
+    // ── CASE MANAGEMENT ───────────────────────────────────────────────────────
 
     @GetMapping("/case-search")
     public String caseSearch(@RequestParam(required = false) String search,
@@ -544,5 +545,41 @@ public class AdminController {
         model.addAttribute("appealPendingCases", caseService.getCasesByStatus(CaseStatus.APPEAL_PENDING).size());
         model.addAttribute("allCases", caseService.getAllCases());
         return "admin/case-reports";
+    }
+
+    // ── ADD NEW CASE ──────────────────────────────────────────────────────────
+
+    @GetMapping("/case-add")
+    public String showAddCaseForm(Model model) {
+        model.addAttribute("students", studentService.findAll());
+        return "admin/case-add";
+    }
+
+    @PostMapping("/case-add")
+    public String addCase(@RequestParam Long studentId,
+                          @RequestParam String caseNumber,
+                          @RequestParam String title,
+                          @RequestParam(required = false) String status,
+                          @RequestParam(required = false) String description,
+                          RedirectAttributes ra) {
+        try {
+            Student student = studentService.findById(studentId)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+            
+            Case newCase = new Case();
+            newCase.setStudent(student);
+            newCase.setCaseNumber(caseNumber);
+            newCase.setTitle(title);
+            newCase.setDescription(description);
+            newCase.setStatus(CaseStatus.valueOf(status != null ? status : "OPEN"));
+            newCase.setCreatedDate(LocalDateTime.now());
+            newCase.setUpdatedDate(LocalDateTime.now());
+            
+            caseService.createCase(newCase);
+            ra.addFlashAttribute("success", "Case created successfully.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/case-add";
     }
 }

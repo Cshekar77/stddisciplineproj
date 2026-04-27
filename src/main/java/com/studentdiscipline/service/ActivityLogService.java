@@ -7,6 +7,7 @@ import com.studentdiscipline.repository.ActivityLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,12 +24,25 @@ public class ActivityLogService {
      * Call this from any other service after a significant action.
      *
      * Example:
-     *   activityLogService.log(currentUser, "Created incident for student John Doe.");
+     *   activityLogService.log(currentUser, "created incident for student John Doe.");
      */
     public ActivityLog log(User user, String description) {
         ActivityLog entry = new ActivityLog();
-        entry.setUser(user);
-        entry.setDescription(description);
+        
+        // ✅ FIX: Ensure user is properly set and handle null cases
+        if (user != null) {
+            entry.setUser(user);
+            // ✅ FIX: Prepend user name to description for better display
+            String firstName = user.getFirstName() != null ? user.getFirstName() : "Unknown";
+            String lastName = user.getLastName() != null ? user.getLastName() : "User";
+            String userName = firstName + " " + lastName;
+            entry.setDescription(userName + " " + description);
+        } else {
+            entry.setUser(null);
+            entry.setDescription("[SYSTEM] " + description);
+        }
+        
+        entry.setTimestamp(LocalDateTime.now());
         return activityLogRepository.save(entry);
     }
 
@@ -39,6 +53,7 @@ public class ActivityLogService {
         ActivityLog entry = new ActivityLog();
         entry.setUser(null);
         entry.setDescription("[SYSTEM] " + description);
+        entry.setTimestamp(LocalDateTime.now());
         return activityLogRepository.save(entry);
     }
 

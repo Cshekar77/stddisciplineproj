@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Student Dashboard</title>
+  <title>My Cases — Student</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root{--nav-w:240px;--accent:#f7c948;--accent2:#ff6b6b;--accent3:#43d9a2;--accent4:#4f7fff;--transition:all 0.3s ease;}
@@ -37,47 +37,14 @@
     .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
     .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
     .content{padding:28px 32px;flex:1;}
-
-    /* Welcome card */
-    .welcome-card{border-radius:16px;padding:24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;border:1px solid;}
-    .welcome-card.GOOD        {background:linear-gradient(135deg,rgba(67,217,162,.12),rgba(67,217,162,.04));border-color:rgba(67,217,162,.25);}
-    .welcome-card.WARNING     {background:linear-gradient(135deg,rgba(247,201,72,.12),rgba(247,201,72,.04));border-color:rgba(247,201,72,.25);}
-    .welcome-card.SUSPENDED   {background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04));border-color:rgba(255,107,107,.25);}
-    .welcome-card.REMOVED     {background:linear-gradient(135deg,rgba(200,0,0,.12),rgba(200,0,0,.04));border-color:rgba(200,0,0,.25);}
-    .welcome-card.APPRECIATED {background:linear-gradient(135deg,rgba(79,127,255,.12),rgba(79,127,255,.04));border-color:rgba(79,127,255,.25);}
-    .welcome-card.UNKNOWN     {background:linear-gradient(135deg,rgba(122,130,154,.1),rgba(122,130,154,.03));border-color:rgba(122,130,154,.2);}
-
-    .welcome-text h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;margin-bottom:4px;}
-    .welcome-text p{font-size:.88rem;color:var(--muted);}
-
-    .status-badge{padding:9px 18px;border-radius:20px;font-size:.85rem;font-weight:700;font-family:'Syne',sans-serif;display:flex;align-items:center;gap:6px;border:1px solid;}
-    .status-badge.GOOD        {background:rgba(67,217,162,.15);color:#43d9a2;border-color:rgba(67,217,162,.3);}
-    .status-badge.WARNING     {background:rgba(247,201,72,.15);color:#f7c948;border-color:rgba(247,201,72,.3);}
-    .status-badge.SUSPENDED   {background:rgba(255,107,107,.15);color:#ff6b6b;border-color:rgba(255,107,107,.3);}
-    .status-badge.REMOVED     {background:rgba(200,0,0,.15);color:#ff2222;border-color:rgba(200,0,0,.3);}
-    .status-badge.APPRECIATED {background:rgba(79,127,255,.15);color:#4f7fff;border-color:rgba(79,127,255,.3);}
-    .status-badge.UNKNOWN     {background:rgba(122,130,154,.12);color:#7a829a;border-color:rgba(122,130,154,.2);}
-
-    /* Stats */
-    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px;}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s;box-shadow:var(--shadow);}
-    .stat-card:hover{transform:translateY(-3px);}
-    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
-    .stat-card.yellow::before{background:var(--accent);}
-    .stat-card.red::before{background:var(--accent2);}
-    .stat-label{font-size:.75rem;color:var(--muted);font-weight:500;margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em;}
-    .stat-value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
-    .stat-card.yellow .stat-value{color:var(--accent);}
-    .stat-card.red .stat-value{color:var(--accent2);}
-    .stat-icon{position:absolute;top:16px;right:16px;font-size:1.5rem;opacity:.12;}
-
-    /* Card */
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;}
+    .count-badge{background:rgba(247,201,72,.15);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:.8rem;font-weight:600;}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;}
     .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
-    .view-all{font-size:.78rem;color:var(--accent);text-decoration:none;font-weight:500;}
     .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-    table{width:100%;border-collapse:collapse;min-width:360px;}
+    table{width:100%;border-collapse:collapse;min-width:500px;}
     thead th{padding:10px 18px;text-align:left;font-size:.7rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border);background:var(--surface2);}
     tbody tr{border-bottom:1px solid var(--border);transition:background .15s;}
     tbody tr:last-child{border-bottom:none;}
@@ -87,13 +54,11 @@
     .pill-open{background:rgba(255,107,107,.12);color:var(--accent2);}
     .pill-review{background:rgba(247,201,72,.12);color:var(--accent);}
     .pill-resolved{background:rgba(67,217,162,.12);color:var(--accent3);}
-
-    /* Quick actions */
-    .quick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px;}
-    .quick-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 8px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);text-decoration:none;color:var(--text);font-size:.75rem;font-weight:500;text-align:center;transition:all .18s;}
-    .quick-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
-    .quick-btn .qicon{font-size:1.2rem;}
-
+    .pill-closed{background:rgba(122,130,154,.12);color:var(--muted);}
+    .action-link{color:var(--accent);text-decoration:none;font-size:.82rem;font-weight:500;margin-right:10px;}
+    .action-link:hover{text-decoration:underline;}
+    .empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
+    .empty-icon{font-size:2.5rem;margin-bottom:12px;}
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
       .sidebar.open{transform:translateX(0);}
@@ -104,14 +69,7 @@
       .topbar-title{font-size:1rem;}
       .content{padding:16px;}
       .badge{display:none;}
-      .quick-grid{grid-template-columns:repeat(3,1fr);}
-      .stat-value{font-size:1.6rem;}
     }
-    @media(max-width:480px){
-      .quick-grid{grid-template-columns:repeat(2,1fr);}
-      .theme-icon{display:none;}
-    }
-
     .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
     @media(max-width:768px){.mobile-logout{display:flex;}}
   </style>
@@ -121,10 +79,10 @@
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Student</span></span></div>
   <div class="nav-section">My Account</div>
-  <a href="/student/dashboard" class="nav-link active"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/student/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
   <a href="/student/my-record" class="nav-link"><span class="icon">📄</span> My Record</a>
   <a href="/student/my-sanctions" class="nav-link"><span class="icon">🔒</span> My Sanctions</a>
-  <a href="/student/my-cases" class="nav-link"><span class="icon">📁</span> My Cases</a>
+  <a href="/student/my-cases" class="nav-link active"><span class="icon">📁</span> My Cases</a>
   <div class="nav-section">Actions</div>
   <a href="/student/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
   <a href="/student/anonymous-report" class="nav-link"><span class="icon">🕵️</span> Report Issue</a>
@@ -139,7 +97,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
-      <div class="topbar-title">My Dashboard</div>
+      <div class="topbar-title">My Cases</div>
     </div>
     <div class="topbar-meta">
       <div class="theme-toggle-wrap">
@@ -148,80 +106,61 @@
       </div>
       <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">STUDENT</span>
-      <div class="avatar" th:text="${studentName != null} ? ${#strings.substring(studentName, 0, 1)} : 'S'">S</div>
+      <div class="avatar" th:text="${student != null} ? ${#strings.substring(student.firstName, 0, 1)} : 'S'">S</div>
     </div>
   </header>
 
   <div class="content">
-
-    <div class="welcome-card"
-         th:classappend="${disciplineStatus != null} ? ${disciplineStatus.name()} : 'UNKNOWN'">
-      <div class="welcome-text">
-        <h2 th:text="'Welcome, ' + ${studentName != null ? studentName : 'Student'} + '!'">Welcome!</h2>
-        <p>Here's an overview of your discipline record.</p>
-      </div>
-      <div class="status-badge"
-           th:classappend="${disciplineStatus != null} ? ${disciplineStatus.name()} : 'UNKNOWN'">
-        <span th:text="${disciplineStatus != null and disciplineStatus.name() == 'GOOD'} ? '✅' :
-                       (${disciplineStatus != null and disciplineStatus.name() == 'WARNING'} ? '⚠️' :
-                       (${disciplineStatus != null and disciplineStatus.name() == 'SUSPENDED'} ? '🚫' :
-                       (${disciplineStatus != null and disciplineStatus.name() == 'REMOVED'} ? '❌' :
-                       (${disciplineStatus != null and disciplineStatus.name() == 'APPRECIATED'} ? '⭐' : '●'))))">●</span>
-        <span th:text="${disciplineStatus != null ? disciplineStatus.name() : 'UNKNOWN'}">UNKNOWN</span>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card yellow">
-        <div class="stat-icon">⚠️</div>
-        <div class="stat-label">Total Incidents</div>
-        <div class="stat-value" th:text="${incidentCount != null} ? ${incidentCount} : 0">0</div>
-      </div>
-      <div class="stat-card red">
-        <div class="stat-icon">🔒</div>
-        <div class="stat-label">Sanctions</div>
-        <div class="stat-value" th:text="${sanctionCount != null} ? ${sanctionCount} : 0">0</div>
-      </div>
+    <div class="page-header">
+      <div class="page-title">My Cases</div>
+      <div class="count-badge" th:text="'Total: ' + ${totalCases != null ? totalCases : 0} + ' cases'">Total: 0 cases</div>
     </div>
 
     <div class="card">
       <div class="card-header">
-        <div class="card-title">Recent Incidents</div>
-        <a href="/student/my-record" class="view-all">View all →</a>
+        <div class="card-title">Disciplinary Cases</div>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Type</th><th>Date</th><th>Status</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Case #</th>
+              <th>Title</th>
+              <th>Status</th>
+              <th>Date Filed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
           <tbody>
-            <tr th:each="incident : ${recentIncidents}">
-              <td th:text="${incident.incidentType}">—</td>
-              <td th:text="${incident.date != null ? #temporals.format(incident.date, 'MMM dd, yyyy') : '—'}">—</td>
+            <tr th:each="case : ${cases}">
+              <td style="font-family:'Syne',sans-serif;font-weight:600;" th:text="${case.caseNumber}">—</td>
+              <td th:text="${case.title}">—</td>
               <td>
                 <span class="pill"
-                  th:classappend="${incident.status != null and incident.status.name() == 'OPEN'} ? 'pill-open' :
-                    (${incident.status != null and incident.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 'pill-resolved')"
-                  th:text="${incident.status}">—</span>
+                  th:classappend="${case.status.name() == 'OPEN'} ? 'pill-open' : 
+                                 (${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 
+                                 (${case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
+                  th:text="${case.status}">—</span>
+              </td>
+              <td th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</td>
+              <td>
+                <a th:href="@{/student/case-profile(id=${case.id})}" class="action-link">View Details</a>
+                <a th:href="@{/student/case-timeline(id=${case.id})}" class="action-link">Timeline</a>
               </td>
             </tr>
-            <tr th:if="${recentIncidents == null or #lists.isEmpty(recentIncidents)}">
-              <td colspan="3" style="text-align:center;color:var(--muted);padding:24px;font-size:.85rem;">✅ No incidents on record</td>
+            <tr th:if="${cases == null or #lists.isEmpty(cases)}">
+              <td colspan="5">
+                <div class="empty-state">
+                  <div class="empty-icon">📁</div>
+                  <div>No cases found</div>
+                  <div style="font-size:.75rem;margin-top:8px;">You have no disciplinary cases on record.</div>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-header"><div class="card-title">Quick Actions</div></div>
-      <div class="quick-grid">
-        <a href="/student/my-record" class="quick-btn"><span class="qicon">📄</span>My Record</a>
-        <a href="/student/my-sanctions" class="quick-btn"><span class="qicon">🔒</span>Sanctions</a>
-        <a href="/student/my-cases" class="quick-btn"><span class="qicon">📁</span>My Cases</a>
-        <a href="/student/feedback" class="quick-btn"><span class="qicon">💬</span>Feedback</a>
-        <a href="/student/anonymous-report" class="quick-btn"><span class="qicon">🕵️</span>Report Issue</a>
-      </div>
-    </div>
-
   </div>
 </main>
 
