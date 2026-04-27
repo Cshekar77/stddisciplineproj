@@ -38,7 +38,7 @@
     body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: var(--transition); }
 
     /* Sidebar */
-    .sidebar { width: var(--nav-w); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s ease, background 0.3s ease; }
+    .sidebar { width: var(--nav-w); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s ease, background 0.3s ease; overflow-y: auto; max-height: 100vh; }
     .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; }
     .sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
     .nav-section { padding: 16px 12px 8px; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
@@ -193,6 +193,8 @@
   <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
   <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
   <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">Case Management</div>
+  <a href="/admin/case-search" class="nav-link"><span class="icon">🗂️</span> Case Management</a>
   <div class="nav-section">System</div>
   <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
   <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
@@ -290,7 +292,7 @@
           <a href="/admin/analytics" class="quick-btn"><span class="qicon">📊</span>Analytics</a>
           <a href="/admin/anonymous-reports" class="quick-btn"><span class="qicon">🕵️</span>Anon Reports</a>
           <a href="/admin/sanctions" class="quick-btn"><span class="qicon">🔒</span>Sanctions</a>
-          <a href="/admin/activity-history" class="quick-btn"><span class="qicon">📋</span>Activity Log</a>
+          <a href="/admin/case-search" class="quick-btn"><span class="qicon">🗂️</span>Cases</a>
         </div>
       </div>
     </div>
