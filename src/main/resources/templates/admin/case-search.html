@@ -58,7 +58,7 @@
     .filter-select:focus { border-color: var(--accent); }
     /* Table */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
     thead th { padding: 10px 18px; text-align: left; font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); background: var(--surface2); }
     tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
     tbody tr:last-child { border-bottom: none; }
@@ -159,13 +159,6 @@
           <option value="RESOLVED" th:selected="${statusFilter == 'RESOLVED'}">Resolved</option>
           <option value="CLOSED" th:selected="${statusFilter == 'CLOSED'}">Closed</option>
         </select>
-        <select class="filter-select" id="severityFilter">
-          <option value="">All Severities</option>
-          <option value="LOW" th:selected="${severityFilter == 'LOW'}">Low</option>
-          <option value="MEDIUM" th:selected="${severityFilter == 'MEDIUM'}">Medium</option>
-          <option value="HIGH" th:selected="${severityFilter == 'HIGH'}">High</option>
-          <option value="CRITICAL" th:selected="${severityFilter == 'CRITICAL'}">Critical</option>
-        </select>
         <button class="btn btn-primary" onclick="applyFilters()">🔍 Search</button>
       </div>
       <div class="table-wrap">
@@ -175,7 +168,6 @@
               <th>Case #</th>
               <th>Student</th>
               <th>Title</th>
-              <th>Severity</th>
               <th>Status</th>
               <th>Date Filed</th>
               <th>Actions</th>
@@ -188,44 +180,37 @@
               <td th:text="${case.title}">—</td>
               <td>
                 <span class="pill"
-                  th:classappend="${case.severity != null and case.severity.name() == 'CRITICAL'} ? 'pill-open' :
-                    (${case.severity != null and case.severity.name() == 'HIGH'} ? 'pill-review' :
-                    (${case.severity != null and case.severity.name() == 'MEDIUM'} ? 'pill-resolved' : 'pill-closed'))"
-                  th:text="${case.severity}">—</span>
-              </td>
-              <td>
-                <span class="pill"
                   th:classappend="${case.status != null and case.status.name() == 'OPEN'} ? 'pill-open' :
                     (${case.status != null and case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' :
                     (${case.status != null and case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
                   th:text="${case.status}">—</span>
               </td>
-              <td th:text="${case.dateFiled != null} ? ${#temporals.format(case.dateFiled, 'MMM dd, yyyy')} : '—'">—</td>
+              <td th:text="${case.createdDate != null} ? ${#temporals.format(case.createdDate, 'MMM dd, yyyy')} : '—'">—</td>
               <td>
                 <a th:href="@{/admin/case-profile(id=${case.id})}" class="action-link">View</a>
                 <a th:href="@{/admin/case-timeline(id=${case.id})}" class="action-link">Timeline</a>
-               </td>
-             </tr>
+              </td>
+            </tr>
             <tr th:if="${cases == null or #lists.isEmpty(cases)}">
-              <td colspan="7">
+              <td colspan="6">
                 <div class="empty-state">
                   <div class="empty-icon">🗂️</div>
                   <div>No cases found</div>
                 </div>
               </td>
-             </tr>
+            </tr>
           </tbody>
-         </table>
+        </table>
       </div>
       <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
         <span class="page-info" th:text="'Page ' + ${currentPage + 1} + ' of ' + ${totalPages}">Page 1</span>
-        <a th:href="@{/admin/case-search(page=${currentPage - 1}, search=${searchQuery}, status=${statusFilter}, severity=${severityFilter})}"
+        <a th:href="@{/admin/case-search(page=${currentPage - 1}, search=${searchQuery}, status=${statusFilter})}"
            class="page-btn" th:classappend="${currentPage == 0} ? 'disabled'" th:if="${currentPage > 0}">‹</a>
         <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-           th:href="@{/admin/case-search(page=${i}, search=${searchQuery}, status=${statusFilter}, severity=${severityFilter})}"
+           th:href="@{/admin/case-search(page=${i}, search=${searchQuery}, status=${statusFilter})}"
            class="page-btn" th:classappend="${i == currentPage} ? 'active'"
            th:text="${i + 1}">1</a>
-        <a th:href="@{/admin/case-search(page=${currentPage + 1}, search=${searchQuery}, status=${statusFilter}, severity=${severityFilter})}"
+        <a th:href="@{/admin/case-search(page=${currentPage + 1}, search=${searchQuery}, status=${statusFilter})}"
            class="page-btn" th:if="${currentPage < totalPages - 1}">›</a>
       </div>
     </div>
@@ -255,11 +240,9 @@
   function applyFilters() {
     const search = document.getElementById('searchInput').value;
     const status = document.getElementById('statusFilter').value;
-    const severity = document.getElementById('severityFilter').value;
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (status) params.set('status', status);
-    if (severity) params.set('severity', severity);
     params.set('page', '0');
     window.location.href = '/admin/case-search?' + params.toString();
   }
