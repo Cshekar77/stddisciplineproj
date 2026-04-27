@@ -4,7 +4,6 @@ import com.studentdiscipline.enums.DisciplineStatus;
 import com.studentdiscipline.enums.IncidentStatus;
 import com.studentdiscipline.model.Incident;
 import com.studentdiscipline.model.Student;
-import com.studentdiscipline.model.Teacher;
 import com.studentdiscipline.model.User;
 import com.studentdiscipline.repository.IncidentRepository;
 import com.studentdiscipline.repository.StudentRepository;
@@ -62,14 +61,7 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-    // ✅ ADDED: Create student for a specific teacher (CRITICAL FIX)
-    public Student createStudentForTeacher(String firstName, String lastName, String studentId,
-                                            String grade, String section, String email, 
-                                            String password, Teacher teacher) {
-        Student student = createStudent(firstName, lastName, studentId, grade, section, email, password);
-        student.setTeacher(teacher);
-        return studentRepository.save(student);
-    }
+    // ❌ REMOVED: createStudentForTeacher (not needed - teachers see ALL students)
 
     // ── Save/update directly ──────────────────────────────────────────────────
     public Student saveStudent(Student student) { return studentRepository.save(student); }
@@ -107,15 +99,11 @@ public class StudentService {
     public Optional<Student> getStudentByUser(User user) { return studentRepository.findByUser(user); }
     public List<Student> getStudentsByGrade(String grade) { return studentRepository.findByGrade(grade); }
 
-    // ✅ ADDED: Find students by teacher ID (CRITICAL FIX)
-    public List<Student> findByTeacherId(Long teacherId) {
-        return studentRepository.findByTeacherId(teacherId);
-    }
+    // ❌ REMOVED: findByTeacherId (not needed)
+    // public List<Student> findByTeacherId(Long teacherId)
 
-    // ✅ ADDED: Count students by teacher ID (CRITICAL FIX)
-    public long countByTeacherId(Long teacherId) {
-        return studentRepository.countByTeacherId(teacherId);
-    }
+    // ❌ REMOVED: countByTeacherId (not needed)
+    // public long countByTeacherId(Long teacherId)
 
     public List<Student> search(String term) {
         String s = term.toLowerCase();

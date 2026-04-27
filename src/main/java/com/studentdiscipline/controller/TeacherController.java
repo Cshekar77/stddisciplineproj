@@ -44,27 +44,19 @@ public class TeacherController {
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
     }
 
-    // ✅ ADDED: Helper method to get student IDs for the current teacher
-    private List<Long> getTeacherStudentIds(Teacher teacher) {
-        return studentService.findByTeacherId(teacher.getId())
-                .stream()
-                .map(Student::getId)
-                .collect(Collectors.toList());
-    }
-
     @GetMapping("/dashboard")
     public String dashboard(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
             Teacher teacher = currentTeacher(userDetails);
             model.addAttribute("teacher", teacher);
             model.addAttribute("teacherName", teacher.getFullName());
-            // ✅ FIXED: Use countByTeacherId instead of countAll
-            model.addAttribute("totalStudents", studentService.countByTeacherId(teacher.getId()));
-            model.addAttribute("myIncidents", incidentService.getIncidentsByTeacher(teacher).size());
-            model.addAttribute("openIncidents", incidentService.getIncidentsByTeacher(teacher)
-                    .stream().filter(i -> i.getStatus() == IncidentStatus.OPEN).count());
-            model.addAttribute("recentIncidents", incidentService.getIncidentsByTeacher(teacher)
-                    .stream().limit(5).collect(Collectors.toList()));
+            // ✅ FIXED: Show ALL students (no filtering)
+            model.addAttribute("totalStudents", studentService.countAll());
+            model.addAttribute("myIncidents", incidentService.findAll().size());
+            model.addAttribute("openIncidents", incidentService.findAll().stream()
+                    .filter(i -> i.getStatus() == IncidentStatus.OPEN).count());
+            model.addAttribute("recentIncidents", incidentService.findAll().stream()
+                    .limit(5).collect(Collectors.toList()));
         } catch (Exception e) {
             model.addAttribute("teacherName", "Teacher");
             model.addAttribute("totalStudents", 0);
@@ -76,12 +68,10 @@ public class TeacherController {
     }
 
     @GetMapping("/students")
-    public String students(@RequestParam(required = false) String search, 
-                          @AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String students(@RequestParam(required = false) String search, Model model) {
         try {
-            Teacher teacher = currentTeacher(userDetails);
-            // ✅ FIXED: Only show students assigned to this teacher
-            List<Student> students = studentService.findByTeacherId(teacher.getId());
+            // ✅ FIXED: Show ALL students (no filtering by teacher)
+            List<Student> students = studentService.findAll();
             
             if (search != null && !search.isBlank()) {
                 String kw = search.toLowerCase();
@@ -101,24 +91,7 @@ public class TeacherController {
         return "teacher/students";
     }
 
-    @PostMapping("/students/add")
-    public String addStudent(@RequestParam String firstName, @RequestParam String lastName,
-                             @RequestParam String studentId,
-                             @RequestParam(required = false) String grade,
-                             @RequestParam(required = false) String section,
-                             @RequestParam(required = false) String email,
-                             @RequestParam String password,
-                             @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
-        try {
-            Teacher teacher = currentTeacher(userDetails);
-            // ✅ FIXED: Use createStudentForTeacher to link student to teacher
-            studentService.createStudentForTeacher(firstName, lastName, studentId,
-                    grade != null ? grade : "N/A", section != null ? section : "N/A", email, password, teacher);
-            activityLogService.log(currentUser(userDetails), "Teacher added student: " + firstName + " " + lastName);
-            ra.addFlashAttribute("success", "Student added successfully.");
-        } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
-        return "redirect:/teacher/students";
-    }
+    // ❌ REMOVED: addStudent method - Teachers should NOT add students
 
     @PostMapping("/students/delete/{id}")
     public String deleteStudent(@PathVariable Long id,
@@ -148,10 +121,10 @@ public class TeacherController {
     @GetMapping("/incidents")
     public String incidents(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            Teacher teacher = currentTeacher(userDetails);
-            model.addAttribute("incidents", incidentService.getIncidentsByTeacher(teacher));
-            // ✅ FIXED: Only show students assigned to this teacher in dropdown
-            model.addAttribute("students", studentService.findByTeacherId(teacher.getId()));
+            // ✅ FIXED: Show ALL incidents (no filtering by teacher)
+            model.addAttribute("incidents", incidentService.findAll());
+            // ✅ FIXED: Show ALL students in dropdown
+            model.addAttribute("students", studentService.findAll());
             model.addAttribute("incidentTypes", IncidentType.values());
         } catch (Exception e) {
             model.addAttribute("incidents", new ArrayList<>());
@@ -196,18 +169,11 @@ public class TeacherController {
     @GetMapping("/sanctions")
     public String sanctions(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            Teacher teacher = currentTeacher(userDetails);
-            List<Long> studentIds = getTeacherStudentIds(teacher);
-            
-            // ✅ FIXED: Only show sanctions for students assigned to this teacher
-            List<Sanction> filteredSanctions = sanctionService.findAll().stream()
-                    .filter(s -> s.getStudent() != null && studentIds.contains(s.getStudent().getId()))
-                    .collect(Collectors.toList());
-            
-            model.addAttribute("sanctions", filteredSanctions);
-            // ✅ FIXED: Only show students assigned to this teacher in dropdown
-            model.addAttribute("students", studentService.findByTeacherId(teacher.getId()));
-            model.addAttribute("incidents", incidentService.getIncidentsByTeacher(teacher));
+            // ✅ FIXED: Show ALL sanctions (no filtering by teacher)
+            model.addAttribute("sanctions", sanctionService.findAll());
+            // ✅ FIXED: Show ALL students in dropdown
+            model.addAttribute("students", studentService.findAll());
+            model.addAttribute("incidents", incidentService.findAll());
             model.addAttribute("sanctionTypes", SanctionType.values());
         } catch (Exception e) {
             model.addAttribute("sanctions", new ArrayList<>());
@@ -329,16 +295,10 @@ public class TeacherController {
 
     @GetMapping("/case-search")
     public String caseSearch(@RequestParam(required = false) String search,
-                             @RequestParam(required = false) String status, 
-                             @AuthenticationPrincipal UserDetails userDetails, Model model) {
+                             @RequestParam(required = false) String status, Model model) {
         try {
-            Teacher teacher = currentTeacher(userDetails);
-            List<Long> studentIds = getTeacherStudentIds(teacher);
-            
-            // ✅ FIXED: Only show cases for students assigned to this teacher
-            List<Case> cases = caseService.getAllCases().stream()
-                    .filter(c -> c.getStudent() != null && studentIds.contains(c.getStudent().getId()))
-                    .collect(Collectors.toList());
+            // ✅ FIXED: Show ALL cases (no filtering by teacher)
+            List<Case> cases = caseService.getAllCases();
             
             if (status != null && !status.isBlank()) {
                 CaseStatus cs = CaseStatus.valueOf(status);
@@ -380,23 +340,18 @@ public class TeacherController {
     }
 
     @GetMapping("/case-reports")
-    public String caseReports(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+    public String caseReports(Model model) {
         try {
-            Teacher teacher = currentTeacher(userDetails);
-            List<Long> studentIds = getTeacherStudentIds(teacher);
+            // ✅ FIXED: Show ALL case reports (no filtering)
+            List<Case> allCases = caseService.getAllCases();
             
-            // ✅ FIXED: Only show case reports for students assigned to this teacher
-            List<Case> teacherCases = caseService.getAllCases().stream()
-                    .filter(c -> c.getStudent() != null && studentIds.contains(c.getStudent().getId()))
-                    .collect(Collectors.toList());
-            
-            model.addAttribute("totalCases", teacherCases.size());
-            model.addAttribute("openCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.OPEN).count());
-            model.addAttribute("resolvedCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.RESOLVED).count());
-            model.addAttribute("closedCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.CLOSED).count());
-            model.addAttribute("underReviewCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.UNDER_REVIEW).count());
-            model.addAttribute("appealPendingCases", teacherCases.stream().filter(c -> c.getStatus() == CaseStatus.APPEAL_PENDING).count());
-            model.addAttribute("allCases", teacherCases);
+            model.addAttribute("totalCases", allCases.size());
+            model.addAttribute("openCases", allCases.stream().filter(c -> c.getStatus() == CaseStatus.OPEN).count());
+            model.addAttribute("resolvedCases", allCases.stream().filter(c -> c.getStatus() == CaseStatus.RESOLVED).count());
+            model.addAttribute("closedCases", allCases.stream().filter(c -> c.getStatus() == CaseStatus.CLOSED).count());
+            model.addAttribute("underReviewCases", allCases.stream().filter(c -> c.getStatus() == CaseStatus.UNDER_REVIEW).count());
+            model.addAttribute("appealPendingCases", allCases.stream().filter(c -> c.getStatus() == CaseStatus.APPEAL_PENDING).count());
+            model.addAttribute("allCases", allCases);
         } catch (Exception e) {
             model.addAttribute("totalCases", 0);
             model.addAttribute("allCases", new ArrayList<>());
