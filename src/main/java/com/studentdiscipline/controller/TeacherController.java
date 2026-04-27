@@ -31,7 +31,7 @@ public class TeacherController {
     @Autowired private FeedbackService feedbackService;
     @Autowired private ActivityLogService activityLogService;
     @Autowired private UserService userService;
-    @Autowired private CaseService caseService; // ✅ ADDED
+    @Autowired private CaseService caseService;
 
     private User currentUser(UserDetails userDetails) {
         return userService.findByEmail(userDetails.getUsername())
@@ -234,7 +234,7 @@ public class TeacherController {
                                  @AuthenticationPrincipal UserDetails userDetails, RedirectAttributes ra) {
         try {
             User user = currentUser(userDetails);
-            feedbackService.submitFeedback(message, user);
+            feedbackService.submitFeedback(message, "GENERAL", user);
             activityLogService.log(user, "Teacher submitted feedback.");
             ra.addFlashAttribute("success", "Feedback submitted successfully.");
         } catch (Exception e) { ra.addFlashAttribute("error", e.getMessage()); }
@@ -292,7 +292,7 @@ public class TeacherController {
         return "redirect:/teacher/change-password";
     }
 
-    // ── CASE MANAGEMENT ───────────────────────────────────────────────────────  ✅ ADDED
+    // ── CASE MANAGEMENT ───────────────────────────────────────────────────────
 
     @GetMapping("/case-search")
     public String caseSearch(@RequestParam(required = false) String search,
