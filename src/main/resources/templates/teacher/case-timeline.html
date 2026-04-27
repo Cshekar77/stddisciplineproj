@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Case Timeline — Teacher</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f1117;--surface:#1a1d27;--card:#21253a;--accent:#4f8ef7;--accent2:#7c3aed;--text:#e2e8f0;--muted:#64748b;--border:#2d3348;--danger:#ef4444;--warning:#f59e0b;--success:#10b981}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;height:100vh;z-index:100}
+  .logo{padding:0 24px 32px;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:-0.5px}
+  .logo span{color:var(--text)}
+  .nav-section{padding:0 12px;margin-bottom:8px}
+  .nav-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:0 12px;margin-bottom:8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:.15s}
+  .nav-item:hover{background:var(--card);color:var(--text)}
+  .nav-item.active{background:rgba(79,142,247,.15);color:var(--accent)}
+  .nav-item svg{width:16px;height:16px;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border)}
+  .user-info{display:flex;align-items:center;gap:10px}
+  .avatar-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+  .user-name{font-size:13px;font-weight:500}
+  .user-role{font-size:11px;color:var(--muted)}
+  .main{margin-left:240px;flex:1;padding:32px}
+  .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
+  .page-title{font-size:24px;font-weight:700;margin-bottom:4px}
+  .page-sub{color:var(--muted);font-size:14px}
+  .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;font-family:inherit}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3b7de8}
+  .filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  select,input[type=date]{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none}
+  select:focus,input[type=date]:focus{border-color:var(--accent)}
+  .filter-label{font-size:13px;color:var(--muted);font-weight:500}
+  .layout{display:grid;grid-template-columns:1fr 300px;gap:24px}
+  .timeline{position:relative}
+  .month-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:12px 0;margin-bottom:4px}
+  .timeline-item{display:flex;gap:16px;margin-bottom:4px;position:relative}
+  .timeline-line{display:flex;flex-direction:column;align-items:center;width:40px;flex-shrink:0}
+  .timeline-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);flex-shrink:0;margin-top:4px;z-index:1}
+  .timeline-dot.danger{border-color:var(--danger)}
+  .timeline-dot.warning{border-color:var(--warning)}
+  .timeline-dot.success{border-color:var(--success)}
+  .timeline-connector{width:2px;flex:1;background:var(--border);margin-top:4px;min-height:24px}
+  .timeline-content{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:.15s}
+  .timeline-content:hover{border-color:rgba(79,142,247,.4)}
+  .tc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+  .tc-title{font-size:14px;font-weight:600}
+  .tc-time{font-size:12px;color:var(--muted)}
+  .tc-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+  .tc-footer{display:flex;gap:8px;align-items:center}
+  .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+  .badge-danger{background:rgba(239,68,68,.15);color:#ef4444}
+  .badge-warning{background:rgba(245,158,11,.15);color:#f59e0b}
+  .badge-success{background:rgba(16,185,129,.15);color:#10b981}
+  .badge-info{background:rgba(79,142,247,.15);color:var(--accent)}
+  .tc-author{font-size:12px;color:var(--muted)}
+  /* Side panel */
+  .side-panel .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+  .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
+  .stat-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid var(--border)}
+  .stat-row:last-child{border-bottom:none}
+  .stat-label{color:var(--muted)}
+  .stat-val{font-weight:600}
+  .activity-item{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .activity-item:last-child{border-bottom:none}
+  .activity-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:5px;flex-shrink:0}
+  .activity-text{color:var(--muted);line-height:1.5}
+  .activity-text strong{color:var(--text)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">Discipline<span>Pro</span></div>
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Cases</div>
+    <a href="case-search.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search Cases
+    </a>
+    <a href="case-timeline.html" class="nav-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Timeline
+    </a>
+    <a href="case-reports.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2z"/></svg>Reports
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <a href="profile.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar-sm">JD</div>
+      <div><div class="user-name">Jane Doe</div><div class="user-role">Teacher</div></div>
+    </div>
+  </div>
+</aside>
+<main class="main">
+  <div class="page-header">
+    <div><div class="page-title">Case Timeline</div><div class="page-sub">Chronological view of all case activities</div></div>
+    <button class="btn btn-primary">+ Log Activity</button>
+  </div>
+  <div class="filter-bar">
+    <span class="filter-label">Filter:</span>
+    <select><option>All Cases</option><option>#C-1042</option><option>#C-1039</option></select>
+    <select><option>All Types</option><option>Status Change</option><option>Note Added</option><option>Document</option><option>Meeting</option></select>
+    <input type="date"/>
+    <input type="date"/>
+  </div>
+  <div class="layout">
+    <div class="timeline">
+      <div class="month-label">April 2026</div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot danger"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="tc-header"><div class="tc-title">Case #C-1042 — Incident Reported</div><div class="tc-time">Apr 25 · 10:55 AM</div></div>
+          <div class="tc-desc">Physical altercation reported in Building B corridor involving Marcus Green. Three witnesses present. Security footage retrieved.</div>
+          <div class="tc-footer"><span class="badge badge-danger">Critical</span><span class="tc-author">by Jane Doe</span></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot warning"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="tc-header"><div class="tc-title">Case #C-1042 — Parent Notified</div><div class="tc-time">Apr 25 · 2:30 PM</div></div>
+          <div class="tc-desc">Phone call made to Robert Green (guardian). Informed about the incident and requested meeting. Meeting scheduled for Apr 27.</div>
+          <div class="tc-footer"><span class="badge badge-warning">Under Review</span><span class="tc-author">by Principal Adams</span></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="tc-header"><div class="tc-title">Case #C-1039 — New Case Filed</div><div class="tc-time">Apr 22 · 9:10 AM</div></div>
+          <div class="tc-desc">Academic dishonesty case opened for Sofia Ramirez. Copied assignment detected during mid-term review. Documentation submitted.</div>
+          <div class="tc-footer"><span class="badge badge-info">Open</span><span class="tc-author">by Jane Doe</span></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot success"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="tc-header"><div class="tc-title">Case #C-1035 — Resolved</div><div class="tc-time">Apr 20 · 11:00 AM</div></div>
+          <div class="tc-desc">Attendance case for James Park resolved. Student's guardian confirmed medical documentation. Absences excused and case closed.</div>
+          <div class="tc-footer"><span class="badge badge-success">Resolved</span><span class="tc-author">by Jane Doe</span></div>
+        </div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot warning"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="tc-header"><div class="tc-title">Case #C-1030 — Review Meeting Held</div><div class="tc-time">Apr 18 · 1:15 PM</div></div>
+          <div class="tc-desc">Counselor meeting with Aisha Patel and parents. Anti-bullying agreement signed. Student placed on behavioral monitoring for 30 days.</div>
+          <div class="tc-footer"><span class="badge badge-warning">Under Review</span><span class="tc-author">by Counselor Lee</span></div>
+        </div>
+      </div>
+      <div class="month-label">March 2026</div>
+      <div class="timeline-item">
+        <div class="timeline-line"><div class="timeline-dot success"></div><div class="timeline-connector"></div></div>
+        <div class="timeline-content">
+          <div class="tc-header"><div class="tc-title">Case #C-1027 — Status Updated</div><div class="tc-time">Mar 30 · 3:45 PM</div></div>
+          <div class="tc-desc">Liam Torres case updated from Open to Under Review. Awaiting parent response to scheduled meeting request.</div>
+          <div class="tc-footer"><span class="badge badge-success">Resolved</span><span class="tc-author">by Jane Doe</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="side-panel">
+      <div class="card">
+        <div class="card-title">Summary</div>
+        <div class="stat-row"><span class="stat-label">Total Activities</span><span class="stat-val">42</span></div>
+        <div class="stat-row"><span class="stat-label">This Month</span><span class="stat-val">18</span></div>
+        <div class="stat-row"><span class="stat-label">My Cases</span><span class="stat-val">9</span></div>
+        <div class="stat-row"><span class="stat-label">Pending Follow-up</span><span class="stat-val" style="color:var(--warning)">3</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Recent Activity</div>
+        <div class="activity-item"><div class="activity-dot"></div><div class="activity-text"><strong>Marcus Green</strong> case escalated to Critical</div></div>
+        <div class="activity-item"><div class="activity-dot" style="background:var(--warning)"></div><div class="activity-text">Meeting scheduled for <strong>Apr 27</strong></div></div>
+        <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-text"><strong>James Park</strong> case resolved</div></div>
+        <div class="activity-item"><div class="activity-dot"></div><div class="activity-text">New case filed for <strong>Sofia Ramirez</strong></div></div>
+        <div class="activity-item"><div class="activity-dot" style="background:var(--success)"></div><div class="activity-text"><strong>Aisha Patel</strong> agreement signed</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

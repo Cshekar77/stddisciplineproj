@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Case Search — Teacher</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0f1117;--surface:#1a1d27;--card:#21253a;--accent:#4f8ef7;--accent2:#7c3aed;--text:#e2e8f0;--muted:#64748b;--border:#2d3348;--danger:#ef4444;--warning:#f59e0b;--success:#10b981}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+  /* Sidebar */
+  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;height:100vh;z-index:100}
+  .logo{padding:0 24px 32px;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:-0.5px}
+  .logo span{color:var(--text)}
+  .nav-section{padding:0 12px;margin-bottom:8px}
+  .nav-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:0 12px;margin-bottom:8px}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:.15s}
+  .nav-item:hover{background:var(--card);color:var(--text)}
+  .nav-item.active{background:rgba(79,142,247,.15);color:var(--accent)}
+  .nav-item svg{width:16px;height:16px;flex-shrink:0}
+  .sidebar-footer{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border)}
+  .user-info{display:flex;align-items:center;gap:10px}
+  .avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+  .user-name{font-size:13px;font-weight:500}
+  .user-role{font-size:11px;color:var(--muted)}
+  /* Main */
+  .main{margin-left:240px;flex:1;padding:32px}
+  .page-header{margin-bottom:28px}
+  .page-title{font-size:24px;font-weight:700;margin-bottom:4px}
+  .page-sub{color:var(--muted);font-size:14px}
+  /* Search bar */
+  .search-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+  .search-row{display:flex;gap:12px;margin-bottom:16px}
+  .search-input-wrap{flex:1;position:relative}
+  .search-input-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);width:16px;height:16px}
+  .search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px 10px 40px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:.15s}
+  .search-input:focus{border-color:var(--accent)}
+  .filters{display:flex;gap:10px;flex-wrap:wrap}
+  select,input[type=date]{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;cursor:pointer}
+  select:focus,input[type=date]:focus{border-color:var(--accent)}
+  .btn{padding:10px 18px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:.15s;font-family:inherit}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:#3b7de8}
+  .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{border-color:var(--text);color:var(--text)}
+  /* Results */
+  .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+  .results-count{font-size:14px;color:var(--muted)}
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  table{width:100%;border-collapse:collapse}
+  th{padding:12px 16px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;border-bottom:1px solid var(--border)}
+  td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(255,255,255,.02)}
+  .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+  .badge-danger{background:rgba(239,68,68,.15);color:#ef4444}
+  .badge-warning{background:rgba(245,158,11,.15);color:#f59e0b}
+  .badge-success{background:rgba(16,185,129,.15);color:#10b981}
+  .badge-info{background:rgba(79,142,247,.15);color:var(--accent)}
+  .action-btn{padding:6px 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:inherit;transition:.15s}
+  .action-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .pagination{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-top:1px solid var(--border)}
+  .page-info{font-size:13px;color:var(--muted)}
+  .page-btns{display:flex;gap:6px}
+  .page-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;font-family:inherit;transition:.15s}
+  .page-btn.active,.page-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="logo">Discipline<span>Pro</span></div>
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <a href="dashboard.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Cases</div>
+    <a href="case-search.html" class="nav-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search Cases
+    </a>
+    <a href="case-timeline.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Timeline
+    </a>
+    <a href="case-reports.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2z"/></svg>Reports
+    </a>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Account</div>
+    <a href="profile.html" class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="avatar">JD</div>
+      <div><div class="user-name">Jane Doe</div><div class="user-role">Teacher</div></div>
+    </div>
+  </div>
+</aside>
+<main class="main">
+  <div class="page-header">
+    <div class="page-title">Case Search</div>
+    <div class="page-sub">Search and filter all discipline cases</div>
+  </div>
+  <div class="search-box">
+    <div class="search-row">
+      <div class="search-input-wrap">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" type="text" placeholder="Search by student name, case ID, or description..."/>
+      </div>
+      <button class="btn btn-primary">Search</button>
+      <button class="btn btn-ghost">Reset</button>
+    </div>
+    <div class="filters">
+      <select><option>All Statuses</option><option>Open</option><option>Under Review</option><option>Resolved</option><option>Closed</option></select>
+      <select><option>All Severity</option><option>Minor</option><option>Moderate</option><option>Major</option><option>Critical</option></select>
+      <select><option>All Types</option><option>Behavioral</option><option>Academic Dishonesty</option><option>Bullying</option><option>Attendance</option></select>
+      <input type="date" placeholder="From"/>
+      <input type="date" placeholder="To"/>
+    </div>
+  </div>
+  <div class="results-header">
+    <div class="results-count">Showing <strong>24</strong> results</div>
+    <select><option>Newest First</option><option>Oldest First</option><option>Severity</option></select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Case ID</th><th>Student</th><th>Type</th><th>Severity</th><th>Status</th><th>Date</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>#C-1042</td><td>Marcus Green</td><td>Behavioral</td><td><span class="badge badge-danger">Critical</span></td><td><span class="badge badge-warning">Under Review</span></td><td>Apr 25, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1039</td><td>Sofia Ramirez</td><td>Academic Dishonesty</td><td><span class="badge badge-warning">Major</span></td><td><span class="badge badge-info">Open</span></td><td>Apr 22, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1035</td><td>James Park</td><td>Attendance</td><td><span class="badge badge-info">Minor</span></td><td><span class="badge badge-success">Resolved</span></td><td>Apr 18, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1030</td><td>Aisha Patel</td><td>Bullying</td><td><span class="badge badge-danger">Critical</span></td><td><span class="badge badge-success">Resolved</span></td><td>Apr 15, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1027</td><td>Liam Torres</td><td>Behavioral</td><td><span class="badge badge-warning">Moderate</span></td><td><span class="badge badge-warning">Under Review</span></td><td>Apr 12, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1021</td><td>Priya Nair</td><td>Attendance</td><td><span class="badge badge-info">Minor</span></td><td><span class="badge badge-success">Closed</span></td><td>Apr 8, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1018</td><td>David Kim</td><td>Academic Dishonesty</td><td><span class="badge badge-warning">Major</span></td><td><span class="badge badge-info">Open</span></td><td>Apr 5, 2026</td><td><button class="action-btn">View</button></td></tr>
+        <tr><td>#C-1014</td><td>Zara Chen</td><td>Behavioral</td><td><span class="badge badge-warning">Moderate</span></td><td><span class="badge badge-success">Resolved</span></td><td>Apr 1, 2026</td><td><button class="action-btn">View</button></td></tr>
+      </tbody>
+    </table>
+    <div class="pagination">
+      <div class="page-info">Page 1 of 3</div>
+      <div class="page-btns">
+        <button class="page-btn">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

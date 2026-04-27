@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Case Management — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --nav-w: 240px; --accent: #4f7fff; --accent2: #ff6b6b; --accent3: #43d9a2; --accent4: #f7c948; --transition: all 0.3s ease; }
+    [data-theme="dark"] { --bg: #0d0f14; --surface: #151820; --surface2: #1c2030; --border: #252a3a; --text: #e8eaf2; --muted: #7a829a; --shadow: 0 4px 24px rgba(0,0,0,0.4); --topbar-bg: #151820; }
+    [data-theme="light"] { --bg: #f0f2f8; --surface: #ffffff; --surface2: #f5f7ff; --border: #e2e6f0; --text: #1a1d2e; --muted: #6b7494; --shadow: 0 4px 24px rgba(0,0,0,0.08); --topbar-bg: #ffffff; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); display: flex; min-height: 100vh; transition: var(--transition); }
+    .sidebar { width: var(--nav-w); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; transition: transform 0.3s ease, background 0.3s ease; overflow-y: auto; max-height: 100vh; }
+    .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border); font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; }
+    .sidebar-logo .dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+    .nav-section { padding: 16px 12px 8px; font-size: .68rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+    .nav-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 8px; margin: 2px 8px; color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 500; transition: all .18s; }
+    .nav-link:hover { background: var(--surface2); color: var(--text); }
+    .nav-link.active { background: rgba(79,127,255,.12); color: var(--accent); }
+    .nav-link .icon { font-size: 1rem; width: 18px; text-align: center; }
+    .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+    .logout-btn { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 8px; background: rgba(255,107,107,.08); color: var(--accent2); text-decoration: none; font-size: .85rem; font-weight: 500; }
+    .logout-btn:hover { background: rgba(255,107,107,.18); }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+    .main { margin-left: var(--nav-w); flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { padding: 16px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--topbar-bg); position: sticky; top: 0; z-index: 50; box-shadow: var(--shadow); transition: var(--transition); }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-title { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 700; font-size: .85rem; color: #fff; flex-shrink: 0; }
+    .badge { padding: 3px 10px; border-radius: 20px; font-size: .72rem; font-weight: 600; background: rgba(79,127,255,.15); color: var(--accent); letter-spacing: .04em; }
+    .theme-toggle-wrap { display: flex; align-items: center; gap: 6px; }
+    .theme-icon { font-size: .9rem; cursor: pointer; user-select: none; }
+    .theme-toggle { width: 42px; height: 24px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; cursor: pointer; position: relative; transition: var(--transition); flex-shrink: 0; }
+    .theme-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); transition: transform 0.3s ease; }
+    [data-theme="light"] .theme-toggle::after { transform: translateX(18px); }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: var(--transition); }
+    .content { padding: 28px 32px; flex: 1; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: .85rem; font-weight: 600; cursor: pointer; border: none; text-decoration: none; transition: all .18s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #3d6be0; }
+    .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--surface2); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); transition: var(--transition); }
+    .card-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; }
+    /* Search / Filter */
+    .search-bar { display: flex; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .search-input-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-input-wrap .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: .9rem; color: var(--muted); pointer-events: none; }
+    .search-input { width: 100%; padding: 9px 12px 9px 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: .85rem; outline: none; transition: border-color .18s; font-family: 'DM Sans', sans-serif; }
+    .search-input:focus { border-color: var(--accent); }
+    .filter-select { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: .85rem; outline: none; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+    .filter-select:focus { border-color: var(--accent); }
+    /* Table */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    thead th { padding: 10px 18px; text-align: left; font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); background: var(--surface2); }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 12px 18px; font-size: .85rem; }
+    .pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: .7rem; font-weight: 600; letter-spacing: .04em; }
+    .pill-open { background: rgba(255,107,107,.12); color: var(--accent2); }
+    .pill-review { background: rgba(247,201,72,.12); color: var(--accent4); }
+    .pill-resolved { background: rgba(67,217,162,.12); color: var(--accent3); }
+    .pill-closed { background: rgba(122,130,154,.12); color: var(--muted); }
+    .action-link { color: var(--accent); text-decoration: none; font-size: .82rem; font-weight: 500; margin-right: 10px; }
+    .action-link:hover { text-decoration: underline; }
+    .empty-state { padding: 48px 24px; text-align: center; color: var(--muted); font-size: .9rem; }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    /* Pagination */
+    .pagination { display: flex; align-items: center; justify-content: flex-end; gap: 6px; padding: 14px 20px; border-top: 1px solid var(--border); }
+    .page-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text); font-size: .82rem; cursor: pointer; transition: all .15s; text-decoration: none; }
+    .page-btn:hover, .page-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .page-info { font-size: .8rem; color: var(--muted); margin-right: auto; }
+    /* Mobile */
+    .mobile-logout { display: none; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 8px; background: rgba(255,107,107,.1); color: #ff6b6b; border: 1px solid rgba(255,107,107,.25); text-decoration: none; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+    @media(max-width:768px) {
+      .sidebar { transform: translateX(-100%); z-index: 200; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.open { display: block; }
+      .main { margin-left: 0; }
+      .hamburger { display: flex; }
+      .topbar { padding: 14px 16px; }
+      .content { padding: 16px; }
+      .mobile-logout { display: flex; }
+      .badge { display: none; }
+      .search-bar { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Admin</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/admin/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/admin/teachers" class="nav-link"><span class="icon">👩‍🏫</span> Teachers</a>
+  <a href="/admin/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <a href="/admin/credentials" class="nav-link"><span class="icon">🔑</span> Credentials</a>
+  <div class="nav-section">Records</div>
+  <a href="/admin/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/admin/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <a href="/admin/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+  <a href="/admin/anonymous-reports" class="nav-link"><span class="icon">🕵️</span> Anon Reports</a>
+  <div class="nav-section">Case Management</div>
+  <a href="/admin/case-search" class="nav-link active"><span class="icon">🗂️</span> Case Management</a>
+  <div class="nav-section">System</div>
+  <a href="/admin/activity-history" class="nav-link"><span class="icon">📋</span> Activity Log</a>
+  <a href="/admin/analytics" class="nav-link"><span class="icon">📊</span> Analytics</a>
+  <div class="nav-section">Account</div>
+  <a href="/admin/change-password" class="nav-link"><span class="icon">🔐</span> Change Password</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Case Management</div>
+    </div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <a href="/logout" class="mobile-logout">Logout</a>
+      <span class="badge">ADMIN</span>
+      <div class="avatar" th:text="${adminName != null} ? ${#strings.substring(adminName, 0, 1)} : 'A'">A</div>
+      <span style="font-size:.87rem;font-weight:500;" th:text="${adminName != null} ? ${adminName} : 'Administrator'">Administrator</span>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-header">
+      <div class="page-title">Case Management</div>
+      <a href="/admin/case-reports" class="btn btn-outline">📊 Reports</a>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">All Cases</div>
+        <span style="font-size:.8rem;color:var(--muted);" th:text="${totalCases != null} ? ${totalCases + ' total'} : '0 total'">0 total</span>
+      </div>
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="searchInput" placeholder="Search by student name or case number…" th:value="${searchQuery}"/>
+        </div>
+        <select class="filter-select" id="statusFilter">
+          <option value="">All Statuses</option>
+          <option value="OPEN" th:selected="${statusFilter == 'OPEN'}">Open</option>
+          <option value="UNDER_REVIEW" th:selected="${statusFilter == 'UNDER_REVIEW'}">Under Review</option>
+          <option value="RESOLVED" th:selected="${statusFilter == 'RESOLVED'}">Resolved</option>
+          <option value="CLOSED" th:selected="${statusFilter == 'CLOSED'}">Closed</option>
+        </select>
+        <select class="filter-select" id="severityFilter">
+          <option value="">All Severities</option>
+          <option value="LOW" th:selected="${severityFilter == 'LOW'}">Low</option>
+          <option value="MEDIUM" th:selected="${severityFilter == 'MEDIUM'}">Medium</option>
+          <option value="HIGH" th:selected="${severityFilter == 'HIGH'}">High</option>
+          <option value="CRITICAL" th:selected="${severityFilter == 'CRITICAL'}">Critical</option>
+        </select>
+        <button class="btn btn-primary" onclick="applyFilters()">🔍 Search</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Case #</th>
+              <th>Student</th>
+              <th>Title</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th>Date Filed</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="case : ${cases}">
+              <td style="font-family:'Syne',sans-serif;font-weight:600;" th:text="${case.caseNumber}">—</td>
+              <td th:text="${case.student != null} ? ${case.student.firstName + ' ' + case.student.lastName} : '—'">—</td>
+              <td th:text="${case.title}">—</td>
+              <td>
+                <span class="pill"
+                  th:classappend="${case.severity != null and case.severity.name() == 'CRITICAL'} ? 'pill-open' :
+                    (${case.severity != null and case.severity.name() == 'HIGH'} ? 'pill-review' :
+                    (${case.severity != null and case.severity.name() == 'MEDIUM'} ? 'pill-resolved' : 'pill-closed'))"
+                  th:text="${case.severity}">—</span>
+              </td>
+              <td>
+                <span class="pill"
+                  th:classappend="${case.status != null and case.status.name() == 'OPEN'} ? 'pill-open' :
+                    (${case.status != null and case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' :
+                    (${case.status != null and case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
+                  th:text="${case.status}">—</span>
+              </td>
+              <td th:text="${case.dateFiled != null} ? ${#temporals.format(case.dateFiled, 'MMM dd, yyyy')} : '—'">—</td>
+              <td>
+                <a th:href="@{/admin/case-profile(id=${case.id})}" class="action-link">View</a>
+                <a th:href="@{/admin/case-timeline(id=${case.id})}" class="action-link">Timeline</a>
+              </td>
+            </tr>
+            <tr th:if="${cases == null or #lists.isEmpty(cases)}">
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">🗂️</div>
+                  <div>No cases found</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
+        <span class="page-info" th:text="'Page ' + ${currentPage + 1} + ' of ' + ${totalPages}">Page 1</span>
+        <a th:href="@{/admin/case-search(page=${currentPage - 1}, search=${searchQuery}, status=${statusFilter}, severity=${severityFilter})}"
+           class="page-btn" th:classappend="${currentPage == 0} ? 'disabled'" th:if="${currentPage > 0}">‹</a>
+        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+           th:href="@{/admin/case-search(page=${i}, search=${searchQuery}, status=${statusFilter}, severity=${severityFilter})}"
+           class="page-btn" th:classappend="${i == currentPage} ? 'active'"
+           th:text="${i + 1}">1</a>
+        <a th:href="@{/admin/case-search(page=${currentPage + 1}, search=${searchQuery}, status=${statusFilter}, severity=${severityFilter})}"
+           class="page-btn" th:if="${currentPage < totalPages - 1}">›</a>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+  function applyFilters() {
+    const search = document.getElementById('searchInput').value;
+    const status = document.getElementById('statusFilter').value;
+    const severity = document.getElementById('severityFilter').value;
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (status) params.set('status', status);
+    if (severity) params.set('severity', severity);
+    params.set('page', '0');
+    window.location.href = '/admin/case-search?' + params.toString();
+  }
+  document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') applyFilters(); });
+</script>
+</body>
+</html>
