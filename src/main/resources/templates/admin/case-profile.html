@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -226,9 +226,7 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- FIX 1: added th:if="${note != null}" guard on each row -->
-                <!-- FIX 2: changed </table> typo to </td> on date cell -->
-                <!-- FIX 3: changed note.content ?: to proper null check -->
+                <!-- Fixed: Added th:if guard, fixed typo, proper null checks -->
                 <tr th:each="note : ${notes}" th:if="${note != null}">
                   <td th:text="${note.createdDate != null ? #temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a') : '—'}">—</td>
                   <td th:text="${note.content != null ? note.content : '—'}">—</td>
@@ -306,7 +304,7 @@
 <script>
   const html = document.documentElement;
   const themeIcon = document.getElementById('themeIcon');
-  const saved = localStorage.getItem('sds-theme') || 'dark';
+  const saved = localStorage.getItem('sds-theme') || 'light';
   html.setAttribute('data-theme', saved);
   themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
   function toggleTheme() {
