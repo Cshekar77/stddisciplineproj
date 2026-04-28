@@ -50,7 +50,6 @@ public class TeacherController {
             Teacher teacher = currentTeacher(userDetails);
             model.addAttribute("teacher", teacher);
             model.addAttribute("teacherName", teacher.getFullName());
-            // ✅ FIXED: Show ALL students (no filtering)
             model.addAttribute("totalStudents", studentService.countAll());
             model.addAttribute("myIncidents", incidentService.findAll().size());
             model.addAttribute("openIncidents", incidentService.findAll().stream()
@@ -70,7 +69,6 @@ public class TeacherController {
     @GetMapping("/students")
     public String students(@RequestParam(required = false) String search, Model model) {
         try {
-            // ✅ FIXED: Show ALL students (no filtering by teacher)
             List<Student> students = studentService.findAll();
             
             if (search != null && !search.isBlank()) {
@@ -121,9 +119,7 @@ public class TeacherController {
     @GetMapping("/incidents")
     public String incidents(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            // ✅ FIXED: Show ALL incidents (no filtering by teacher)
             model.addAttribute("incidents", incidentService.findAll());
-            // ✅ FIXED: Show ALL students in dropdown
             model.addAttribute("students", studentService.findAll());
             model.addAttribute("incidentTypes", IncidentType.values());
         } catch (Exception e) {
@@ -169,9 +165,7 @@ public class TeacherController {
     @GetMapping("/sanctions")
     public String sanctions(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            // ✅ FIXED: Show ALL sanctions (no filtering by teacher)
             model.addAttribute("sanctions", sanctionService.findAll());
-            // ✅ FIXED: Show ALL students in dropdown
             model.addAttribute("students", studentService.findAll());
             model.addAttribute("incidents", incidentService.findAll());
             model.addAttribute("sanctionTypes", SanctionType.values());
@@ -297,7 +291,6 @@ public class TeacherController {
     public String caseSearch(@RequestParam(required = false) String search,
                              @RequestParam(required = false) String status, Model model) {
         try {
-            // ✅ FIXED: Show ALL cases (no filtering by teacher)
             List<Case> cases = caseService.getAllCases();
             
             if (status != null && !status.isBlank()) {
@@ -324,25 +317,54 @@ public class TeacherController {
 
     @GetMapping("/case-profile")
     public String caseProfile(@RequestParam Long id, Model model) {
-        Case c = caseService.getCaseById(id);
-        model.addAttribute("case", c);
-        model.addAttribute("notes", caseService.getCaseNotes(id));
-        model.addAttribute("caseStatuses", CaseStatus.values());
+        try {
+            Case c = caseService.getCaseById(id);
+            if (c == null) {
+                return "redirect:/teacher/case-search";
+            }
+            
+            List<CaseNote> notes = caseService.getCaseNotes(id);
+            if (notes == null) {
+                notes = new ArrayList<>();
+            }
+            
+            model.addAttribute("case", c);
+            model.addAttribute("notes", notes);
+            model.addAttribute("caseStatuses", CaseStatus.values());
+        } catch (Exception e) {
+            return "redirect:/teacher/case-search";
+        }
         return "teacher/case-profile";
     }
 
     @GetMapping("/case-timeline")
     public String caseTimeline(@RequestParam Long id, Model model) {
-        Case c = caseService.getCaseById(id);
-        model.addAttribute("case", c);
-        model.addAttribute("notes", caseService.getCaseNotes(id));
+        try {
+            Case c = caseService.getCaseById(id);
+            if (c == null) {
+                return "redirect:/teacher/case-search";
+            }
+            
+            List<CaseNote> notes = caseService.getCaseNotes(id);
+            if (notes == null) {
+                notes = new ArrayList<>();
+            }
+            
+            // ✅ Calculate notes count in controller
+            int notesCount = notes.size();
+            
+            model.addAttribute("case", c);
+            model.addAttribute("notes", notes);
+            model.addAttribute("notesCount", notesCount);
+        } catch (Exception e) {
+            return "redirect:/teacher/case-search";
+        }
         return "teacher/case-timeline";
     }
 
     @GetMapping("/case-reports")
     public String caseReports(Model model) {
         try {
-            // ✅ FIXED: Show ALL case reports (no filtering)
             List<Case> allCases = caseService.getAllCases();
             
             model.addAttribute("totalCases", allCases.size());

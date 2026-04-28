@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,11 +17,12 @@
         .card-stats:hover { transform: translateY(-3px); }
         .stat-icon { font-size: 2.5rem; opacity: 0.3; position: absolute; right: 20px; top: 20px; }
         .table-custom { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .badge-open { background-color: #e74c3c; }
-        .badge-resolved { background-color: #27ae60; }
-        .badge-review { background-color: #f39c12; }
-        .badge-closed { background-color: #7f8c8d; }
-        .badge-appeal { background-color: #9b59b6; }
+        .badge-open { background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-resolved { background-color: #27ae60; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-review { background-color: #f39c12; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-closed { background-color: #7f8c8d; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .badge-appeal { background-color: #9b59b6; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
+        .btn-sm { padding: 4px 8px; font-size: 12px; }
     </style>
 </head>
 <body>
@@ -100,7 +101,7 @@
                             <div class="card-body">
                                 <i class="fas fa-folder-open stat-icon"></i>
                                 <h5 class="card-title">Total Cases</h5>
-                                <h2 class="mb-0" th:text="${totalCases}">0</h2>
+                                <h2 class="mb-0" th:text="${totalCases != null ? totalCases : 0}">0</h2>
                                 <small>All time cases</small>
                             </div>
                         </div>
@@ -110,7 +111,7 @@
                             <div class="card-body">
                                 <i class="fas fa-spinner stat-icon"></i>
                                 <h5 class="card-title">Open</h5>
-                                <h2 class="mb-0" th:text="${openCases}">0</h2>
+                                <h2 class="mb-0" th:text="${openCases != null ? openCases : 0}">0</h2>
                                 <small>Awaiting action</small>
                             </div>
                         </div>
@@ -120,7 +121,7 @@
                             <div class="card-body">
                                 <i class="fas fa-eye stat-icon"></i>
                                 <h5 class="card-title">Under Review</h5>
-                                <h2 class="mb-0" th:text="${underReviewCases}">0</h2>
+                                <h2 class="mb-0" th:text="${underReviewCases != null ? underReviewCases : 0}">0</h2>
                                 <small>Being investigated</small>
                             </div>
                         </div>
@@ -130,7 +131,7 @@
                             <div class="card-body">
                                 <i class="fas fa-check-circle stat-icon"></i>
                                 <h5 class="card-title">Resolved</h5>
-                                <h2 class="mb-0" th:text="${resolvedCases}">0</h2>
+                                <h2 class="mb-0" th:text="${resolvedCases != null ? resolvedCases : 0}">0</h2>
                                 <small>Successfully resolved</small>
                             </div>
                         </div>
@@ -144,7 +145,7 @@
                             <div class="card-body">
                                 <i class="fas fa-archive stat-icon"></i>
                                 <h5 class="card-title">Closed</h5>
-                                <h2 class="mb-0" th:text="${closedCases}">0</h2>
+                                <h2 class="mb-0" th:text="${closedCases != null ? closedCases : 0}">0</h2>
                                 <small>Archived cases</small>
                             </div>
                         </div>
@@ -154,7 +155,7 @@
                             <div class="card-body">
                                 <i class="fas fa-gavel stat-icon"></i>
                                 <h5 class="card-title">Appeal Pending</h5>
-                                <h2 class="mb-0" th:text="${appealPendingCases}">0</h2>
+                                <h2 class="mb-0" th:text="${appealPendingCases != null ? appealPendingCases : 0}">0</h2>
                                 <small>Waiting for appeal decision</small>
                             </div>
                         </div>
@@ -164,7 +165,7 @@
                             <div class="card-body">
                                 <i class="fas fa-chart-line stat-icon"></i>
                                 <h5 class="card-title">Resolution Rate</h5>
-                                <h2 class="mb-0" th:text="${totalCases > 0 ? (resolvedCases * 100 / totalCases) : 0}">0<span style="font-size: 1.5rem;">%</span></h2>
+                                <h2 class="mb-0" th:text="${totalCases != null and totalCases > 0 ? (resolvedCases * 100 / totalCases) : 0}">0<span style="font-size: 1.5rem;">%</span></h2>
                                 <small>Cases resolved</small>
                             </div>
                         </div>
@@ -193,20 +194,14 @@
                                 <tbody>
                                     <tr th:each="case : ${allCases}">
                                         <td th:text="${case.caseNumber}">CASE-001</td>
-                                        <td>
-                                            <span th:text="${case.student != null ? case.student.fullName : 'N/A'}">John Doe</span>
-                                        </td>
+                                        <td th:text="${case.student != null ? case.student.fullName : 'N/A'}">John Doe</td>
                                         <td th:text="${case.student != null ? case.student.grade : 'N/A'}">10</td>
                                         <td>
-                                            <span class="badge" th:classappend="${case.status.name() == 'OPEN'} ? 'badge-open' : 
-                                                                           ${case.status.name() == 'RESOLVED'} ? 'badge-resolved' :
-                                                                           ${case.status.name() == 'UNDER_REVIEW'} ? 'badge-review' :
-                                                                           ${case.status.name() == 'CLOSED'} ? 'badge-closed' :
-                                                                           'badge-appeal'"
-                                                  style="padding: 5px 10px; border-radius: 20px; color: white;"
-                                                  th:text="${case.status}">
-                                                OPEN
-                                            </span>
+                                            <span th:class="'badge-open'" th:if="${case.status.name() == 'OPEN'}" th:text="${case.status}">OPEN</span>
+                                            <span th:class="'badge-review'" th:if="${case.status.name() == 'UNDER_REVIEW'}" th:text="${case.status}">UNDER_REVIEW</span>
+                                            <span th:class="'badge-resolved'" th:if="${case.status.name() == 'RESOLVED'}" th:text="${case.status}">RESOLVED</span>
+                                            <span th:class="'badge-closed'" th:if="${case.status.name() == 'CLOSED'}" th:text="${case.status}">CLOSED</span>
+                                            <span th:class="'badge-appeal'" th:if="${case.status.name() == 'APPEAL_PENDING'}" th:text="${case.status}">APPEAL_PENDING</span>
                                         </td>
                                         <td th:text="${#temporals.format(case.createdDate, 'yyyy-MM-dd')}">2024-01-15</td>
                                         <td th:text="${case.updatedDate != null ? #temporals.format(case.updatedDate, 'yyyy-MM-dd') : '-'}">2024-01-20</td>

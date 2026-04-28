@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -125,14 +125,14 @@
 
   <div class="layout">
     <div class="timeline">
-      <div th:if="${#lists.isEmpty(notes)}" class="empty-state">
+      <div th:if="${notes == null or notes.empty}" class="empty-state">
         <div>📭</div>
         <div>No timeline events yet</div>
         <div style="font-size:12px;margin-top:8px">Add case notes to see them here</div>
       </div>
       
       <!-- Timeline Events from Case Notes -->
-      <div th:each="note, iterStat : ${notes}">
+      <div th:each="note, iterStat : ${notes}" th:if="${notes != null and !notes.empty}">
         <div class="timeline-item">
           <div class="timeline-line">
             <div class="timeline-dot note"></div>
@@ -165,7 +165,7 @@
       
       <div class="card">
         <div class="card-title">Timeline Stats</div>
-        <div class="stat-row"><span class="stat-label">Total Events</span><span class="stat-val" th:text="${#lists.size(notes)}">0</span></div>
+        <div class="stat-row"><span class="stat-label">Total Events</span><span class="stat-val" th:text="${notesCount}">0</span></div>
       </div>
 
       <div class="card">
@@ -180,5 +180,18 @@
     </div>
   </div>
 </main>
+<script>
+  // Theme handling
+  const html = document.documentElement;
+  const savedTheme = localStorage.getItem('sds-theme') || 'light';
+  html.setAttribute('data-theme', savedTheme);
+  
+  function toggleTheme() {
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+  }
+</script>
 </body>
 </html>

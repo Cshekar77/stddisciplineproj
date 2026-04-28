@@ -208,7 +208,6 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Notes</div>
-            <!-- ✅ FIXED: Using notesCount from controller instead of .size() -->
             <span style="font-size:.8rem;color:var(--muted);"
                   th:text="${notesCount} + ' notes'">0 notes</span>
           </div>
@@ -225,7 +224,7 @@
                 <tr th:each="note : ${notes}">
                   <td th:text="${note.createdDate != null}
                                 ? ${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')}
-                                : '—'">—</td>
+                                : '—'">—</table>
                   <td th:text="${note.content ?: '—'}">—</td>
                   <td th:text="${note.createdBy != null}
                                 ? ${note.createdBy.firstName + ' ' + note.createdBy.lastName}
@@ -266,13 +265,9 @@
               <span class="meta-label">Case Number</span>
               <span class="meta-value" th:text="${disciplineCase?.caseNumber ?: '—'}">—</span>
             </li>
-            <li>
-              <span class="meta-label">Created By</span>
-              <span class="meta-value" th:text="${disciplineCase?.createdBy ?: '—'}">—</span>
-            </li>
+            <!-- ✅ REMOVED: Created By line (field doesn't exist in Case model) -->
             <li>
               <span class="meta-label">Total Notes</span>
-              <!-- ✅ FIXED: Using notesCount from controller -->
               <span class="meta-value" th:text="${notesCount}">0</span>
             </li>
             <li>
