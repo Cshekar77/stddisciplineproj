@@ -455,12 +455,12 @@
         <div class="breadcrumb">
             <a th:href="@{/admin/dashboard}">Dashboard</a> /
             <a th:href="@{/admin/case-search}">Cases</a> /
-            <span th:text="${case.caseNumber}">CASE-001</span> /
+            <span th:text="${disciplineCase.caseNumber}">CASE-001</span> /
             Timeline
         </div>
 
         <div class="page-header">
-            <h1>Case <span th:text="${case.caseNumber}">Timeline</span></h1>
+            <h1>Case <span th:text="${disciplineCase.caseNumber}">Timeline</span></h1>
             <button class="add-event-btn" onclick="document.getElementById('addEventModal').classList.add('open')">
                 ＋ Add Note
             </button>
@@ -468,20 +468,19 @@
 
         <!-- Case Info Strip -->
         <div class="case-info-card">
-            <div class="case-badge" th:text="${case.caseNumber}">CASE-001</div>
+            <div class="case-badge" th:text="${disciplineCase.caseNumber}">CASE-001</div>
             <div class="case-meta">
-                <h2 th:text="${case.title}">Case Title</h2>
-                <p>Student: <strong th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</strong>
-                   &nbsp;|&nbsp; Filed: <span th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span>
+                <h2 th:text="${disciplineCase.title}">Case Title</h2>
+                <p>Student: <strong th:text="${disciplineCase.student != null ? disciplineCase.student.fullName : 'N/A'}">—</strong>
+                   &nbsp;|&nbsp; Filed: <span th:text="${#temporals.format(disciplineCase.createdDate, 'MMM dd, yyyy')}">—</span>
                 </p>
             </div>
-            <!-- FIX: Single th:class replaces multiple th:classappend (Thymeleaf does not allow duplicate attributes) -->
             <span th:class="'status-badge' +
-                    (${case.status.name() == 'OPEN'}         ? ' status-open'     :
-                    (${case.status.name() == 'UNDER_REVIEW'} ? ' status-review'   :
-                    (${case.status.name() == 'RESOLVED'}     ? ' status-resolved' :
-                    (${case.status.name() == 'CLOSED'}       ? ' status-closed'   : ''))))"
-                  th:text="${case.status}">OPEN</span>
+                    (${disciplineCase.status.name() == 'OPEN'}         ? ' status-open'     :
+                    (${disciplineCase.status.name() == 'UNDER_REVIEW'} ? ' status-review'   :
+                    (${disciplineCase.status.name() == 'RESOLVED'}     ? ' status-resolved' :
+                    (${disciplineCase.status.name() == 'CLOSED'}       ? ' status-closed'   : ''))))"
+                  th:text="${disciplineCase.status}">OPEN</span>
         </div>
 
         <div class="timeline-container">
@@ -499,9 +498,9 @@
                         <div class="timeline-card">
                             <div class="timeline-card-header">
                                 <span class="timeline-card-title">Case Created</span>
-                                <span class="timeline-card-time" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</span>
+                                <span class="timeline-card-time" th:text="${#temporals.format(disciplineCase.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</span>
                             </div>
-                            <div class="timeline-card-body" th:text="'Case &quot;' + ${case.title} + '&quot; was created'">Case created</div>
+                            <div class="timeline-card-body" th:text="'Case &quot;' + ${disciplineCase.title} + '&quot; was created'">Case created</div>
                             <div class="timeline-card-footer">
                                 <span class="tag tag-create">Case Created</span>
                                 <span class="timeline-by">By: System</span>
@@ -543,19 +542,19 @@
             <aside class="timeline-sidebar-panel">
                 <div class="panel-card">
                     <h3>Case Summary</h3>
-                    <div class="stat-row"><span class="stat-label">Case ID</span><span class="stat-value" th:text="${case.caseNumber}">—</span></div>
-                    <div class="stat-row"><span class="stat-label">Status</span><span class="stat-value" th:text="${case.status}">—</span></div>
-                    <div class="stat-row"><span class="stat-label">Created</span><span class="stat-value" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span></div>
+                    <div class="stat-row"><span class="stat-label">Case ID</span><span class="stat-value" th:text="${disciplineCase.caseNumber}">—</span></div>
+                    <div class="stat-row"><span class="stat-label">Status</span><span class="stat-value" th:text="${disciplineCase.status}">—</span></div>
+                    <div class="stat-row"><span class="stat-label">Created</span><span class="stat-value" th:text="${#temporals.format(disciplineCase.createdDate, 'MMM dd, yyyy')}">—</span></div>
                     <div class="stat-row"><span class="stat-label">Total Events</span><span class="stat-value" th:text="${notes != null ? notes.size() : '0'}">0</span></div>
                 </div>
 
                 <div class="panel-card">
                     <h3>Student Info</h3>
                     <div class="person-row">
-                        <div class="person-avatar" th:text="${case.student != null ? #strings.substring(case.student.firstName, 0, 1) : '?'}">S</div>
+                        <div class="person-avatar" th:text="${disciplineCase.student != null ? #strings.substring(disciplineCase.student.firstName, 0, 1) : '?'}">S</div>
                         <div>
-                            <div class="person-name" th:text="${case.student != null ? case.student.fullName : 'N/A'}">Student Name</div>
-                            <div class="person-role" th:text="${case.student != null ? 'Grade ' + case.student.grade : '—'}">Grade</div>
+                            <div class="person-name" th:text="${disciplineCase.student != null ? disciplineCase.student.fullName : 'N/A'}">Student Name</div>
+                            <div class="person-role" th:text="${disciplineCase.student != null ? 'Grade ' + disciplineCase.student.grade : '—'}">Grade</div>
                         </div>
                     </div>
                 </div>
@@ -563,7 +562,7 @@
                 <div class="panel-card">
                     <h3>Quick Actions</h3>
                     <div style="display:flex;flex-direction:column;gap:8px;">
-                        <a th:href="@{/admin/case-profile(id=${case.id})}" class="btn btn-secondary" style="text-align:center;text-decoration:none;">View Profile</a>
+                        <a th:href="@{/admin/case-profile(id=${disciplineCase.id})}" class="btn btn-secondary" style="text-align:center;text-decoration:none;">View Profile</a>
                         <a th:href="@{/admin/case-search}" class="btn btn-secondary" style="text-align:center;text-decoration:none;">Back to Cases</a>
                     </div>
                 </div>
@@ -577,7 +576,7 @@
     <div class="modal">
         <h2>Add Case Note</h2>
         <form th:action="@{/admin/case-add-note}" method="post">
-            <input type="hidden" name="caseId" th:value="${case.id}"/>
+            <input type="hidden" name="caseId" th:value="${disciplineCase.id}"/>
             <div class="form-group">
                 <label>Note Content</label>
                 <textarea class="form-control" name="content" placeholder="Enter your note here..." required></textarea>
@@ -591,7 +590,6 @@
 </div>
 
 <script>
-    // Theme handling
     const html = document.documentElement;
     const themeIcon = document.getElementById('themeIcon');
     const savedTheme = localStorage.getItem('sds-theme') || 'dark';
@@ -606,7 +604,6 @@
         themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
     }
 
-    // Sidebar
     function openSidebar() {
         document.getElementById('sidebar').classList.add('open');
         document.getElementById('sidebarOverlay').classList.add('open');
@@ -618,7 +615,6 @@
         document.body.style.overflow = '';
     }
 
-    // Timeline filter
     function filterTimeline(type, btn) {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -631,7 +627,6 @@
         });
     }
 
-    // Modal
     function closeModal() {
         document.getElementById('addEventModal').classList.remove('open');
     }

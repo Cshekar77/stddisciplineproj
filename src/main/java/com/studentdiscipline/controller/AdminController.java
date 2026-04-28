@@ -521,7 +521,7 @@ public class AdminController {
     @GetMapping("/case-profile")
     public String caseProfile(@RequestParam Long id, Model model) {
         Case c = caseService.getCaseById(id);
-        model.addAttribute("case", c);
+        model.addAttribute("disciplineCase", c);  // ✅ FIXED: renamed from "case" (reserved word in SpEL)
         model.addAttribute("notes", caseService.getCaseNotes(id));
         model.addAttribute("caseStatuses", CaseStatus.values());
         return "admin/case-profile";
@@ -530,7 +530,7 @@ public class AdminController {
     @GetMapping("/case-timeline")
     public String caseTimeline(@RequestParam Long id, Model model) {
         Case c = caseService.getCaseById(id);
-        model.addAttribute("case", c);
+        model.addAttribute("disciplineCase", c);  // ✅ FIXED: renamed from "case" (reserved word in SpEL)
         model.addAttribute("notes", caseService.getCaseNotes(id));
         return "admin/case-timeline";
     }
@@ -565,7 +565,7 @@ public class AdminController {
         try {
             Student student = studentService.findById(studentId)
                     .orElseThrow(() -> new RuntimeException("Student not found"));
-            
+
             Case newCase = new Case();
             newCase.setStudent(student);
             newCase.setCaseNumber(caseNumber);
@@ -574,7 +574,7 @@ public class AdminController {
             newCase.setStatus(CaseStatus.valueOf(status != null ? status : "OPEN"));
             newCase.setCreatedDate(LocalDateTime.now());
             newCase.setUpdatedDate(LocalDateTime.now());
-            
+
             caseService.createCase(newCase);
             ra.addFlashAttribute("success", "Case created successfully.");
         } catch (Exception e) {
