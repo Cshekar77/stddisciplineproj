@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -350,7 +351,6 @@ public class TeacherController {
                 notes = new ArrayList<>();
             }
             
-            // ✅ Calculate notes count in controller
             int notesCount = notes.size();
             
             model.addAttribute("case", c);
@@ -379,5 +379,63 @@ public class TeacherController {
             model.addAttribute("allCases", new ArrayList<>());
         }
         return "teacher/case-reports";
+    }
+
+    // ── UPDATE CASE STATUS (ADDED) ────────────────────────────────────────────
+
+    @PostMapping("/case-update-status")
+    public String updateCaseStatus(@RequestParam Long caseId,
+                                   @RequestParam String status,
+                                   @AuthenticationPrincipal UserDetails userDetails,
+                                   RedirectAttributes ra) {
+        try {
+            Case caseToUpdate = caseService.getCaseById(caseId);
+            if (caseToUpdate == null) {
+                ra.addFlashAttribute("error", "Case not found");
+                return "redirect:/teacher/case-search";
+            }
+            
+            caseToUpdate.setStatus(CaseStatus.valueOf(status));
+            caseToUpdate.setUpdatedDate(LocalDateTime.now());
+            caseService.updateCase(caseId, caseToUpdate);
+            
+            activityLogService.log(currentUser(userDetails), 
+                "Updated case status to " + status + " for case " + caseToUpdate.getCaseNumber());
+            ra.addFlashAttribute("success", "Case status updated successfully");
+            
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to update status: " + e.getMessage());
+        }
+        return "redirect:/teacher/case-profile?id=" + caseId;
+    }
+
+    // ── ADD CASE NOTE (ADDED) ─────────────────────────────────────────────────
+
+    @PostMapping("/case-add-note")
+    public String addCaseNote(@RequestParam Long caseId,
+                              @RequestParam String content,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              RedirectAttributes ra) {
+        try {
+            Case existingCase = caseService.getCaseById(caseId);
+            if (existingCase == null) {
+                ra.addFlashAttribute("error", "Case not found");
+                return "redirect:/teacher/case-search";
+            }
+            
+            CaseNote note = new CaseNote();
+            note.setContent(content);
+            note.setDisciplineCase(existingCase);
+            note.setCreatedBy(currentUser(userDetails));
+            caseService.addCaseNote(caseId, note);
+            
+            activityLogService.log(currentUser(userDetails), 
+                "Added note to case " + existingCase.getCaseNumber());
+            ra.addFlashAttribute("success", "Note added successfully");
+            
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Failed to add note: " + e.getMessage());
+        }
+        return "redirect:/teacher/case-profile?id=" + caseId;
     }
 }

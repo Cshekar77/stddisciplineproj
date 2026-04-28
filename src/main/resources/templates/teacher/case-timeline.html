@@ -1,197 +1,259 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="light">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Case Timeline — Teacher</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#0f1117;--surface:#1a1d27;--card:#21253a;--accent:#4f8ef7;--accent2:#7c3aed;--text:#e2e8f0;--muted:#64748b;--border:#2d3348;--danger:#ef4444;--warning:#f59e0b;--success:#10b981}
-  [data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--card:#f5f7ff;--accent:#4f7fff;--accent2:#7c3aed;--text:#1a1d2e;--muted:#6b7494;--border:#e2e6f0;--danger:#ef4444;--warning:#f59e0b;--success:#10b981}
-  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
-  .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;height:100vh;z-index:100}
-  .logo{padding:0 24px 32px;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:-0.5px}
-  .logo span{color:var(--text)}
-  .nav-section{padding:0 12px;margin-bottom:8px}
-  .nav-label{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:0 12px;margin-bottom:8px}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;transition:.15s}
-  .nav-item:hover{background:var(--card);color:var(--text)}
-  .nav-item.active{background:rgba(79,142,247,.15);color:var(--accent)}
-  .nav-item svg{width:16px;height:16px;flex-shrink:0}
-  .sidebar-footer{margin-top:auto;padding:16px 24px;border-top:1px solid var(--border)}
-  .user-info{display:flex;align-items:center;gap:10px}
-  .avatar-sm{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
-  .user-name{font-size:13px;font-weight:500}
-  .user-role{font-size:11px;color:var(--muted)}
-  .main{margin-left:240px;flex:1;padding:32px}
-  .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
-  .page-title{font-size:24px;font-weight:700;margin-bottom:4px}
-  .page-sub{color:var(--muted);font-size:14px}
-  .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;font-family:inherit;text-decoration:none;display:inline-block}
-  .btn-primary{background:var(--accent);color:#fff}
-  .btn-primary:hover{background:#3b7de8}
-  .btn-secondary{background:transparent;border:1px solid var(--border);color:var(--text)}
-  .btn-secondary:hover{background:var(--card)}
-  .case-info-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-  .case-details{display:flex;gap:24px;flex-wrap:wrap}
-  .case-detail-item{font-size:13px}
-  .case-detail-label{color:var(--muted);margin-right:6px}
-  .case-detail-value{font-weight:600}
-  .layout{display:grid;grid-template-columns:1fr 300px;gap:24px}
-  .timeline{position:relative}
-  .month-label{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;padding:12px 0;margin-bottom:4px}
-  .timeline-item{display:flex;gap:16px;margin-bottom:4px;position:relative}
-  .timeline-line{display:flex;flex-direction:column;align-items:center;width:40px;flex-shrink:0}
-  .timeline-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);flex-shrink:0;margin-top:4px;z-index:1}
-  .timeline-dot.note{border-color:var(--accent)}
-  .timeline-dot.status{border-color:var(--warning)}
-  .timeline-dot.create{border-color:var(--success)}
-  .timeline-connector{width:2px;flex:1;background:var(--border);margin-top:4px;min-height:24px}
-  .timeline-content{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:.15s}
-  .timeline-content:hover{border-color:rgba(79,142,247,.4)}
-  .tc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-  .tc-title{font-size:14px;font-weight:600}
-  .tc-time{font-size:12px;color:var(--muted)}
-  .tc-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px}
-  .tc-footer{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
-  .badge-danger{background:rgba(239,68,68,.15);color:#ef4444}
-  .badge-warning{background:rgba(245,158,11,.15);color:#f59e0b}
-  .badge-success{background:rgba(16,185,129,.15);color:#10b981}
-  .badge-info{background:rgba(79,142,247,.15);color:var(--accent)}
-  .tc-author{font-size:12px;color:var(--muted)}
-  .side-panel .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
-  .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px}
-  .stat-row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid var(--border)}
-  .stat-row:last-child{border-bottom:none}
-  .stat-label{color:var(--muted)}
-  .stat-val{font-weight:600}
-  .empty-state{text-align:center;padding:48px;color:var(--muted)}
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Case Timeline — Teacher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--nav-w:240px;--accent:#43d9a2;--accent2:#ff6b6b;--accent3:#4f7fff;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;}
+    [data-theme="light"]{--bg:#f0f4f0;--surface:#ffffff;--surface2:#f0faf5;--border:#d4e8dc;--text:#1a2e1a;--muted:#5a7a5a;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;overflow-y:auto;max-height:100vh;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(67,217,162,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);transition:var(--transition);}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#0d0f14;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(67,217,162,.15);color:var(--accent);}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform 0.3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
+    .back-link{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;font-size:.85rem;margin-bottom:20px;transition:color .15s;}
+    .back-link:hover{color:var(--accent);}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;}
+    .page-sub{color:var(--muted);font-size:.85rem;margin-top:4px;}
+    .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s;font-family:inherit;text-decoration:none;display:inline-block;}
+    .btn-primary{background:var(--accent);color:#0d0f14;}
+    .btn-primary:hover{background:#3bcc8e;}
+    .btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);}
+    .btn-secondary:hover{background:var(--surface2);color:var(--text);}
+    .case-info-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+    .case-details{display:flex;gap:24px;flex-wrap:wrap;}
+    .case-detail-item{font-size:13px;}
+    .case-detail-label{color:var(--muted);margin-right:6px;}
+    .case-detail-value{font-weight:600;}
+    .layout{display:grid;grid-template-columns:1fr 300px;gap:24px;}
+    .timeline{position:relative;padding-left:32px;}
+    .timeline::before{content:'';position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--border);}
+    .timeline-item{position:relative;margin-bottom:24px;}
+    .timeline-dot{position:absolute;left:-32px;top:4px;width:16px;height:16px;border-radius:50%;border:2px solid var(--surface);background:var(--accent);z-index:1;}
+    .timeline-dot.note{background:var(--accent3);}
+    .timeline-connector{position:absolute;left:-24px;top:20px;bottom:-20px;width:2px;background:var(--border);}
+    .timeline-content{background:var(--surface2);border-radius:10px;padding:16px;margin-left:16px;transition:all .18s;}
+    .timeline-content:hover{transform:translateX(4px);}
+    .timeline-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:8px;}
+    .timeline-title{font-weight:700;font-size:.9rem;}
+    .timeline-date{font-size:.7rem;color:var(--muted);}
+    .timeline-description{font-size:.85rem;line-height:1.5;color:var(--text);margin-bottom:8px;}
+    .timeline-footer{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .badge-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.65rem;font-weight:600;}
+    .badge-tag-note{background:rgba(79,127,255,.15);color:var(--accent3);}
+    .timeline-author{font-size:.7rem;color:var(--muted);}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;}
+    .card-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;}
+    .stat-row{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid var(--border);}
+    .stat-row:last-child{border-bottom:none;}
+    .stat-label{color:var(--muted);}
+    .stat-val{font-weight:600;}
+    .empty-state{text-align:center;padding:48px;color:var(--muted);}
+    .badge-open{background:rgba(255,107,107,.15);color:#ff6b6b;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-review{background:rgba(247,201,72,.15);color:#f7c948;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-resolved{background:rgba(67,217,162,.15);color:#43d9a2;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-closed{background:rgba(122,130,154,.15);color:#7a829a;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
+    @media(max-width:1024px){.layout{grid-template-columns:1fr;}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+      .mobile-logout{display:flex;}
+      .case-details{flex-direction:column;gap:8px;}
+      .timeline-content{margin-left:0;}
+    }
+  </style>
 </head>
 <body>
-<aside class="sidebar">
-  <div class="logo">Discipline<span>Pro</span></div>
-  <div class="nav-section">
-    <div class="nav-label">Overview</div>
-    <a href="/teacher/dashboard" class="nav-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard
-    </a>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Cases</div>
-    <a href="/teacher/case-search" class="nav-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>Search Cases
-    </a>
-    <a href="/teacher/case-timeline" class="nav-item active">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>Timeline
-    </a>
-    <a href="/teacher/case-reports" class="nav-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2z"/></svg>Reports
-    </a>
-  </div>
-  <div class="nav-section">
-    <div class="nav-label">Account</div>
-    <a href="/teacher/change-password" class="nav-item">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
-    </a>
-  </div>
-  <div class="sidebar-footer">
-    <div class="user-info">
-      <div class="avatar-sm" th:text="${#strings.substring(teacherName, 0, 1)}">T</div>
-      <div><div class="user-name" th:text="${teacherName}">Teacher</div><div class="user-role">Teacher</div></div>
-    </div>
-  </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Teacher</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/teacher/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/teacher/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/teacher/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/teacher/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <div class="nav-section">Case Management</div>
+  <a href="/teacher/case-search" class="nav-link"><span class="icon">📁</span> Case Search</a>
+  <a href="/teacher/case-timeline" class="nav-link active"><span class="icon">📅</span> Timeline</a>
+  <a href="/teacher/case-reports" class="nav-link"><span class="icon">📊</span> Reports</a>
+  <div class="nav-section">Account</div>
+  <a href="/teacher/change-password" class="nav-link"><span class="icon">🔐</span> Change Password</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
 </aside>
 <main class="main">
-  <div class="page-header">
-    <div>
-      <div class="page-title">Case Timeline</div>
-      <div class="page-sub" th:text="'Case #' + ${case.caseNumber} + ' - ' + ${case.title}">Case Timeline</div>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Case Timeline</div>
     </div>
-    <a th:href="@{/teacher/case-profile(id=${case.id})}" class="btn btn-secondary">← Back to Case</a>
-  </div>
-
-  <!-- Case Information Bar -->
-  <div class="case-info-bar" th:if="${case != null}">
-    <div class="case-details">
-      <div class="case-detail-item"><span class="case-detail-label">Case Number:</span><span class="case-detail-value" th:text="${case.caseNumber}">—</span></div>
-      <div class="case-detail-item"><span class="case-detail-label">Student:</span><span class="case-detail-value" th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</span></div>
-      <div class="case-detail-item"><span class="case-detail-label">Status:</span><span class="case-detail-value" th:text="${case.status}">—</span></div>
-      <div class="case-detail-item"><span class="case-detail-label">Created:</span><span class="case-detail-value" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span></div>
-    </div>
-  </div>
-
-  <div class="layout">
-    <div class="timeline">
-      <div th:if="${notes == null or notes.empty}" class="empty-state">
-        <div>📭</div>
-        <div>No timeline events yet</div>
-        <div style="font-size:12px;margin-top:8px">Add case notes to see them here</div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
       </div>
-      
-      <!-- Timeline Events from Case Notes -->
-      <div th:each="note, iterStat : ${notes}" th:if="${notes != null and !notes.empty}">
-        <div class="timeline-item">
-          <div class="timeline-line">
-            <div class="timeline-dot note"></div>
-            <div class="timeline-connector" th:if="${!iterStat.last}"></div>
-          </div>
-          <div class="timeline-content">
-            <div class="tc-header">
-              <div class="tc-title">Note Added</div>
-              <div class="tc-time" th:text="${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</div>
-            </div>
-            <div class="tc-desc" th:text="${note.content}">Note content here...</div>
-            <div class="tc-footer">
-              <span class="badge badge-info">Case Note</span>
-              <span class="tc-author" th:text="'by ' + ${note.createdBy != null ? note.createdBy.firstName + ' ' + note.createdBy.lastName : 'System'}">by User</span>
-            </div>
-          </div>
+      <a href="/logout" class="mobile-logout">Logout</a>
+      <span class="badge">TEACHER</span>
+      <div class="avatar" th:text="${teacherName != null} ? ${#strings.substring(teacherName, 0, 1)} : 'T'">T</div>
+    </div>
+  </header>
+  <div class="content">
+    <a href="/teacher/case-search" class="back-link">← Back to Cases</a>
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Case Timeline</div>
+        <div class="page-sub" th:text="'Case #' + ${case.caseNumber} + ' - ' + ${case.title}">Case Timeline</div>
+      </div>
+      <a th:href="@{/teacher/case-profile(id=${case.id})}" class="btn btn-secondary">Back to Case</a>
+    </div>
+
+    <!-- Case Information Bar -->
+    <div class="case-info-bar" th:if="${case != null}">
+      <div class="case-details">
+        <div class="case-detail-item">
+          <span class="case-detail-label">Case Number:</span>
+          <span class="case-detail-value" th:text="${case.caseNumber}">—</span>
+        </div>
+        <div class="case-detail-item">
+          <span class="case-detail-label">Student:</span>
+          <span class="case-detail-value" th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</span>
+        </div>
+        <div class="case-detail-item">
+          <span class="case-detail-label">Status:</span>
+          <span class="case-detail-value">
+            <span class="badge-open" th:if="${case.status.name() == 'OPEN'}" th:text="${case.status}">OPEN</span>
+            <span class="badge-review" th:if="${case.status.name() == 'UNDER_REVIEW'}" th:text="${case.status}">UNDER_REVIEW</span>
+            <span class="badge-resolved" th:if="${case.status.name() == 'RESOLVED'}" th:text="${case.status}">RESOLVED</span>
+            <span class="badge-closed" th:if="${case.status.name() == 'CLOSED'}" th:text="${case.status}">CLOSED</span>
+          </span>
+        </div>
+        <div class="case-detail-item">
+          <span class="case-detail-label">Created:</span>
+          <span class="case-detail-value" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span>
         </div>
       </div>
     </div>
 
-    <div class="side-panel">
-      <div class="card">
-        <div class="card-title">Case Summary</div>
-        <div class="stat-row"><span class="stat-label">Case ID</span><span class="stat-val" th:text="${case.caseNumber}">—</span></div>
-        <div class="stat-row"><span class="stat-label">Student</span><span class="stat-val" th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</span></div>
-        <div class="stat-row"><span class="stat-label">Status</span><span class="stat-val" th:text="${case.status}">—</span></div>
-        <div class="stat-row"><span class="stat-label">Created</span><span class="stat-val" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span></div>
-        <div class="stat-row"><span class="stat-label">Last Updated</span><span class="stat-val" th:text="${#temporals.format(case.updatedDate, 'MMM dd, yyyy')}">—</span></div>
-      </div>
-      
-      <div class="card">
-        <div class="card-title">Timeline Stats</div>
-        <div class="stat-row"><span class="stat-label">Total Events</span><span class="stat-val" th:text="${notesCount}">0</span></div>
+    <div class="layout">
+      <div class="timeline">
+        <div th:if="${notes == null or notes.empty}" class="empty-state">
+          <div>📭</div>
+          <div>No timeline events yet</div>
+          <div style="font-size:12px;margin-top:8px">Add case notes to see them here</div>
+        </div>
+        
+        <!-- Timeline Events from Case Notes -->
+        <div th:each="note, iterStat : ${notes}" th:if="${notes != null and !notes.empty}">
+          <div class="timeline-item">
+            <div class="timeline-dot note"></div>
+            <div th:if="${!iterStat.last}" class="timeline-connector"></div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <span class="timeline-title">Note Added</span>
+                <span class="timeline-date" th:text="${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</span>
+              </div>
+              <div class="timeline-description" th:text="${note.content}">Note content here...</div>
+              <div class="timeline-footer">
+                <span class="badge-tag badge-tag-note">Case Note</span>
+                <span class="timeline-author" th:text="'by ' + ${note.createdBy != null ? note.createdBy.firstName + ' ' + note.createdBy.lastName : 'System'}">by User</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="card">
-        <div class="card-title">Quick Actions</div>
-        <a th:href="@{/teacher/case-profile(id=${case.id})}" style="display:block;margin-bottom:10px;text-decoration:none">
-          <button class="btn btn-primary" style="width:100%">View Full Case</button>
-        </a>
-        <a th:href="@{/teacher/case-search}" style="display:block;text-decoration:none">
-          <button class="btn btn-secondary" style="width:100%">Back to Search</button>
-        </a>
+      <div class="side-panel">
+        <div class="card">
+          <div class="card-title">Case Summary</div>
+          <div class="stat-row"><span class="stat-label">Case ID</span><span class="stat-val" th:text="${case.caseNumber}">—</span></div>
+          <div class="stat-row"><span class="stat-label">Student</span><span class="stat-val" th:text="${case.student != null ? case.student.fullName : 'N/A'}">—</span></div>
+          <div class="stat-row">
+            <span class="stat-label">Status</span>
+            <span class="stat-val">
+              <span class="badge-open" th:if="${case.status.name() == 'OPEN'}" th:text="${case.status}">OPEN</span>
+              <span class="badge-review" th:if="${case.status.name() == 'UNDER_REVIEW'}" th:text="${case.status}">UNDER_REVIEW</span>
+              <span class="badge-resolved" th:if="${case.status.name() == 'RESOLVED'}" th:text="${case.status}">RESOLVED</span>
+              <span class="badge-closed" th:if="${case.status.name() == 'CLOSED'}" th:text="${case.status}">CLOSED</span>
+            </span>
+          </div>
+          <div class="stat-row"><span class="stat-label">Created</span><span class="stat-val" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span></div>
+          <div class="stat-row"><span class="stat-label">Last Updated</span><span class="stat-val" th:text="${#temporals.format(case.updatedDate, 'MMM dd, yyyy')}">—</span></div>
+        </div>
+        
+        <div class="card">
+          <div class="card-title">Timeline Stats</div>
+          <div class="stat-row"><span class="stat-label">Total Events</span><span class="stat-val" th:text="${notesCount}">0</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Quick Actions</div>
+          <a th:href="@{/teacher/case-profile(id=${case.id})}" style="display:block;margin-bottom:10px;text-decoration:none">
+            <button class="btn btn-primary" style="width:100%">View Full Case</button>
+          </a>
+          <a th:href="@{/teacher/case-search}" style="display:block;text-decoration:none">
+            <button class="btn btn-secondary" style="width:100%">Back to Search</button>
+          </a>
+        </div>
       </div>
     </div>
   </div>
 </main>
 <script>
-  // Theme handling
   const html = document.documentElement;
-  const savedTheme = localStorage.getItem('sds-theme') || 'light';
-  html.setAttribute('data-theme', savedTheme);
-  
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
   function toggleTheme() {
-    const current = html.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
     localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
   }
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+  });
 </script>
 </body>
 </html>

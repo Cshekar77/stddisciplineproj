@@ -1,270 +1,299 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<html xmlns:th="http://www.thymeleaf.org" lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Case Reports - Teacher | Student Discipline System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { min-height: 100vh; background: linear-gradient(135deg, #2c3e50 0%, #1a1a2e 100%); box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
-        .sidebar .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; margin: 4px 0; border-radius: 8px; transition: all 0.3s; }
-        .sidebar .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
-        .sidebar .nav-link.active { background: #3498db; color: white; }
-        .sidebar .nav-link i { width: 25px; margin-right: 10px; }
-        .card-stats { border: none; border-radius: 15px; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .card-stats:hover { transform: translateY(-3px); }
-        .stat-icon { font-size: 2.5rem; opacity: 0.3; position: absolute; right: 20px; top: 20px; }
-        .table-custom { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .badge-open { background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .badge-resolved { background-color: #27ae60; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .badge-review { background-color: #f39c12; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .badge-closed { background-color: #7f8c8d; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .badge-appeal { background-color: #9b59b6; color: white; padding: 5px 10px; border-radius: 20px; font-size: 12px; }
-        .btn-sm { padding: 4px 8px; font-size: 12px; }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Case Reports — Teacher</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--nav-w:240px;--accent:#43d9a2;--accent2:#ff6b6b;--accent3:#4f7fff;--accent4:#f7c948;--transition:all 0.3s ease;}
+    [data-theme="dark"]{--bg:#0d0f14;--surface:#151820;--surface2:#1c2030;--border:#252a3a;--text:#e8eaf2;--muted:#7a829a;--shadow:0 4px 24px rgba(0,0,0,0.4);--topbar-bg:#151820;}
+    [data-theme="light"]{--bg:#f0f4f0;--surface:#ffffff;--surface2:#f0faf5;--border:#d4e8dc;--text:#1a2e1a;--muted:#5a7a5a;--shadow:0 4px 24px rgba(0,0,0,0.08);--topbar-bg:#ffffff;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh;transition:var(--transition);}
+    .sidebar{width:var(--nav-w);min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;transition:transform .3s ease,background .3s ease;overflow-y:auto;max-height:100vh;}
+    .sidebar-logo{padding:24px 20px;border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:10px;}
+    .sidebar-logo .dot{width:8px;height:8px;background:var(--accent);border-radius:50%;}
+    .nav-section{padding:16px 12px 8px;font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:8px;margin:2px 8px;color:var(--muted);text-decoration:none;font-size:.88rem;font-weight:500;transition:all .18s;}
+    .nav-link:hover{background:var(--surface2);color:var(--text);}
+    .nav-link.active{background:rgba(67,217,162,.12);color:var(--accent);}
+    .nav-link .icon{font-size:1rem;width:18px;text-align:center;}
+    .sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+    .logout-btn{display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:8px;background:rgba(255,107,107,.08);color:var(--accent2);text-decoration:none;font-size:.85rem;font-weight:500;}
+    .logout-btn:hover{background:rgba(255,107,107,.18);}
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;}
+    .main{margin-left:var(--nav-w);flex:1;display:flex;flex-direction:column;min-width:0;}
+    .topbar{padding:16px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--topbar-bg);position:sticky;top:0;z-index:50;box-shadow:var(--shadow);transition:var(--transition);}
+    .topbar-left{display:flex;align-items:center;gap:14px;}
+    .topbar-title{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;}
+    .topbar-meta{display:flex;align-items:center;gap:12px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:#0d0f14;}
+    .badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(67,217,162,.15);color:var(--accent);}
+    .theme-toggle-wrap{display:flex;align-items:center;gap:6px;}
+    .theme-icon{font-size:.9rem;cursor:pointer;user-select:none;}
+    .theme-toggle{width:42px;height:24px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:var(--transition);flex-shrink:0;}
+    .theme-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--accent);transition:transform 0.3s ease;}
+    [data-theme="light"] .theme-toggle::after{transform:translateX(18px);}
+    .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
+    .hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;}
+    .content{padding:28px 32px;flex:1;}
+    .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px;}
+    .page-header h2{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;}
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:transform .2s;box-shadow:var(--shadow);}
+    .stat-card:hover{transform:translateY(-3px);border-color:var(--accent);}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+    .stat-card.blue::before{background:var(--accent3);}
+    .stat-card.yellow::before{background:var(--accent4);}
+    .stat-card.orange::before{background:var(--accent2);}
+    .stat-card.green::before{background:var(--accent);}
+    .stat-label{font-size:.75rem;color:var(--muted);font-weight:500;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase;}
+    .stat-value{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;}
+    .stat-card.blue .stat-value{color:var(--accent3);}
+    .stat-card.yellow .stat-value{color:var(--accent4);}
+    .stat-card.orange .stat-value{color:var(--accent2);}
+    .stat-card.green .stat-value{color:var(--accent);}
+    .stat-icon{position:absolute;top:16px;right:16px;font-size:1.5rem;opacity:.12;}
+    .stat-sub{font-size:.7rem;color:var(--muted);margin-top:4px;}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);}
+    .card-header{padding:16px 20px;border-bottom:1px solid var(--border);}
+    .card-header h5{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;}
+    th{padding:12px 16px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;text-align:left;border-bottom:1px solid var(--border);background:var(--surface2);}
+    td{padding:14px 16px;font-size:14px;border-bottom:1px solid var(--border);}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(0,0,0,.02);}
+    .badge-open{background:rgba(255,107,107,.15);color:#ff6b6b;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-review{background:rgba(247,201,72,.15);color:#f7c948;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-resolved{background:rgba(67,217,162,.15);color:#43d9a2;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-closed{background:rgba(122,130,154,.15);color:#7a829a;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .badge-appeal{background:rgba(155,89,182,.15);color:#9b59b6;padding:3px 10px;border-radius:20px;font-size:12px;display:inline-block;}
+    .btn-sm{padding:5px 10px;font-size:12px;border-radius:6px;text-decoration:none;display:inline-block;margin:2px;}
+    .btn-outline-primary{background:transparent;border:1px solid var(--accent3);color:var(--accent3);}
+    .btn-outline-primary:hover{background:rgba(79,127,255,.15);}
+    .btn-outline-secondary{background:transparent;border:1px solid var(--border);color:var(--muted);}
+    .btn-outline-secondary:hover{background:var(--surface2);color:var(--text);}
+    .text-primary{color:var(--accent3) !important;}
+    .bg-white{background:var(--surface);}
+    .btn-outline-secondary{border-color:var(--border);}
+    .row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .row-2{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+    .export-bar{display:flex;gap:10px;align-items:center;}
+    .mobile-logout{display:none;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;background:rgba(255,107,107,.1);color:#ff6b6b;border:1px solid rgba(255,107,107,.25);text-decoration:none;font-size:.8rem;font-weight:600;white-space:nowrap;}
+    @media(max-width:1024px){.row{grid-template-columns:repeat(2,1fr);}.row-2{grid-template-columns:repeat(2,1fr);}}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);z-index:200;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main{margin-left:0;}
+      .hamburger{display:flex;}
+      .topbar{padding:14px 16px;}
+      .topbar-title{font-size:1rem;}
+      .content{padding:16px;}
+      .badge{display:none;}
+      .mobile-logout{display:flex;}
+      .row{grid-template-columns:1fr 1fr;gap:12px;}
+      .row-2{grid-template-columns:1fr;}
+      .stat-value{font-size:1.6rem;}
+      .stat-card{padding:16px;}
+      .page-header{flex-direction:column;align-items:flex-start;}
+    }
+    @media(max-width:480px){.row{grid-template-columns:1fr;}.stat-value{font-size:1.4rem;}}
+  </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Sidebar -->
-            <nav class="col-md-2 d-md-block sidebar p-0">
-                <div class="position-sticky pt-3">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-school fa-2x text-white"></i>
-                        <h6 class="text-white mt-2">Teacher Portal</h6>
-                    </div>
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/dashboard">
-                                <i class="fas fa-tachometer-alt"></i> Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/students">
-                                <i class="fas fa-users"></i> Students
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/incidents">
-                                <i class="fas fa-exclamation-triangle"></i> Incidents
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/sanctions">
-                                <i class="fas fa-gavel"></i> Sanctions
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/case-search">
-                                <i class="fas fa-search"></i> Case Search
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/teacher/case-reports">
-                                <i class="fas fa-chart-bar"></i> Case Reports
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/feedback">
-                                <i class="fas fa-comment-dots"></i> Feedback
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/teacher/activity">
-                                <i class="fas fa-history"></i> Activity
-                            </a>
-                        </li>
-                        <li class="nav-item mt-4">
-                            <a class="nav-link text-danger" href="/logout">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <!-- Main Content -->
-            <main class="col-md-10 ms-sm-auto px-md-4 py-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2><i class="fas fa-chart-bar text-primary"></i> Case Reports</h2>
-                    <button onclick="window.print()" class="btn btn-outline-secondary">
-                        <i class="fas fa-print"></i> Print Report
-                    </button>
-                </div>
-
-                <!-- Statistics Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3 mb-3">
-                        <div class="card card-stats bg-primary text-white">
-                            <div class="card-body">
-                                <i class="fas fa-folder-open stat-icon"></i>
-                                <h5 class="card-title">Total Cases</h5>
-                                <h2 class="mb-0" th:text="${totalCases != null ? totalCases : 0}">0</h2>
-                                <small>All time cases</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card card-stats bg-warning text-white">
-                            <div class="card-body">
-                                <i class="fas fa-spinner stat-icon"></i>
-                                <h5 class="card-title">Open</h5>
-                                <h2 class="mb-0" th:text="${openCases != null ? openCases : 0}">0</h2>
-                                <small>Awaiting action</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card card-stats bg-info text-white">
-                            <div class="card-body">
-                                <i class="fas fa-eye stat-icon"></i>
-                                <h5 class="card-title">Under Review</h5>
-                                <h2 class="mb-0" th:text="${underReviewCases != null ? underReviewCases : 0}">0</h2>
-                                <small>Being investigated</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card card-stats bg-success text-white">
-                            <div class="card-body">
-                                <i class="fas fa-check-circle stat-icon"></i>
-                                <h5 class="card-title">Resolved</h5>
-                                <h2 class="mb-0" th:text="${resolvedCases != null ? resolvedCases : 0}">0</h2>
-                                <small>Successfully resolved</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Second Row of Stats -->
-                <div class="row mb-4">
-                    <div class="col-md-4 mb-3">
-                        <div class="card card-stats bg-secondary text-white">
-                            <div class="card-body">
-                                <i class="fas fa-archive stat-icon"></i>
-                                <h5 class="card-title">Closed</h5>
-                                <h2 class="mb-0" th:text="${closedCases != null ? closedCases : 0}">0</h2>
-                                <small>Archived cases</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card card-stats bg-purple text-white" style="background-color: #9b59b6;">
-                            <div class="card-body">
-                                <i class="fas fa-gavel stat-icon"></i>
-                                <h5 class="card-title">Appeal Pending</h5>
-                                <h2 class="mb-0" th:text="${appealPendingCases != null ? appealPendingCases : 0}">0</h2>
-                                <small>Waiting for appeal decision</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card card-stats" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                            <div class="card-body">
-                                <i class="fas fa-chart-line stat-icon"></i>
-                                <h5 class="card-title">Resolution Rate</h5>
-                                <h2 class="mb-0" th:text="${totalCases != null and totalCases > 0 ? (resolvedCases * 100 / totalCases) : 0}">0<span style="font-size: 1.5rem;">%</span></h2>
-                                <small>Cases resolved</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cases Table -->
-                <div class="card table-custom">
-                    <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="fas fa-list"></i> All Cases Details</h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Case #</th>
-                                        <th>Student</th>
-                                        <th>Grade</th>
-                                        <th>Status</th>
-                                        <th>Created Date</th>
-                                        <th>Last Updated</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="case : ${allCases}">
-                                        <td th:text="${case.caseNumber}">CASE-001</td>
-                                        <td th:text="${case.student != null ? case.student.fullName : 'N/A'}">John Doe</td>
-                                        <td th:text="${case.student != null ? case.student.grade : 'N/A'}">10</td>
-                                        <td>
-                                            <span th:class="'badge-open'" th:if="${case.status.name() == 'OPEN'}" th:text="${case.status}">OPEN</span>
-                                            <span th:class="'badge-review'" th:if="${case.status.name() == 'UNDER_REVIEW'}" th:text="${case.status}">UNDER_REVIEW</span>
-                                            <span th:class="'badge-resolved'" th:if="${case.status.name() == 'RESOLVED'}" th:text="${case.status}">RESOLVED</span>
-                                            <span th:class="'badge-closed'" th:if="${case.status.name() == 'CLOSED'}" th:text="${case.status}">CLOSED</span>
-                                            <span th:class="'badge-appeal'" th:if="${case.status.name() == 'APPEAL_PENDING'}" th:text="${case.status}">APPEAL_PENDING</span>
-                                        </td>
-                                        <td th:text="${#temporals.format(case.createdDate, 'yyyy-MM-dd')}">2024-01-15</td>
-                                        <td th:text="${case.updatedDate != null ? #temporals.format(case.updatedDate, 'yyyy-MM-dd') : '-'}">2024-01-20</td>
-                                        <td>
-                                            <a th:href="@{/teacher/case-profile(id=${case.id})}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i> View
-                                            </a>
-                                            <a th:href="@{/teacher/case-timeline(id=${case.id})}" class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-history"></i> Timeline
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr th:if="${allCases == null or allCases.empty}">
-                                        <td colspan="7" class="text-center text-muted py-4">
-                                            <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
-                                            No cases found
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Export Options -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body text-center">
-                                <h6><i class="fas fa-download"></i> Export Reports</h6>
-                                <a href="#" class="btn btn-sm btn-success m-1" onclick="exportCSV()">
-                                    <i class="fas fa-file-csv"></i> Export CSV
-                                </a>
-                                <a href="#" class="btn btn-sm btn-danger m-1" onclick="window.print()">
-                                    <i class="fas fa-file-pdf"></i> Print as PDF
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo"><div class="dot"></div><span>SDS <span style="color:var(--accent)">Teacher</span></span></div>
+  <div class="nav-section">Main</div>
+  <a href="/teacher/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
+  <a href="/teacher/students" class="nav-link"><span class="icon">🎓</span> Students</a>
+  <div class="nav-section">Records</div>
+  <a href="/teacher/incidents" class="nav-link"><span class="icon">⚠️</span> Incidents</a>
+  <a href="/teacher/sanctions" class="nav-link"><span class="icon">🔒</span> Sanctions</a>
+  <div class="nav-section">Case Management</div>
+  <a href="/teacher/case-search" class="nav-link"><span class="icon">📁</span> Case Search</a>
+  <a href="/teacher/case-timeline" class="nav-link"><span class="icon">📅</span> Timeline</a>
+  <a href="/teacher/case-reports" class="nav-link active"><span class="icon">📊</span> Reports</a>
+  <div class="nav-section">Account</div>
+  <a href="/teacher/change-password" class="nav-link"><span class="icon">🔐</span> Change Password</a>
+  <div class="sidebar-footer"><a href="/logout" class="logout-btn">🚪 Logout</a></div>
+</aside>
+<main class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" onclick="openSidebar()"><span></span><span></span><span></span></div>
+      <div class="topbar-title">Case Reports</div>
+    </div>
+    <div class="topbar-meta">
+      <div class="theme-toggle-wrap">
+        <span class="theme-icon" id="themeIcon">🌙</span>
+        <div class="theme-toggle" onclick="toggleTheme()"></div>
+      </div>
+      <a href="/logout" class="mobile-logout">Logout</a>
+      <span class="badge">TEACHER</span>
+      <div class="avatar" th:text="${teacherName != null} ? ${#strings.substring(teacherName, 0, 1)} : 'T'">T</div>
+    </div>
+  </header>
+  <div class="content">
+    <div class="page-header">
+      <h2><i class="fas fa-chart-bar"></i> Case Reports</h2>
+      <div class="export-bar">
+        <button onclick="window.print()" class="btn btn-outline-secondary" style="padding:8px 16px;border-radius:8px;">🖨️ Print</button>
+      </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function exportCSV() {
-            let csv = [];
-            let rows = document.querySelectorAll('table tr');
-            for (let row of rows) {
-                let rowData = [];
-                let cols = row.querySelectorAll('td, th');
-                for (let col of cols) {
-                    rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
-                }
-                csv.push(rowData.join(','));
-            }
-            let blob = new Blob([csv.join('\n')], { type: 'text/csv' });
-            let link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'case_reports.csv';
-            link.click();
-        }
-    </script>
+    <!-- Statistics Cards - Row 1 -->
+    <div class="row">
+      <div class="stat-card blue">
+        <div class="stat-icon">📊</div>
+        <div class="stat-label">Total Cases</div>
+        <div class="stat-value" th:text="${totalCases != null ? totalCases : 0}">0</div>
+        <div class="stat-sub">All time cases</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-label">Open</div>
+        <div class="stat-value" th:text="${openCases != null ? openCases : 0}">0</div>
+        <div class="stat-sub">Awaiting action</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-icon">👁️</div>
+        <div class="stat-label">Under Review</div>
+        <div class="stat-value" th:text="${underReviewCases != null ? underReviewCases : 0}">0</div>
+        <div class="stat-sub">Being investigated</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value" th:text="${resolvedCases != null ? resolvedCases : 0}">0</div>
+        <div class="stat-sub">Successfully resolved</div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards - Row 2 -->
+    <div class="row-2">
+      <div class="stat-card" style="background:var(--surface);border-color:var(--border);">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">Closed</div>
+        <div class="stat-value" style="color:#7a829a;" th:text="${closedCases != null ? closedCases : 0}">0</div>
+        <div class="stat-sub">Archived cases</div>
+      </div>
+      <div class="stat-card" style="background:var(--surface);border-color:var(--border);">
+        <div class="stat-icon">⚖️</div>
+        <div class="stat-label">Appeal Pending</div>
+        <div class="stat-value" style="color:#9b59b6;" th:text="${appealPendingCases != null ? appealPendingCases : 0}">0</div>
+        <div class="stat-sub">Waiting for appeal</div>
+      </div>
+      <div class="stat-card" style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="stat-icon">📈</div>
+        <div class="stat-label">Resolution Rate</div>
+        <div class="stat-value" th:text="${totalCases != null and totalCases > 0 ? (resolvedCases * 100 / totalCases) : 0}">0<span style="font-size:1.3rem;">%</span></div>
+        <div class="stat-sub">Cases resolved</div>
+      </div>
+    </div>
+
+    <!-- Cases Table -->
+    <div class="card">
+      <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-list"></i> All Cases Details</h5>
+      </div>
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Case #</th>
+              <th>Student</th>
+              <th>Grade</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Last Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="case : ${allCases}">
+              <td th:text="${case.caseNumber}">CASE-001</td>
+              <td th:text="${case.student != null ? case.student.fullName : 'N/A'}">John Doe</td>
+              <td th:text="${case.student != null ? case.student.grade : 'N/A'}">10</td>
+              <td>
+                <span class="badge-open" th:if="${case.status.name() == 'OPEN'}" th:text="${case.status}">OPEN</span>
+                <span class="badge-review" th:if="${case.status.name() == 'UNDER_REVIEW'}" th:text="${case.status}">UNDER_REVIEW</span>
+                <span class="badge-resolved" th:if="${case.status.name() == 'RESOLVED'}" th:text="${case.status}">RESOLVED</span>
+                <span class="badge-closed" th:if="${case.status.name() == 'CLOSED'}" th:text="${case.status}">CLOSED</span>
+                <span class="badge-appeal" th:if="${case.status.name() == 'APPEAL_PENDING'}" th:text="${case.status}">APPEAL_PENDING</span>
+              </td>
+              <td th:text="${#temporals.format(case.createdDate, 'yyyy-MM-dd')}">2024-01-15</td>
+              <td th:text="${case.updatedDate != null ? #temporals.format(case.updatedDate, 'yyyy-MM-dd') : '-'}">2024-01-20</td>
+              <td>
+                <a th:href="@{/teacher/case-profile(id=${case.id})}" class="btn-sm btn-outline-primary">👁️ View</a>
+                <a th:href="@{/teacher/case-timeline(id=${case.id})}" class="btn-sm btn-outline-secondary">📅 Timeline</a>
+              </td>
+            </tr>
+            <tr th:if="${allCases == null or allCases.empty}">
+              <td colspan="7" class="empty-state" style="text-align:center;padding:48px;color:var(--muted);">
+                <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                No cases found
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Export Options -->
+    <div class="card" style="margin-top:20px;">
+      <div class="card-body" style="text-align:center;">
+        <h6 style="margin-bottom:12px;"><i class="fas fa-download"></i> Export Reports</h6>
+        <a href="#" class="btn-sm" style="background:#28a745;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;display:inline-block;margin:4px;" onclick="exportCSV()">
+          📊 Export CSV
+        </a>
+        <a href="#" class="btn-sm" style="background:#dc3545;color:white;padding:8px 16px;border-radius:6px;text-decoration:none;display:inline-block;margin:4px;" onclick="window.print()">
+          🖨️ Print as PDF
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  const html = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+  const saved = localStorage.getItem('sds-theme') || 'dark';
+  html.setAttribute('data-theme', saved);
+  themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+  });
+  
+  function exportCSV() {
+    let csv = [];
+    let rows = document.querySelectorAll('table tr');
+    for (let row of rows) {
+      let rowData = [];
+      let cols = row.querySelectorAll('td, th');
+      for (let col of cols) {
+        rowData.push('"' + col.innerText.replace(/"/g, '""') + '"');
+      }
+      csv.push(rowData.join(','));
+    }
+    let blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    let link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'case_reports.csv';
+    link.click();
+  }
+</script>
 </body>
 </html>
