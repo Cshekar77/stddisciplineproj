@@ -8,6 +8,7 @@ import com.studentdiscipline.repository.CaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,20 +35,54 @@ public class CaseService {
     }
 
     public Case getCaseById(Long id) {
-        return caseRepository.findById(id)
+        Case c = caseRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Case not found with id: " + id));
+        
+        // ✅ FIX: Ensure notes is never null
+        if (c.getNotes() == null) {
+            c.setNotes(new ArrayList<>());
+        }
+        
+        return c;
     }
 
     public List<Case> getAllCases() {
-        return caseRepository.findAll();
+        List<Case> cases = caseRepository.findAll();
+        
+        // ✅ FIX: Ensure all cases have non-null notes
+        for (Case c : cases) {
+            if (c.getNotes() == null) {
+                c.setNotes(new ArrayList<>());
+            }
+        }
+        
+        return cases;
     }
 
     public List<Case> getCasesByStudentId(Long studentId) {
-        return caseRepository.findByStudentId(studentId);
+        List<Case> cases = caseRepository.findByStudentId(studentId);
+        
+        // ✅ FIX: Ensure all cases have non-null notes
+        for (Case c : cases) {
+            if (c.getNotes() == null) {
+                c.setNotes(new ArrayList<>());
+            }
+        }
+        
+        return cases;
     }
 
     public List<Case> getCasesByStatus(CaseStatus status) {
-        return caseRepository.findByStatus(status);
+        List<Case> cases = caseRepository.findByStatus(status);
+        
+        // ✅ FIX: Ensure all cases have non-null notes
+        for (Case c : cases) {
+            if (c.getNotes() == null) {
+                c.setNotes(new ArrayList<>());
+            }
+        }
+        
+        return cases;
     }
 
     public void deleteCaseById(Long id) {
@@ -61,7 +96,14 @@ public class CaseService {
     }
 
     public List<CaseNote> getCaseNotes(Long caseId) {
-        return caseNoteRepository.findByDisciplineCaseIdOrderByCreatedDateDesc(caseId);
+        List<CaseNote> notes = caseNoteRepository.findByDisciplineCaseIdOrderByCreatedDateDesc(caseId);
+        
+        // ✅ FIX: Ensure notes is never null
+        if (notes == null) {
+            notes = new ArrayList<>();
+        }
+        
+        return notes;
     }
 
     public Case changeCaseStatus(Long caseId, CaseStatus status) {

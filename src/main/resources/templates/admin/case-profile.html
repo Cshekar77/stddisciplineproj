@@ -136,6 +136,9 @@
       </div>
       <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">ADMIN</span>
+      <!--
+        FIX: safe navigation on adminName to avoid NPE if null
+      -->
       <div class="avatar" th:text="${adminName != null} ? ${#strings.substring(adminName, 0, 1)} : 'A'">A</div>
     </div>
   </header>
@@ -143,65 +146,95 @@
     <a href="/admin/case-search" class="back-link">← Back to Case Management</a>
     <div class="page-header">
       <div>
-        <div class="case-number" th:text="${disciplineCase != null} ? ${disciplineCase.caseNumber} : 'CASE-000'">CASE-000</div>
-        <div class="page-title" th:text="${disciplineCase != null} ? ${disciplineCase.title} : 'Case Title'">Case Title</div>
+        <!--
+          FIX: all disciplineCase field accesses guarded with null check
+        -->
+        <div class="case-number" th:text="${disciplineCase?.caseNumber ?: 'CASE-000'}">CASE-000</div>
+        <div class="page-title"  th:text="${disciplineCase?.title ?: 'Case Title'}">Case Title</div>
       </div>
       <div class="header-actions">
-        <a th:href="@{/admin/case-timeline(id=${disciplineCase != null} ? ${disciplineCase.id} : 0)}" class="btn btn-outline">📅 Timeline</a>
-        <a th:href="@{/admin/case-reports(id=${disciplineCase != null} ? ${disciplineCase.id} : 0)}" class="btn btn-outline">📊 Report</a>
+        <a th:href="@{/admin/case-timeline(id=${disciplineCase?.id ?: 0})}" class="btn btn-outline">📅 Timeline</a>
+        <a th:href="@{/admin/case-reports(id=${disciplineCase?.id ?: 0})}"  class="btn btn-outline">📊 Report</a>
       </div>
     </div>
 
     <div class="grid-2">
       <div>
-        <!-- Case Details -->
+        <!-- ═══════════════════════════════════
+             Case Details Card
+             ═══════════════════════════════════ -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Details</div>
-            <span th:class="'pill' +
-                    (${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'OPEN'} ? ' pill-open' :
-                    (${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'UNDER_REVIEW'} ? ' pill-review' :
-                    (${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'RESOLVED'} ? ' pill-resolved' :
-                    (${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'CLOSED'} ? ' pill-closed' : ''))))"
-                  th:text="${disciplineCase != null} ? ${disciplineCase.status} : '—'">—</span>
+            <!--
+              FIX: replaced deeply nested ternary with safe-navigation + Elvis.
+                   disciplineCase?.status?.name() will return null (not throw) when
+                   disciplineCase or status is null, so the comparisons simply fail
+                   to match and fall through to the empty string.
+            -->
+            <span th:with="st=${disciplineCase?.status?.name()}"
+                  th:class="'pill'
+                    + (${st == 'OPEN'}         ? ' pill-open'     :
+                      (${st == 'UNDER_REVIEW'}  ? ' pill-review'   :
+                      (${st == 'RESOLVED'}      ? ' pill-resolved' :
+                      (${st == 'CLOSED'}        ? ' pill-closed'   : ''))))"
+                  th:text="${disciplineCase?.status ?: '—'}">—</span>
           </div>
           <div class="card-body">
             <div class="info-grid">
               <div class="info-item">
                 <label>Student</label>
-                <div class="value" th:text="${disciplineCase != null and disciplineCase.student != null} ? ${disciplineCase.student.firstName + ' ' + disciplineCase.student.lastName} : '—'">—</div>
+                <!--
+                  FIX: safe-navigate through student; concatenation done only when not null
+                -->
+                <div class="value"
+                     th:text="${disciplineCase?.student != null}
+                               ? ${disciplineCase.student.firstName + ' ' + disciplineCase.student.lastName}
+                               : '—'">—</div>
               </div>
               <div class="info-item">
                 <label>Student ID</label>
-                <div class="value" th:text="${disciplineCase != null and disciplineCase.student != null} ? ${disciplineCase.student.studentId} : '—'">—</div>
+                <div class="value" th:text="${disciplineCase?.student?.studentId ?: '—'}">—</div>
               </div>
               <div class="info-item">
                 <label>Date Filed</label>
-                <div class="value" th:text="${disciplineCase != null and disciplineCase.createdDate != null} ? ${#temporals.format(disciplineCase.createdDate, 'MMM dd, yyyy')} : '—'">—</div>
+                <div class="value"
+                     th:text="${disciplineCase?.createdDate != null}
+                               ? ${#temporals.format(disciplineCase.createdDate, 'MMM dd, yyyy')}
+                               : '—'">—</div>
               </div>
               <div class="info-item">
                 <label>Last Updated</label>
-                <div class="value" th:text="${disciplineCase != null and disciplineCase.updatedDate != null} ? ${#temporals.format(disciplineCase.updatedDate, 'MMM dd, yyyy')} : '—'">—</div>
+                <div class="value"
+                     th:text="${disciplineCase?.updatedDate != null}
+                               ? ${#temporals.format(disciplineCase.updatedDate, 'MMM dd, yyyy')}
+                               : '—'">—</div>
               </div>
             </div>
             <div style="margin-top:18px;">
               <div class="info-item">
                 <label>Description</label>
-                <div class="description-text" style="margin-top:6px;" th:text="${disciplineCase != null} ? ${disciplineCase.description} : 'No description available.'">—</div>
+                <div class="description-text" style="margin-top:6px;"
+                     th:text="${disciplineCase?.description ?: 'No description available.'}">—</div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Case Notes -->
+        <!-- ═══════════════════════════════════
+             Case Notes Card
+             FIX: every reference to disciplineCase.notes now uses
+                  safe navigation (?.) so a null collection never
+                  reaches .size() or th:each.
+             ═══════════════════════════════════ -->
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Notes</div>
-            <span style="font-size:.8rem;color:var(--muted);">
-              <span th:if="${disciplineCase != null and disciplineCase.notes != null}" th:text="${disciplineCase.notes.size()}"></span>
-              <span th:if="${disciplineCase != null and disciplineCase.notes != null}"> notes</span>
-              <span th:if="${disciplineCase == null or disciplineCase.notes == null}">0 notes</span>
-            </span>
+            <!--
+              FIX: single expression with safe-nav + Elvis; no risk of NPE
+            -->
+            <span style="font-size:.8rem;color:var(--muted);"
+                  th:text="${(disciplineCase?.notes?.size() ?: 0) + ' notes'}">0 notes</span>
           </div>
           <div class="table-wrap">
             <table>
@@ -213,35 +246,62 @@
                 </tr>
               </thead>
               <tbody>
-                <tr th:each="note : ${disciplineCase != null and disciplineCase.notes != null ? disciplineCase.notes : null}" th:if="${disciplineCase != null and disciplineCase.notes != null}">
-                  <td th:text="${note.createdDate != null} ? ${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')} : '—'">—</td>
-                  <td th:text="${note.content}">—</td>
-                  <td th:text="${note.createdBy != null} ? ${note.createdBy.firstName + ' ' + note.createdBy.lastName} : 'System'">—</td>
-                 </tr>
-                <tr th:if="${disciplineCase == null or disciplineCase.notes == null or disciplineCase.notes.empty}">
+                <!--
+                  FIX: th:each iterates over an empty list (never null) thanks to
+                       the Elvis fallback; removed the redundant th:if that was on
+                       the same <tr> as th:each (Thymeleaf only honours one
+                       iteration attribute per element).
+                -->
+                <tr th:each="note : ${disciplineCase?.notes ?: T(java.util.Collections).emptyList()}">
+                  <td th:text="${note.createdDate != null}
+                                ? ${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')}
+                                : '—'">—</td>
+                  <td th:text="${note.content ?: '—'}">—</td>
+                  <td th:text="${note.createdBy != null}
+                                ? ${note.createdBy.firstName + ' ' + note.createdBy.lastName}
+                                : 'System'">System</td>
+                </tr>
+                <!--
+                  FIX: show "no notes" row when the list is null OR empty
+                -->
+                <tr th:if="${disciplineCase?.notes == null or disciplineCase.notes.empty}">
                   <td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">No notes available</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-      </div>
+      </div><!-- /left column -->
 
-      <!-- Right sidebar -->
+      <!-- ═══════════════════════════════════
+           Right sidebar
+           ═══════════════════════════════════ -->
       <div>
         <!-- Update Status -->
         <div class="card">
           <div class="card-header"><div class="card-title">Update Status</div></div>
           <form th:action="@{/admin/case-profile/update-status}" method="post" class="status-form">
-            <input type="hidden" name="caseId" th:value="${disciplineCase != null} ? ${disciplineCase.id} : 0"/>
+            <!--
+              FIX: safe-nav for caseId hidden field
+            -->
+            <input type="hidden" name="caseId" th:value="${disciplineCase?.id ?: 0}"/>
+            <!--
+              FIX: status option selection uses safe-nav on status.name()
+            -->
             <select class="form-select" name="status">
-              <option value="OPEN" th:selected="${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'OPEN'}">Open</option>
-              <option value="UNDER_REVIEW" th:selected="${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'UNDER_REVIEW'}">Under Review</option>
-              <option value="RESOLVED" th:selected="${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'RESOLVED'}">Resolved</option>
-              <option value="CLOSED" th:selected="${disciplineCase != null and disciplineCase.status != null and disciplineCase.status.name() == 'CLOSED'}">Closed</option>
+              <option value="OPEN"
+                      th:selected="${disciplineCase?.status?.name() == 'OPEN'}">Open</option>
+              <option value="UNDER_REVIEW"
+                      th:selected="${disciplineCase?.status?.name() == 'UNDER_REVIEW'}">Under Review</option>
+              <option value="RESOLVED"
+                      th:selected="${disciplineCase?.status?.name() == 'RESOLVED'}">Resolved</option>
+              <option value="CLOSED"
+                      th:selected="${disciplineCase?.status?.name() == 'CLOSED'}">Closed</option>
             </select>
-            <textarea class="form-textarea" name="notes" placeholder="Add a note about this status change…"></textarea>
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Update Status</button>
+            <textarea class="form-textarea" name="notes"
+                      placeholder="Add a note about this status change…"></textarea>
+            <button type="submit" class="btn btn-primary"
+                    style="width:100%;justify-content:center;">Update Status</button>
           </form>
         </div>
 
@@ -251,29 +311,28 @@
           <ul class="meta-list">
             <li>
               <span class="meta-label">Case Number</span>
-              <span class="meta-value" th:text="${disciplineCase != null} ? ${disciplineCase.caseNumber} : '—'">—</span>
+              <span class="meta-value" th:text="${disciplineCase?.caseNumber ?: '—'}">—</span>
             </li>
             <li>
               <span class="meta-label">Created By</span>
-              <span class="meta-value" th:text="${disciplineCase != null and disciplineCase.createdBy != null} ? ${disciplineCase.createdBy} : '—'">—</span>
+              <span class="meta-value" th:text="${disciplineCase?.createdBy ?: '—'}">—</span>
             </li>
             <li>
-              <span class="meta-label">Total Events</span>
-              <span th:if="${disciplineCase != null and disciplineCase.notes != null}">
-                <span class="meta-value" th:text="${disciplineCase.notes.size()}">0</span>
-              </span>
-              <span th:unless="${disciplineCase != null and disciplineCase.notes != null}">
-                <span class="meta-value">0</span>
-              </span>
+              <!--
+                FIX: safe-nav + Elvis collapses the verbose th:if/th:unless pair
+                     into a single expression that can never throw NPE
+              -->
+              <span class="meta-label">Total Notes</span>
+              <span class="meta-value"
+                    th:text="${disciplineCase?.notes?.size() ?: 0}">0</span>
             </li>
             <li>
+              <!--
+                FIX: same pattern for sanctions
+              -->
               <span class="meta-label">Sanctions</span>
-              <span th:if="${disciplineCase != null and disciplineCase.sanctions != null}">
-                <span class="meta-value" th:text="${disciplineCase.sanctions.size()}">0</span>
-              </span>
-              <span th:unless="${disciplineCase != null and disciplineCase.sanctions != null}">
-                <span class="meta-value">0</span>
-              </span>
+              <span class="meta-value"
+                    th:text="${disciplineCase?.sanctions?.size() ?: 0}">0</span>
             </li>
           </ul>
         </div>
@@ -282,12 +341,18 @@
         <div class="card">
           <div class="card-header"><div class="card-title">Quick Actions</div></div>
           <div style="padding:14px;display:flex;flex-direction:column;gap:8px;">
-            <a th:href="@{/admin/case-timeline(id=${disciplineCase != null} ? ${disciplineCase.id} : 0)}" class="btn btn-outline" style="justify-content:center;">📅 View Timeline</a>
-            <a th:href="@{/admin/case-reports(id=${disciplineCase != null} ? ${disciplineCase.id} : 0)}" class="btn btn-outline" style="justify-content:center;">📊 Generate Report</a>
-            <a th:href="@{/admin/students/{id}(id=${disciplineCase != null and disciplineCase.student != null} ? ${disciplineCase.student.id} : 0)}" class="btn btn-outline" style="justify-content:center;">🎓 View Student</a>
+            <!--
+              FIX: safe-nav on all id lookups
+            -->
+            <a th:href="@{/admin/case-timeline(id=${disciplineCase?.id ?: 0})}"
+               class="btn btn-outline" style="justify-content:center;">📅 View Timeline</a>
+            <a th:href="@{/admin/case-reports(id=${disciplineCase?.id ?: 0})}"
+               class="btn btn-outline" style="justify-content:center;">📊 Generate Report</a>
+            <a th:href="@{/admin/students/{id}(id=${disciplineCase?.student?.id ?: 0})}"
+               class="btn btn-outline" style="justify-content:center;">🎓 View Student</a>
           </div>
         </div>
-      </div>
+      </div><!-- /right column -->
     </div>
   </div>
 </main>
@@ -297,12 +362,19 @@
   const saved = localStorage.getItem('sds-theme') || 'dark';
   html.setAttribute('data-theme', saved);
   themeIcon.textContent = saved === 'dark' ? '🌙' : '☀️';
-  function toggleTheme() { const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; html.setAttribute('data-theme', next); localStorage.setItem('sds-theme', next); themeIcon.textContent = next === 'dark' ? '🌙' : '☀️'; }
+  function toggleTheme() {
+    const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('sds-theme', next);
+    themeIcon.textContent = next === 'dark' ? '🌙' : '☀️';
+  }
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebarOverlay');
-  function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function openSidebar()  { sidebar.classList.add('open');    overlay.classList.add('open');    document.body.style.overflow = 'hidden'; }
   function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); document.body.style.overflow = ''; }
-  document.querySelectorAll('.nav-link').forEach(link => { link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); }); });
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => { if (window.innerWidth <= 768) closeSidebar(); });
+  });
 </script>
 </body>
 </html>
