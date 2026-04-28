@@ -158,12 +158,12 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Details</div>
-            <!-- SIMPLIFIED: Using multiple th:classappend instead of nested ternary -->
-            <span class="pill"
-                  th:classappend="${case != null and case.status != null and case.status.name() == 'OPEN'} ? 'pill-open' : ''"
-                  th:classappend="${case != null and case.status != null and case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : ''"
-                  th:classappend="${case != null and case.status != null and case.status.name() == 'RESOLVED'} ? 'pill-resolved' : ''"
-                  th:classappend="${case != null and case.status != null and case.status.name() == 'CLOSED'} ? 'pill-closed' : ''"
+            <!-- FIX: Single th:class replaces multiple th:classappend (Thymeleaf does not allow duplicate attributes) -->
+            <span th:class="'pill' +
+                    (${case != null and case.status != null and case.status.name() == 'OPEN'} ? ' pill-open' :
+                    (${case != null and case.status != null and case.status.name() == 'UNDER_REVIEW'} ? ' pill-review' :
+                    (${case != null and case.status != null and case.status.name() == 'RESOLVED'} ? ' pill-resolved' :
+                    (${case != null and case.status != null and case.status.name() == 'CLOSED'} ? ' pill-closed' : ''))))"
                   th:text="${case != null} ? ${case.status} : '—'">—</span>
           </div>
           <div class="card-body">

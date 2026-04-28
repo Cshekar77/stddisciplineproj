@@ -475,12 +475,12 @@
                    &nbsp;|&nbsp; Filed: <span th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span>
                 </p>
             </div>
-            <!-- SIMPLIFIED: Using multiple th:classappend instead of nested ternary -->
-            <span class="status-badge"
-                  th:classappend="${case.status.name() == 'OPEN'} ? 'status-open' : ''"
-                  th:classappend="${case.status.name() == 'UNDER_REVIEW'} ? 'status-review' : ''"
-                  th:classappend="${case.status.name() == 'RESOLVED'} ? 'status-resolved' : ''"
-                  th:classappend="${case.status.name() == 'CLOSED'} ? 'status-closed' : ''"
+            <!-- FIX: Single th:class replaces multiple th:classappend (Thymeleaf does not allow duplicate attributes) -->
+            <span th:class="'status-badge' +
+                    (${case.status.name() == 'OPEN'}         ? ' status-open'     :
+                    (${case.status.name() == 'UNDER_REVIEW'} ? ' status-review'   :
+                    (${case.status.name() == 'RESOLVED'}     ? ' status-resolved' :
+                    (${case.status.name() == 'CLOSED'}       ? ' status-closed'   : ''))))"
                   th:text="${case.status}">OPEN</span>
         </div>
 
@@ -501,7 +501,7 @@
                                 <span class="timeline-card-title">Case Created</span>
                                 <span class="timeline-card-time" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</span>
                             </div>
-                            <div class="timeline-card-body" th:text="'Case "' + ${case.title} + '" was created'">Case created</div>
+                            <div class="timeline-card-body" th:text="'Case &quot;' + ${case.title} + '&quot; was created'">Case created</div>
                             <div class="timeline-card-footer">
                                 <span class="tag tag-create">Case Created</span>
                                 <span class="timeline-by">By: System</span>
