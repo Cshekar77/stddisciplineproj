@@ -50,7 +50,6 @@
     .card-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .card-body{padding:20px;}
-
     .timeline{position:relative;padding-left:32px;}
     .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border);}
     .timeline-item{position:relative;margin-bottom:24px;}
@@ -68,10 +67,8 @@
     .tag-note{background:rgba(79,127,255,.15);color:var(--accent4);}
     .tag-create{background:rgba(67,217,162,.15);color:var(--accent3);}
     .timeline-author{font-size:.7rem;color:var(--muted);margin-left:auto;}
-
     .empty-state{text-align:center;padding:48px 24px;color:var(--muted);}
     .alert-error{background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.25);color:var(--accent2);padding:12px 18px;border-radius:8px;margin-bottom:20px;}
-
     @media(max-width:768px){
       .sidebar{transform:translateX(-100%);z-index:200;}
       .sidebar.open{transform:translateX(0);}
@@ -97,7 +94,7 @@
   <a href="/student/dashboard" class="nav-link"><span class="icon">⊞</span> Dashboard</a>
   <a href="/student/my-record" class="nav-link"><span class="icon">📄</span> My Record</a>
   <a href="/student/my-sanctions" class="nav-link"><span class="icon">🔒</span> My Sanctions</a>
-  <a href="/student/my-cases" class="nav-link"><span class="icon">📁</span> My Cases</a>
+  <a href="/student/my-cases" class="nav-link active"><span class="icon">📁</span> My Cases</a>
   <div class="nav-section">Actions</div>
   <a href="/student/feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
   <a href="/student/anonymous-report" class="nav-link"><span class="icon">🕵️</span> Report Issue</a>
@@ -121,7 +118,7 @@
       </div>
       <a href="/logout" class="mobile-logout">Logout</a>
       <span class="badge">STUDENT</span>
-      <div class="avatar" th:text="${student != null} ? ${#strings.substring(student.firstName, 0, 1)} : 'S'">S</div>
+      <div class="avatar" th:text="${studentName != null} ? ${#strings.substring(studentName, 0, 1)} : 'S'">S</div>
     </div>
   </header>
 
@@ -134,7 +131,6 @@
 
     <div class="page-header">
       <div class="page-title" th:text="${case.caseNumber}">CASE-001</div>
-      <!-- SIMPLIFIED: Using th:classappend instead of complex ternary -->
       <span class="pill" 
             th:classappend="${case.status.name() == 'OPEN'} ? 'pill-open' : ''"
             th:classappend="${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : ''"
@@ -143,7 +139,6 @@
             th:text="${case.status}">OPEN</span>
     </div>
 
-    <!-- Case Summary Card -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Case Summary</div>
@@ -157,14 +152,12 @@
       </div>
     </div>
 
-    <!-- Timeline -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Timeline</div>
       </div>
       <div class="card-body">
         <div th:if="${notes != null and !notes.empty}" class="timeline">
-          <!-- Case Creation Event -->
           <div class="timeline-item">
             <div class="timeline-dot create"></div>
             <div class="timeline-content">
@@ -172,14 +165,13 @@
                 <span class="timeline-title">Case Created</span>
                 <span class="timeline-date" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</span>
               </div>
-              <div class="timeline-description" th:text="'Case "' + ${case.title} + '" was initiated'">Case created</div>
+              <div class="timeline-description" th:text="'Case \"' + ${case.title} + '\" was initiated'">Case created</div>
               <div class="timeline-footer">
                 <span class="tag tag-create">Case Created</span>
               </div>
             </div>
           </div>
 
-          <!-- Note Events -->
           <div class="timeline-item" th:each="note : ${notes}">
             <div class="timeline-dot note"></div>
             <div class="timeline-content">
@@ -203,7 +195,6 @@
       </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Quick Actions</div>
