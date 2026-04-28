@@ -197,8 +197,11 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Notes</div>
-            <span style="font-size:.8rem;color:var(--muted);" th:if="${disciplineCase != null and disciplineCase.notes != null}" th:text="${disciplineCase.notes.size() + ' notes'}">0 notes</span>
-            <span style="font-size:.8rem;color:var(--muted);" th:unless="${disciplineCase != null and disciplineCase.notes != null}">0 notes</span>
+            <span style="font-size:.8rem;color:var(--muted);">
+              <span th:if="${disciplineCase != null and disciplineCase.notes != null}" th:text="${disciplineCase.notes.size()}"></span>
+              <span th:if="${disciplineCase != null and disciplineCase.notes != null}"> notes</span>
+              <span th:if="${disciplineCase == null or disciplineCase.notes == null}">0 notes</span>
+            </span>
           </div>
           <div class="table-wrap">
             <table>
@@ -210,12 +213,12 @@
                 </tr>
               </thead>
               <tbody>
-                <tr th:each="note : ${disciplineCase != null} ? ${disciplineCase.notes} : ${T(java.util.Collections).emptyList()}">
+                <tr th:each="note : ${disciplineCase != null and disciplineCase.notes != null ? disciplineCase.notes : null}" th:if="${disciplineCase != null and disciplineCase.notes != null}">
                   <td th:text="${note.createdDate != null} ? ${#temporals.format(note.createdDate, 'MMM dd, yyyy · hh:mm a')} : '—'">—</td>
                   <td th:text="${note.content}">—</td>
                   <td th:text="${note.createdBy != null} ? ${note.createdBy.firstName + ' ' + note.createdBy.lastName} : 'System'">—</td>
-                </tr>
-                <tr th:if="${disciplineCase == null or disciplineCase.notes == null or #lists.isEmpty(disciplineCase.notes)}">
+                 </tr>
+                <tr th:if="${disciplineCase == null or disciplineCase.notes == null or disciplineCase.notes.empty}">
                   <td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">No notes available</td>
                 </tr>
               </tbody>
@@ -256,13 +259,21 @@
             </li>
             <li>
               <span class="meta-label">Total Events</span>
-              <span class="meta-value" th:if="${disciplineCase != null and disciplineCase.notes != null}" th:text="${disciplineCase.notes.size()}">0</span>
-              <span class="meta-value" th:unless="${disciplineCase != null and disciplineCase.notes != null}">0</span>
+              <span th:if="${disciplineCase != null and disciplineCase.notes != null}">
+                <span class="meta-value" th:text="${disciplineCase.notes.size()}">0</span>
+              </span>
+              <span th:unless="${disciplineCase != null and disciplineCase.notes != null}">
+                <span class="meta-value">0</span>
+              </span>
             </li>
             <li>
               <span class="meta-label">Sanctions</span>
-              <span class="meta-value" th:if="${disciplineCase != null and disciplineCase.sanctions != null}" th:text="${disciplineCase.sanctions.size()}">0</span>
-              <span class="meta-value" th:unless="${disciplineCase != null and disciplineCase.sanctions != null}">0</span>
+              <span th:if="${disciplineCase != null and disciplineCase.sanctions != null}">
+                <span class="meta-value" th:text="${disciplineCase.sanctions.size()}">0</span>
+              </span>
+              <span th:unless="${disciplineCase != null and disciplineCase.sanctions != null}">
+                <span class="meta-value">0</span>
+              </span>
             </li>
           </ul>
         </div>
