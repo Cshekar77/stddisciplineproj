@@ -131,12 +131,7 @@
 
     <div class="page-header">
       <div class="page-title" th:text="${case.caseNumber}">CASE-001</div>
-      <span class="pill" 
-            th:classappend="${case.status.name() == 'OPEN'} ? 'pill-open' : ''"
-            th:classappend="${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : ''"
-            th:classappend="${case.status.name() == 'RESOLVED'} ? 'pill-resolved' : ''"
-            th:classappend="${case.status.name() == 'CLOSED'} ? 'pill-closed' : ''"
-            th:text="${case.status}">OPEN</span>
+      <span class="pill" th:class="${case.status.name() == 'OPEN' ? 'pill-open' : (case.status.name() == 'UNDER_REVIEW' ? 'pill-review' : (case.status.name() == 'RESOLVED' ? 'pill-resolved' : (case.status.name() == 'CLOSED' ? 'pill-closed' : '')))}" th:text="${case.status}">OPEN</span>
     </div>
 
     <div class="card">
@@ -165,7 +160,7 @@
                 <span class="timeline-title">Case Created</span>
                 <span class="timeline-date" th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy · hh:mm a')}">—</span>
               </div>
-              <div class="timeline-description" th:text="|Case '${case.title}' was initiated|">Case created</div>
+              <div class="timeline-description" th:text="'Case ' + ${case.title} + ' was initiated'">Case created</div>
               <div class="timeline-footer">
                 <span class="tag tag-create">Case Created</span>
               </div>
@@ -182,7 +177,7 @@
               <div class="timeline-description" th:text="${note.content}">Note content...</div>
               <div class="timeline-footer">
                 <span class="tag tag-note">Case Note</span>
-                <span class="timeline-author" th:text="'by ' + (${note.createdBy != null ? note.createdBy.firstName + ' ' + note.createdBy.lastName : 'System'})">by User</span>
+                <span class="timeline-author" th:text="'by ' + ${note.createdBy != null ? note.createdBy.firstName + ' ' + note.createdBy.lastName : 'System'}">by User</span>
               </div>
             </div>
           </div>
