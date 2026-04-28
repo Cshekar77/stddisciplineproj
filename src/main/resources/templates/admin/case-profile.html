@@ -177,27 +177,14 @@
                 <label>Student ID</label>
                 <div class="value" th:text="${case != null and case.student != null} ? ${case.student.studentId} : '—'">—</div>
               </div>
-              <div class="info-item">
-                <label>Severity</label>
-                <div class="value">
-                  <span class="pill"
-                    th:classappend="${case != null and case.severity != null and case.severity.name() == 'CRITICAL'} ? 'pill-open' :
-                      (${case != null and case.severity != null and case.severity.name() == 'HIGH'} ? 'pill-review' :
-                      (${case != null and case.severity != null and case.severity.name() == 'MEDIUM'} ? 'pill-resolved' : 'pill-closed'))"
-                    th:text="${case != null} ? ${case.severity} : '—'">—</span>
-                </div>
-              </div>
+              <!-- ✅ REMOVED: Severity section -->
               <div class="info-item">
                 <label>Date Filed</label>
-                <div class="value" th:text="${case != null and case.dateFiled != null} ? ${#temporals.format(case.dateFiled, 'MMM dd, yyyy')} : '—'">—</div>
-              </div>
-              <div class="info-item">
-                <label>Assigned Teacher</label>
-                <div class="value" th:text="${case != null and case.assignedTeacher != null} ? ${case.assignedTeacher.firstName + ' ' + case.assignedTeacher.lastName} : '—'">—</div>
+                <div class="value" th:text="${case != null and case.createdDate != null} ? ${#temporals.format(case.createdDate, 'MMM dd, yyyy')} : '—'">—</div>
               </div>
               <div class="info-item">
                 <label>Last Updated</label>
-                <div class="value" th:text="${case != null and case.lastUpdated != null} ? ${#temporals.format(case.lastUpdated, 'MMM dd, yyyy')} : '—'">—</div>
+                <div class="value" th:text="${case != null and case.updatedDate != null} ? ${#temporals.format(case.updatedDate, 'MMM dd, yyyy')} : '—'">—</div>
               </div>
             </div>
             <div style="margin-top:18px;">
@@ -271,7 +258,7 @@
             </li>
             <li>
               <span class="meta-label">Total Events</span>
-              <span class="meta-value" th:text="${case != null and case.timelineEvents != null} ? ${#lists.size(case.timelineEvents)} : '0'">0</span>
+              <span class="meta-value" th:text="${case != null and case.notes != null} ? ${#lists.size(case.notes)} : '0'">0</span>
             </li>
             <li>
               <span class="meta-label">Sanctions</span>
