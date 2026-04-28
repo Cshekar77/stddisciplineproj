@@ -138,10 +138,10 @@
     <div class="page-header">
       <div class="page-title" th:text="${case.caseNumber}">CASE-001</div>
       <span class="pill"
-        th:classappend="${case.status.name() == 'OPEN'} ? 'pill-open' : 
-                       (${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 
-                       (${case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
-        th:text="${case.status}">OPEN</span>
+            th:class="${case.status.name() == 'OPEN'} ? 'pill-open' : 
+                      (${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 
+                      (${case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
+            th:text="${case.status}">OPEN</span>
     </div>
 
     <!-- Case Summary Card -->
@@ -211,8 +211,8 @@
       </div>
       <div class="card-body">
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
-          <a th:href="@{/student/case-profile(id=${case.id})}" class="btn" style="background:rgba(247,201,72,.15);color:var(--accent);padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.8rem;">📄 View Full Case</a>
-          <a href="/student/my-cases" class="btn" style="background:var(--surface2);color:var(--muted);padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.8rem;border:1px solid var(--border);">← Back to My Cases</a>
+          <a th:href="@{/student/case-profile(id=${case.id})}" style="background:rgba(247,201,72,.15);color:var(--accent);padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.8rem;display:inline-block;">📄 View Full Case</a>
+          <a href="/student/my-cases" style="background:var(--surface2);color:var(--muted);padding:8px 16px;border-radius:8px;text-decoration:none;font-size:.8rem;border:1px solid var(--border);display:inline-block;">← Back to My Cases</a>
         </div>
       </div>
     </div>

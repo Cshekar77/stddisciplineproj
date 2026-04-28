@@ -8,6 +8,7 @@
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{--bg:#0f1117;--surface:#1a1d27;--card:#21253a;--accent:#4f8ef7;--accent2:#7c3aed;--text:#e2e8f0;--muted:#64748b;--border:#2d3348;--danger:#ef4444;--warning:#f59e0b;--success:#10b981}
+  [data-theme="light"]{--bg:#f0f2f8;--surface:#ffffff;--card:#f5f7ff;--accent:#4f7fff;--accent2:#7c3aed;--text:#1a1d2e;--muted:#6b7494;--border:#e2e6f0;--danger:#ef4444;--warning:#f59e0b;--success:#10b981}
   body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
   .sidebar{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0;position:fixed;height:100vh;z-index:100}
   .logo{padding:0 24px 32px;font-size:18px;font-weight:700;color:var(--accent);letter-spacing:-0.5px}
@@ -109,7 +110,7 @@
       <div class="page-title">Case Timeline</div>
       <div class="page-sub" th:text="'Case #' + ${case.caseNumber} + ' - ' + ${case.title}">Case Timeline</div>
     </div>
-    <a href="/teacher/case-profile?id=${case.id}" class="btn btn-secondary">← Back to Case</a>
+    <a th:href="@{/teacher/case-profile(id=${case.id})}" class="btn btn-secondary">← Back to Case</a>
   </div>
 
   <!-- Case Information Bar -->
@@ -131,11 +132,11 @@
       </div>
       
       <!-- Timeline Events from Case Notes -->
-      <div th:each="note : ${notes}">
+      <div th:each="note, iterStat : ${notes}">
         <div class="timeline-item">
           <div class="timeline-line">
             <div class="timeline-dot note"></div>
-            <div class="timeline-connector" th:if="${!noteStat.last}"></div>
+            <div class="timeline-connector" th:if="${!iterStat.last}"></div>
           </div>
           <div class="timeline-content">
             <div class="tc-header">
