@@ -475,10 +475,12 @@
                    &nbsp;|&nbsp; Filed: <span th:text="${#temporals.format(case.createdDate, 'MMM dd, yyyy')}">—</span>
                 </p>
             </div>
+            <!-- SIMPLIFIED: Using multiple th:classappend instead of nested ternary -->
             <span class="status-badge"
-                  th:classappend="${case.status.name() == 'OPEN'} ? 'status-open' : 
-                                 (${case.status.name() == 'UNDER_REVIEW'} ? 'status-review' : 
-                                 (${case.status.name() == 'RESOLVED'} ? 'status-resolved' : 'status-closed'))"
+                  th:classappend="${case.status.name() == 'OPEN'} ? 'status-open' : ''"
+                  th:classappend="${case.status.name() == 'UNDER_REVIEW'} ? 'status-review' : ''"
+                  th:classappend="${case.status.name() == 'RESOLVED'} ? 'status-resolved' : ''"
+                  th:classappend="${case.status.name() == 'CLOSED'} ? 'status-closed' : ''"
                   th:text="${case.status}">OPEN</span>
         </div>
 

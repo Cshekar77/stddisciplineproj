@@ -65,7 +65,6 @@
     .info-item label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
     .info-item .value { font-size: .9rem; font-weight: 500; }
     .description-text { font-size: .88rem; line-height: 1.6; color: var(--text); }
-    /* Case Notes table */
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; }
     thead th { padding: 10px 16px; text-align: left; font-size: .7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); background: var(--surface2); }
@@ -75,13 +74,11 @@
     tbody td { padding: 11px 16px; font-size: .84rem; }
     .action-link { color: var(--accent); text-decoration: none; font-size: .82rem; font-weight: 500; }
     .action-link:hover { text-decoration: underline; }
-    /* Sidebar info card */
     .meta-list { list-style: none; }
     .meta-list li { display: flex; justify-content: space-between; align-items: center; padding: 11px 20px; border-bottom: 1px solid var(--border); font-size: .85rem; }
     .meta-list li:last-child { border-bottom: none; }
     .meta-label { color: var(--muted); font-size: .8rem; }
     .meta-value { font-weight: 500; }
-    /* Status update form */
     .status-form { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
     .form-select { width: 100%; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: .85rem; outline: none; font-family: 'DM Sans', sans-serif; }
     .form-select:focus { border-color: var(--accent); }
@@ -161,11 +158,13 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Details</div>
+            <!-- SIMPLIFIED: Using multiple th:classappend instead of nested ternary -->
             <span class="pill"
-              th:classappend="${case != null and case.status != null and case.status.name() == 'OPEN'} ? 'pill-open' :
-                (${case != null and case.status != null and case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' :
-                (${case != null and case.status != null and case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
-              th:text="${case != null} ? ${case.status} : '—'">—</span>
+                  th:classappend="${case != null and case.status != null and case.status.name() == 'OPEN'} ? 'pill-open' : ''"
+                  th:classappend="${case != null and case.status != null and case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : ''"
+                  th:classappend="${case != null and case.status != null and case.status.name() == 'RESOLVED'} ? 'pill-resolved' : ''"
+                  th:classappend="${case != null and case.status != null and case.status.name() == 'CLOSED'} ? 'pill-closed' : ''"
+                  th:text="${case != null} ? ${case.status} : '—'">—</span>
           </div>
           <div class="card-body">
             <div class="info-grid">

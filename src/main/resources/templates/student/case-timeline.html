@@ -51,13 +51,11 @@
     .card-title{font-family:'Syne',sans-serif;font-size:.95rem;font-weight:700;}
     .card-body{padding:20px;}
 
-    /* Timeline specific styles */
     .timeline{position:relative;padding-left:32px;}
     .timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--border);}
     .timeline-item{position:relative;margin-bottom:24px;}
     .timeline-dot{position:absolute;left:-32px;top:4px;width:16px;height:16px;border-radius:50%;border:3px solid var(--surface);background:var(--accent3);z-index:1;}
     .timeline-dot.note{background:var(--accent4);}
-    .timeline-dot.status{background:var(--accent);}
     .timeline-dot.create{background:var(--accent3);}
     .timeline-content{background:var(--surface2);border-radius:10px;padding:16px;transition:all .18s;}
     .timeline-content:hover{transform:translateX(4px);}
@@ -68,7 +66,6 @@
     .timeline-footer{display:flex;gap:10px;flex-wrap:wrap;}
     .tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:.65rem;font-weight:600;}
     .tag-note{background:rgba(79,127,255,.15);color:var(--accent4);}
-    .tag-status{background:rgba(247,201,72,.15);color:var(--accent);}
     .tag-create{background:rgba(67,217,162,.15);color:var(--accent3);}
     .timeline-author{font-size:.7rem;color:var(--muted);margin-left:auto;}
 
@@ -137,10 +134,12 @@
 
     <div class="page-header">
       <div class="page-title" th:text="${case.caseNumber}">CASE-001</div>
-      <span class="pill"
-            th:class="${case.status.name() == 'OPEN'} ? 'pill-open' : 
-                      (${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : 
-                      (${case.status.name() == 'RESOLVED'} ? 'pill-resolved' : 'pill-closed'))"
+      <!-- SIMPLIFIED: Using th:classappend instead of complex ternary -->
+      <span class="pill" 
+            th:classappend="${case.status.name() == 'OPEN'} ? 'pill-open' : ''"
+            th:classappend="${case.status.name() == 'UNDER_REVIEW'} ? 'pill-review' : ''"
+            th:classappend="${case.status.name() == 'RESOLVED'} ? 'pill-resolved' : ''"
+            th:classappend="${case.status.name() == 'CLOSED'} ? 'pill-closed' : ''"
             th:text="${case.status}">OPEN</span>
     </div>
 
