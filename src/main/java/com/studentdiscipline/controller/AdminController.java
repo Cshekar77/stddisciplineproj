@@ -520,18 +520,45 @@ public class AdminController {
 
     @GetMapping("/case-profile")
     public String caseProfile(@RequestParam Long id, Model model) {
-        Case c = caseService.getCaseById(id);
-        model.addAttribute("disciplineCase", c);  // ✅ FIXED: renamed from "case" (reserved word in SpEL)
-        model.addAttribute("notes", caseService.getCaseNotes(id));
-        model.addAttribute("caseStatuses", CaseStatus.values());
+        try {
+            Case c = caseService.getCaseById(id);
+            if (c == null) {
+                return "redirect:/admin/case-search";
+            }
+            
+            // ✅ FIXED: Ensure notes is never null
+            List<CaseNote> notes = caseService.getCaseNotes(id);
+            if (notes == null) {
+                notes = new ArrayList<>();
+            }
+            
+            model.addAttribute("disciplineCase", c);
+            model.addAttribute("notes", notes);
+            model.addAttribute("caseStatuses", CaseStatus.values());
+        } catch (Exception e) {
+            return "redirect:/admin/case-search";
+        }
         return "admin/case-profile";
     }
 
     @GetMapping("/case-timeline")
     public String caseTimeline(@RequestParam Long id, Model model) {
-        Case c = caseService.getCaseById(id);
-        model.addAttribute("disciplineCase", c);  // ✅ FIXED: renamed from "case" (reserved word in SpEL)
-        model.addAttribute("notes", caseService.getCaseNotes(id));
+        try {
+            Case c = caseService.getCaseById(id);
+            if (c == null) {
+                return "redirect:/admin/case-search";
+            }
+            
+            List<CaseNote> notes = caseService.getCaseNotes(id);
+            if (notes == null) {
+                notes = new ArrayList<>();
+            }
+            
+            model.addAttribute("disciplineCase", c);
+            model.addAttribute("notes", notes);
+        } catch (Exception e) {
+            return "redirect:/admin/case-search";
+        }
         return "admin/case-timeline";
     }
 
