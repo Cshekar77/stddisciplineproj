@@ -532,8 +532,12 @@ public class AdminController {
                 notes = new ArrayList<>();
             }
             
+            // ✅ ADDED: Calculate notes count in controller (prevents Thymeleaf .size() issue)
+            int notesCount = notes.size();
+            
             model.addAttribute("disciplineCase", c);
             model.addAttribute("notes", notes);
+            model.addAttribute("notesCount", notesCount);
             model.addAttribute("caseStatuses", CaseStatus.values());
         } catch (Exception e) {
             return "redirect:/admin/case-search";
