@@ -198,7 +198,8 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">Case Notes</div>
-            <span style="font-size:.8rem;color:var(--muted);" th:text="${case != null and case.notes != null} ? ${case.notes.size() + ' notes'} : '0 notes'">0 notes</span>
+            <span style="font-size:.8rem;color:var(--muted);" th:if="${case != null and case.notes != null}" th:text="${case.notes.size() + ' notes'}">0 notes</span>
+            <span style="font-size:.8rem;color:var(--muted);" th:unless="${case != null and case.notes != null}">0 notes</span>
           </div>
           <div class="table-wrap">
             <table>
@@ -256,11 +257,13 @@
             </li>
             <li>
               <span class="meta-label">Total Events</span>
-              <span class="meta-value" th:text="${case != null and case.notes != null} ? ${case.notes.size()} : '0'">0</span>
+              <span class="meta-value" th:if="${case != null and case.notes != null}" th:text="${case.notes.size()}">0</span>
+              <span class="meta-value" th:unless="${case != null and case.notes != null}">0</span>
             </li>
             <li>
               <span class="meta-label">Sanctions</span>
-              <span class="meta-value" th:text="${case != null and case.sanctions != null} ? ${case.sanctions.size()} : '0'">0</span>
+              <span class="meta-value" th:if="${case != null and case.sanctions != null}" th:text="${case.sanctions.size()}">0</span>
+              <span class="meta-value" th:unless="${case != null and case.sanctions != null}">0</span>
             </li>
           </ul>
         </div>
